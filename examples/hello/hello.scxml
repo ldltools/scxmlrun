@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0">
+  <datamodel/>
+  <final id="hello">
+    <onentry><log label="hello" expr="world!"/></onentry>
+  </final>
+</scxml>
