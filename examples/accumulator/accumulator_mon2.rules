@@ -1,0 +1,20 @@
+protocol
+  init; 
+  day_close; (day_open; day_close)*;
+  (knockout + terminate) ;;
+
+rule
+on init do { _data.KO_PRICE = _event.data.ko_price || 110; };
+
+// memorize the price passed as a parameter of the event
+on day_close do { _data.price = _event.data.price; };
+
+// ensure that price should not be less than or equal to KO_PRICE
+on knockout when { _data.price > _data.KO_PRICE }  do { /*ok case. this rule needs to be defined*/ };
+on knockout when { _data.price <= _data.KO_PRICE }  do { throw new Error ("** error on knockout"); };
+// alternative
+/*
+on knockout do {
+  if (_data.price <= _data.KO_PRICE) { throw new Error ("** error on knockout"); }
+};
+*/

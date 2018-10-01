@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scxml version="1.0" datamodel="ecmascript" initial="1">
+  <datamodel>
+    <!-- _trace for each 'run' is a sequence of 'possible worlds' generated/tracked at run-time -->
+    <data id="_trace"/>
+    <!-- _trace_matches (guard) examines whether _trace ⊨ [true*]guard holds or not -->
+    <data id="_trace_matches" expr="function (guard) { return true; }"/>
+    <!-- _trace_append (next_world) appends next_world to _trace -->
+    <data id="_trace_append" expr="function (next_world) { }"/>
+  </datamodel>
+  <!--proposition 0 _b0-->
+  <!--proposition 1 _b1-->
+  <!--proposition 2 _b2-->
+  <!--proposition 3 _b3-->
+  <!--proposition 4 is_over_strike-->
+  <state id="13">
+    <transition target="7" event="_under_strike">
+      <!--tid t146-->
+      <!--transition: curr_world: true label: !is_over_strike next_world: !is_over_strike-->
+      <script>_trace_append (" !is_over_strike ");</script>
+      <!--rule: r133 event: _under_strike certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: !is_over_strike-->
+    </transition>
+    <transition target="15" event="_over_strike">
+      <!--tid t154-->
+      <!--transition: curr_world: true label: is_over_strike next_world: is_over_strike-->
+      <script>_trace_append (" is_over_strike ");</script>
+      <!--rule: r132 event: _over_strike certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: is_over_strike-->
+    </transition>
+  </state>
+  <state id="1">
+    <transition target="3" event="_init">
+      <!--tid t157-->
+    </transition>
+  </state>
+  <state id="4">
+    <transition target="5" event="day_close">
+      <!--tid t175-->
+      <!--transition: curr_world: is_over_strike label: is_over_strike next_world: is_over_strike-->
+      <script>_trace_append (" is_over_strike ");     _data.price = _event.data.price;
+    if (_data.price &gt; _data.KO_PRICE)
+        __raiseEvent ("_knockout");
+    else
+        __raiseEvent ("_not_knockout"); ;</script>
+      <!--rule: r130 event: day_close certainty: 7-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+      <!--rule.raise(choice): _knockout _not_knockout-->
+    </transition>
+  </state>
+  <state id="18">
+    <transition target="13" event="_not_knockout">
+      <!--tid t182-->
+      <!--transition: curr_world: is_over_strike label: is_over_strike next_world: true-->
+      <script>_trace_append (" is_over_strike ");     if (_data.price &lt; _data.STRIKE_PRICE)
+        __raiseEvent ("_under_strike");
+    else
+        __raiseEvent ("_over_strike"); ;</script>
+      <!--rule: r131 event: _not_knockout certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+      <!--rule.raise(choice): _under_strike _over_strike-->
+    </transition>
+    <transition target="19" event="_knockout">
+      <!--tid t185-->
+    </transition>
+  </state>
+  <state id="6">
+    <transition target="7" event="_under_strike">
+      <!--tid t192-->
+      <!--transition: curr_world: is_over_strike label: !is_over_strike next_world: !is_over_strike-->
+      <script>_trace_append (" !is_over_strike ");</script>
+      <!--rule: r133 event: _under_strike certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: !is_over_strike-->
+    </transition>
+    <transition target="8" event="_over_strike">
+      <!--tid t200-->
+      <!--transition: curr_world: is_over_strike label: is_over_strike next_world: is_over_strike-->
+      <script>_trace_append (" is_over_strike ");</script>
+      <!--rule: r132 event: _over_strike certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: is_over_strike-->
+    </transition>
+  </state>
+  <state id="16">
+    <transition target="18" event="day_close">
+      <!--tid t210-->
+      <!--transition: curr_world: is_over_strike label: is_over_strike next_world: is_over_strike-->
+      <script>_trace_append (" is_over_strike ");     _data.price = _event.data.price;
+    if (_data.price &gt; _data.KO_PRICE)
+        __raiseEvent ("_knockout");
+    else
+        __raiseEvent ("_not_knockout"); ;</script>
+      <!--rule: r130 event: day_close certainty: 7-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+      <!--rule.raise(choice): _knockout _not_knockout-->
+    </transition>
+  </state>
+  <state id="15">
+    <transition target="16" event="day_open">
+      <!--tid t218-->
+    </transition>
+    <transition target="17" event="terminate">
+      <!--tid t221-->
+    </transition>
+  </state>
+  <state id="9">
+    <transition target="11" event="day_close">
+      <!--tid t232-->
+      <!--transition: curr_world: !is_over_strike label: !is_over_strike next_world: !is_over_strike-->
+      <script>_trace_append (" !is_over_strike ");     _data.price = _event.data.price;
+    if (_data.price &gt; _data.KO_PRICE)
+        __raiseEvent ("_knockout");
+    else
+        __raiseEvent ("_not_knockout"); ;</script>
+      <!--rule: r130 event: day_close certainty: 7-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+      <!--rule.raise(choice): _knockout _not_knockout-->
+    </transition>
+  </state>
+  <state id="7">
+    <transition target="9" event="day_open">
+      <!--tid t240-->
+    </transition>
+    <transition target="10" event="terminate">
+      <!--tid t243-->
+    </transition>
+  </state>
+  <state id="19">
+    <transition target="17" event="knockout">
+      <!--tid t250-->
+    </transition>
+  </state>
+  <state id="8">
+    <transition target="4" event="day_open">
+      <!--tid t264-->
+    </transition>
+  </state>
+  <state id="11">
+    <transition target="13" event="_not_knockout">
+      <!--tid t273-->
+      <!--transition: curr_world: !is_over_strike label: !is_over_strike next_world: true-->
+      <script>_trace_append (" !is_over_strike ");     if (_data.price &lt; _data.STRIKE_PRICE)
+        __raiseEvent ("_under_strike");
+    else
+        __raiseEvent ("_over_strike"); ;</script>
+      <!--rule: r131 event: _not_knockout certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+      <!--rule.raise(choice): _under_strike _over_strike-->
+    </transition>
+    <transition target="14" event="_knockout">
+      <!--tid t276-->
+    </transition>
+  </state>
+  <state id="12"/>
+  <state id="14">
+    <transition target="10" event="knockout">
+      <!--tid t293-->
+    </transition>
+  </state>
+  <state id="10">
+    <transition target="12" event="_accept">
+      <!--tid t303-->
+    </transition>
+  </state>
+  <state id="5">
+    <transition target="6" event="_not_knockout">
+      <!--tid t318-->
+      <!--transition: curr_world: is_over_strike label: is_over_strike next_world: is_over_strike-->
+      <script>_trace_append (" is_over_strike ");     if (_data.price &lt; _data.STRIKE_PRICE)
+        __raiseEvent ("_under_strike");
+    else
+        __raiseEvent ("_over_strike"); ;</script>
+      <!--rule: r131 event: _not_knockout certainty: 7-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+      <!--rule.raise(choice): _under_strike _over_strike-->
+    </transition>
+  </state>
+  <state id="17">
+    <transition target="12" event="_accept">
+      <!--tid t326-->
+    </transition>
+  </state>
+  <state id="3">
+    <transition target="4" event="init">
+      <!--tid t346-->
+      <!--transition: curr_world: is_over_strike label: is_over_strike next_world: is_over_strike-->
+      <script>_trace_append (" is_over_strike ");     _data.KO_PRICE = _event.data.ko_price || 110;
+    _data.STRIKE_PRICE = _event.data.strike_price || 90; ;</script>
+      <!--rule: r129 event: init certainty: 7-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+  </state>
+</scxml>

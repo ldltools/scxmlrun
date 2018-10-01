@@ -1,0 +1,12 @@
+event init, day_close, day_open, knockout, terminate;
+property
+  !knockedout & !terminated;
+  [] !(knockedout & terminated);
+  []<> (knockedout | terminated);
+
+rule
+  on knockout ensure knockedout;
+  except on knockout preserve knockedout;
+
+  on terminate ensure terminated;
+  except on terminate preserve terminated;

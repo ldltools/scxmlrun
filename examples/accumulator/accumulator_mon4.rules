@@ -1,0 +1,40 @@
+protocol
+init; 
+day_close;
+(_not_knockout; (_under_strike + _over_strike); day_open; day_close)*;
+(_knockout; knockout + _not_knockout; (_under_strike + _over_strike); terminate)
+;;
+
+property
+is_over_strike;
+!(<{is_over_strike}*>(last & is_over_strike));
+!(<{!is_over_strike}*>(last & !is_over_strike));
+
+rule
+on init do {
+    _data.KO_PRICE = _event.data.ko_price || 110;
+    _data.STRIKE_PRICE = _event.data.strike_price || 90;
+};
+
+on day_close raise _knockout + _not_knockout
+  // raise either "_knockout" or "_not_knockout"
+  // in a non-deterministic manner
+{
+    _data.price = _event.data.price;
+    if (_data.price > _data.KO_PRICE)
+        __raiseEvent ("_knockout");
+    else
+        __raiseEvent ("_not_knockout");
+};
+
+on _not_knockout raise _under_strike + _over_strike
+{
+    if (_data.price < _data.STRIKE_PRICE)
+        __raiseEvent ("_under_strike");
+    else
+        __raiseEvent ("_over_strike");
+};
+
+on _over_strike ensure is_over_strike;
+on _under_strike ensure !is_over_strike;
+except on _over_strike, _under_strike preserve is_over_strike;

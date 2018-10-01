@@ -1,0 +1,6 @@
+protocol
+init; 
+day_close;
+(day_open; day_close)*;
+(knockout + terminate)
+;;
