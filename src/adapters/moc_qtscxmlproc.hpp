@@ -86,27 +86,27 @@ int scxml::monitor::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     _id = QObject::qt_metacall(_c, _id, _a);
     return _id;
 }
-struct qt_meta_stringdata_scxml__JSConsole_t {
+struct qt_meta_stringdata_JSConsole_t {
     QByteArrayData data[3];
-    char stringdata0[22];
+    char stringdata0[15];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_scxml__JSConsole_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_JSConsole_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_scxml__JSConsole_t qt_meta_stringdata_scxml__JSConsole = {
+static const qt_meta_stringdata_JSConsole_t qt_meta_stringdata_JSConsole = {
     {
-QT_MOC_LITERAL(0, 0, 16), // "scxml::JSConsole"
-QT_MOC_LITERAL(1, 17, 3), // "log"
-QT_MOC_LITERAL(2, 21, 0) // ""
+QT_MOC_LITERAL(0, 0, 9), // "JSConsole"
+QT_MOC_LITERAL(1, 10, 3), // "log"
+QT_MOC_LITERAL(2, 14, 0) // ""
 
     },
-    "scxml::JSConsole\0log\0"
+    "JSConsole\0log\0"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_scxml__JSConsole[] = {
+static const uint qt_meta_data_JSConsole[] = {
 
  // content:
        7,       // revision
@@ -128,7 +128,7 @@ static const uint qt_meta_data_scxml__JSConsole[] = {
        0        // eod
 };
 
-void scxml::JSConsole::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void JSConsole::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
         JSConsole *_t = static_cast<JSConsole *>(_o);
@@ -140,26 +140,26 @@ void scxml::JSConsole::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
     }
 }
 
-const QMetaObject scxml::JSConsole::staticMetaObject = {
-    { &QObject::staticMetaObject, qt_meta_stringdata_scxml__JSConsole.data,
-      qt_meta_data_scxml__JSConsole,  qt_static_metacall, nullptr, nullptr}
+const QMetaObject JSConsole::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_JSConsole.data,
+      qt_meta_data_JSConsole,  qt_static_metacall, nullptr, nullptr}
 };
 
 
-const QMetaObject *scxml::JSConsole::metaObject() const
+const QMetaObject *JSConsole::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *scxml::JSConsole::qt_metacast(const char *_clname)
+void *JSConsole::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_scxml__JSConsole.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_JSConsole.stringdata0))
         return static_cast<void*>(this);
     return QObject::qt_metacast(_clname);
 }
 
-int scxml::JSConsole::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int JSConsole::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)

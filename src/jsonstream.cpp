@@ -82,11 +82,20 @@ jsonimstream::read (nlohmann::json& obj)
 {
     //std::clog << ";; read\n";
 
+    if (_messages.empty ())
+    {
+        obj = nullptr;
+        return (*this);
+    }
+    /*
     while (_messages.empty ())
     {
         //std::clog << ";; sleep\n";
         usleep (100000);	// 100ms
     }
+    */
+
+    assert (!_messages.empty ());
     std::string* msg = _messages.front ();
     _messages.pop ();
     obj = nlohmann::json::parse (*msg);

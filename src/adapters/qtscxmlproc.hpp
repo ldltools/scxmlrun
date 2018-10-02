@@ -40,7 +40,7 @@ public:
     static void version (void);
 
 public:
-    void step (const bool timeout = false);
+    void step (void);
 
 public:
     void event_read (QScxmlEvent&);
@@ -92,19 +92,6 @@ private:
 };
 
 //
-class JSConsole : public QObject
-{
-    Q_OBJECT
-public:
-    explicit JSConsole (QObject* parent = nullptr) : QObject (parent) {}
-
-signals:
-
-public slots:
-    void log (const QString);
-};
-
-//
 class _QScxmlEcmaScriptDataModelPrivate : public QScxmlDataModelPrivate
 {
     Q_DECLARE_PUBLIC(QScxmlEcmaScriptDataModel)
@@ -148,5 +135,18 @@ public:
 };
 
 }
+
+//
+class JSConsole : public QObject
+{
+    Q_OBJECT
+public:
+    explicit JSConsole (QObject* parent = nullptr) : QObject (parent) {}
+
+signals:
+
+public slots:
+    void log (const QString);
+};
 
 #endif

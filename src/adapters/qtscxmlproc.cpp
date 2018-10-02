@@ -32,6 +32,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 using namespace scxml;
 
@@ -107,7 +108,14 @@ void
 qtscxmlproc::run (void)
 {
     if (!_machine->isInitialized ()) _machine->init ();
+    if (!_machine->isInitialized ())
+    {
+        qCritical () << "** ERROR: statemachine not initialized";
+        _application-> quit ();
+        throw std::runtime_error ("Failure");
+    }
     assert (_machine->isInitialized ());
+    qDebug () << ";; start running";
 
     _machine->start ();
     assert (_machine->isRunning ());
@@ -122,7 +130,7 @@ qtscxmlproc::run (void)
 // --------------------------------------------------------------------------------
 
 void
-qtscxmlproc::step (const bool timeout)
+qtscxmlproc::step (void)
 {
     qDebug () << ";; step";
     assert (_eventin);
@@ -136,19 +144,25 @@ qtscxmlproc::step (const bool timeout)
     try { event_read (*e); }
     catch (std::runtime_error ex)
     {
-                if (strcmp (ex.what (), "End_of_file") == 0)
-                {
-                    if (timeout)
-                    {
-                        _application->quit ();
-                        //throw std::runtime_error ("Exit");
-                        return;
-                    }
-                    else
-                        return;
-                }
-                else
-                    throw ex;
+        if (strcmp (ex.what (), "End_of_file") == 0)
+        {
+            qDebug () << ";; EOF reached";
+            if (_machine->isRunning ()) return;
+
+            _application->quit ();
+            //throw std::runtime_error ("Exit");
+            qDebug () << ";; quit on EOF";
+            return;
+        }
+        else if (strcmp (ex.what (), "Not_found") == 0)
+            // no event found
+            // there's still a chance that there will be.
+        {
+            usleep (100000);	// 100ms
+            return;
+        }
+        else
+            throw ex;
     }
     //std::clog << e << std::endl;
     //_interpreter.receive (e);
@@ -229,6 +243,7 @@ qtscxmlproc::event_read (QScxmlEvent& e)
 
     qDebug () << ";; event_read:" << obj.dump ().c_str ();
 
+    if (!obj["name"].is_string ()) throw std::runtime_error ("Invalid_argument");
     assert (obj["name"].is_string ());
     std::string name = obj["name"];
     e.setName (QString (name.c_str ()));
@@ -420,6 +435,12 @@ qtscxmlproc::setup (void)
                           _application->quit (); 
                       });
 
+    // SIGNAL: initializedChanged (initialized)
+    QObject::connect (_machine, &QScxmlStateMachine::initializedChanged,
+                      [this](bool initialized) {
+                          qDebug () << ";; SIGNAL: initializedChanged" << initialized;
+                      });
+
     // SIGNAL: log
     //QObject::connect (_machine, SIGNAL (log (const QString&, const QString&)),
     //                  _monitor, SLOT (log (const QString&, const QString&)));
@@ -448,7 +469,7 @@ qtscxmlproc::setup (void)
                       [this]() {
                           qDebug () << ";; SIGNAL: timeout";
                           //assert (_machine->isRunning ());
-                          step (true);
+                          step ();
                       });
     timer->start ();
 
@@ -491,9 +512,15 @@ qtscxmlproc::_hack (void)
     //QJSEngine* engine = nullptr;
     assert (engine);
 
+    // raiseEvent
+
+    // sendEvent
+
+    // console
     engine->installExtensions (QJSEngine::TranslationExtension | QJSEngine::ConsoleExtension);
     return;
 
+    // console.log
     JSConsole* console = new JSConsole ();
     QJSValue console_val =  engine->newQObject (console);
     engine->globalObject ().setProperty ("console", console_val);
