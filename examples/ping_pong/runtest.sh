@@ -32,3 +32,5 @@ do
     sleep 1
 done
 mosquitto_pub -t ping_pong -m "{\"event\":{\"name\":\"_accept\"}}"
+
+rm -f .ping_done .pong_done
