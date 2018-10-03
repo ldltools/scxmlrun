@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<scxml version="1.0" datamodel="ecmascript" initial="1">
+<?xml version="1.0"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q3">
   <datamodel>
     <!-- _trace for each 'run' is a sequence of 'possible worlds' generated/tracked at run-time -->
     <data id="_trace"/>
@@ -11,20 +11,19 @@
   <!--proposition 0 _b0-->
   <!--proposition 1 _b1-->
   <!--proposition 2 _b2-->
-  <state id="2">
-    <transition target="4" event="_accept">
+  <state id="q3">
+    <transition target="q3" event="_skip">
       <!--tid t19-->
     </transition>
-    <transition target="2" event="knockout">
+    <transition target="q3" event="day_close">
       <!--tid t20-->
       <!--transition: curr_world: true label: true next_world: true-->
-      <script>_trace_append (" true ");   if (_data.price &lt; KO_PRICE)
-    console.log ("** error: knockout"); ;</script>
-      <!--rule: r18 event: knockout certainty: 15-->
+      <script>_trace_append (" true ");     _data.price = _event.data.price; ;</script>
+      <!--rule: r15 event: day_close certainty: 15-->
       <!--rule.when: true-->
       <!--rule.ensure: true-->
     </transition>
-    <transition target="2" event="day_open">
+    <transition target="q3" event="day_open">
       <!--tid t21-->
       <!--transition: curr_world: true label: true next_world: true-->
       <script>_trace_append (" true ");     _data.cur_date = _data.cur_date + 1; ;</script>
@@ -32,16 +31,32 @@
       <!--rule.when: true-->
       <!--rule.ensure: true-->
     </transition>
-    <transition target="2" event="day_close">
+    <transition target="q3" event="init">
       <!--tid t22-->
       <!--transition: curr_world: true label: true next_world: true-->
-      <script>_trace_append (" true ");     _data.price = _event.data.price; ;</script>
-      <!--rule: r15 event: day_close certainty: 15-->
+      <script>_trace_append (" true ");     _data.KO_PRICE = _event.data.ko_price || 110;
+    _data.STRIKE_PRICE = _event.data.strike_price || 90;
+    _data.EXPIRY_DATE  = _event.data.expiry_date  || 3;
+    //_data.SHARE_PER_DAY = _event.data.share_per_day || 1000;
+    //_data.LEVERAGE = _event.data.leverage || 3;
+    _data.cur_date = _event.data.cur_date || 1;
+    _data.price = _event.data.price || 100;    
+    //_data.bought_shares = _event.data.bought_shares || 0; ;</script>
+      <!--rule: r14 event: init certainty: 15-->
       <!--rule.when: true-->
       <!--rule.ensure: true-->
     </transition>
-    <transition target="2" event="terminate">
+    <transition target="q3" event="knockout">
       <!--tid t23-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");   if (_data.price &lt; KO_PRICE)
+    console.log ("** error: knockout"); ;</script>
+      <!--rule: r18 event: knockout certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q3" event="terminate">
+      <!--tid t24-->
       <!--transition: curr_world: true label: true next_world: true-->
       <script>_trace_append (" true ");   if (_data.cur_date != EXPIRY_DATE)
     console.log ("** error: terminate"); ;</script>
@@ -49,8 +64,67 @@
       <!--rule.when: true-->
       <!--rule.ensure: true-->
     </transition>
-    <transition target="2" event="init">
-      <!--tid t24-->
+  </state>
+  <state id="q1">
+    <transition target="q2" event="_init">
+      <!--tid t25-->
+    </transition>
+    <transition target="q3" event="knockout">
+      <!--tid t26-->
+    </transition>
+    <transition target="q3" event="day_open">
+      <!--tid t27-->
+    </transition>
+    <transition target="q3" event="day_close">
+      <!--tid t28-->
+    </transition>
+    <transition target="q3" event="init">
+      <!--tid t29-->
+    </transition>
+    <transition target="q3" event="terminate">
+      <!--tid t30-->
+    </transition>
+  </state>
+  <state id="q2">
+    <transition target="q4" event="_accept">
+      <!--tid t31-->
+    </transition>
+    <transition target="q2" event="knockout">
+      <!--tid t32-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");   if (_data.price &lt; KO_PRICE)
+    console.log ("** error: knockout"); ;</script>
+      <!--rule: r18 event: knockout certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q2" event="day_open">
+      <!--tid t33-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");     _data.cur_date = _data.cur_date + 1; ;</script>
+      <!--rule: r16 event: day_open certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q2" event="day_close">
+      <!--tid t34-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");     _data.price = _event.data.price; ;</script>
+      <!--rule: r15 event: day_close certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q2" event="terminate">
+      <!--tid t35-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");   if (_data.cur_date != EXPIRY_DATE)
+    console.log ("** error: terminate"); ;</script>
+      <!--rule: r17 event: terminate certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q2" event="init">
+      <!--tid t36-->
       <!--transition: curr_world: true label: true next_world: true-->
       <script>_trace_append (" true ");     _data.KO_PRICE = _event.data.ko_price || 110;
     _data.STRIKE_PRICE = _event.data.strike_price || 90;
@@ -65,10 +139,58 @@
       <!--rule.ensure: true-->
     </transition>
   </state>
-  <state id="1">
-    <transition target="2" event="_init">
-      <!--tid t25-->
+  <state id="q4">
+    <transition target="q3" event="_skip">
+      <!--tid t37-->
+    </transition>
+    <transition target="q3" event="day_close">
+      <!--tid t38-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");     _data.price = _event.data.price; ;</script>
+      <!--rule: r15 event: day_close certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q3" event="day_open">
+      <!--tid t39-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");     _data.cur_date = _data.cur_date + 1; ;</script>
+      <!--rule: r16 event: day_open certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q3" event="init">
+      <!--tid t40-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");     _data.KO_PRICE = _event.data.ko_price || 110;
+    _data.STRIKE_PRICE = _event.data.strike_price || 90;
+    _data.EXPIRY_DATE  = _event.data.expiry_date  || 3;
+    //_data.SHARE_PER_DAY = _event.data.share_per_day || 1000;
+    //_data.LEVERAGE = _event.data.leverage || 3;
+    _data.cur_date = _event.data.cur_date || 1;
+    _data.price = _event.data.price || 100;    
+    //_data.bought_shares = _event.data.bought_shares || 0; ;</script>
+      <!--rule: r14 event: init certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q3" event="knockout">
+      <!--tid t41-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");   if (_data.price &lt; KO_PRICE)
+    console.log ("** error: knockout"); ;</script>
+      <!--rule: r18 event: knockout certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q3" event="terminate">
+      <!--tid t42-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>_trace_append (" true ");   if (_data.cur_date != EXPIRY_DATE)
+    console.log ("** error: terminate"); ;</script>
+      <!--rule: r17 event: terminate certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
     </transition>
   </state>
-  <state id="4"/>
 </scxml>

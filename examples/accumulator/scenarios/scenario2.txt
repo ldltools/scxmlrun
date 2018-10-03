@@ -1,0 +1,5 @@
+{"event" : {"name" : "_init"}}
+{"event" : {"name" : "init", "data" : {"ko_price": 110, "strike_price": 90, "expiry_date": 3, "share_per_day": 100, "leverage": 3}}}
+{"event" : {"name" : "day_close", "data" : {"price": 111}}}
+{"event" : {"name" : "knockout"}}
+{"event" : {"name" : "_accept"}}

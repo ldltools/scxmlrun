@@ -13,18 +13,19 @@ with the following features:
 
 # Example: [ping\_pong](examples/ping_pong/README.md)
 
-(1) [ping.sh](examples/ping_pong/ping.sh) and [pong.sh](examples/ping_pong/pong.sh) interact with each other by emitting _ping_ and _pong_ events via MQTT.  
+(1) [_ping.sh_](examples/ping_pong/ping.sh) and [_pong.sh_](examples/ping_pong/pong.sh) interact with each other by emitting _ping_ and _pong_ events via MQTT.  
 They start communication when an initial _ping (0)_ event is received by _ping.sh_,
-upon which _ping.sh_ emits _pong (1)_.
-Then, it is is delivered to _pong.sh_ and responded with _ping (1)_ and so on.
+upon which _ping.sh_ emits _pong (1)_.  
+Then, it is is delivered to _pong.sh_ and responded with _ping (1)_,
+and interaction goes on that way.
 
-(2) [*ping\_pong.scxml*](examples/ping_pong/ping_pong.scxml) is generated
-from [*ping\_pong.rules*](examples/ping_pong/ping_pong.rules)
+(2) [_ping\_pong.scxml_](examples/ping_pong/ping_pong.scxml) is generated
+from [_ping\_pong.rules_](examples/ping_pong/ping_pong.rules)
 that is defined in *dsl4sc*.
 
-![ping\_pong](examples/ping_pong/ping_pong.svg)
-
-(3) [*ping\_pong.scxml*](examples/ping_pong/ping_pong.scxml) works as a _monitor_ for the above 2 programs.
+(3) When running these together,
+[*ping\_pong.scxml*](examples/ping_pong/ping_pong.scxml) works as a _monitor_
+for _ping.sh_ and _pong.sh_.
 It monitors all events exchanged between _ping.sh_ and _pong.sh_,
 and reports them on the console.
 
@@ -40,6 +41,8 @@ pong 3
 ```
 
 ![ping\_pong](examples/ping_pong/ping_pong.jpg)
+
+See [more examples](examples/README.md) if you are interested.
 
 # Installation on Docker
 (to be filled in)
