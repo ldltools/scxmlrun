@@ -11,6 +11,26 @@ with the following features:
 - the underlying [JavaScript engine](http://doc.qt.io/qt-5/qjsengine.html) is extended with several new built-in primitives including:
   \_\__raiseEvent_ (_event_, _data_) and \_\__sendEvent_ (_event_, _data_)
 
+# Example: [ping\_pong](examples/ping_pong/README.md)
+
+(1) [ping.sh](examples/ping_pong/ping.sh) and [pong.sh](examples/ping_pong/pong.sh) interact with each other by exchaing _ping_ and _pong_ events via MQTT.  
+They start communication when an initial single _ping 0_ event is sent to _ping.sh_.
+
+(2) [*ping\_pong.scxml*](examples/ping_pong/ping_pong.scxml) works as a _monitor_ for the above 2 programs.
+All events processed by the programs are monitored and reported as follows.
+
+```
+ping 0  
+pong 1  
+ping 1  
+pong 2  
+ping 2  
+pong 3  
+...
+```
+
+![ping\_pong](examples/ping_pong/ping_pong.jpg)
+
 # Installation on Docker
 (to be filled in)
 

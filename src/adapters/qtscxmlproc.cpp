@@ -158,7 +158,8 @@ qtscxmlproc::step (void)
             // no event found
             // there's still a chance that there will be.
         {
-            usleep (100000);	// 100ms
+            //usleep (100000);	// 100ms
+            // ** this sometimes causes ignoring submitted events.. why?
             return;
         }
         else

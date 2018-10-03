@@ -91,7 +91,7 @@ scxmlproc::eventin_message_cb (mosquitto* mosq, void* obj, const mosquitto_messa
     std::string* str = new std::string ((const char*) msg->payload, 0, len);
     //char str[len + 1];
     //memcpy (str, msg->payload, len); str[len] = '\0';
-    std::clog << *str << std::endl;
+    //std::clog << *str << std::endl;
 
     assert (obj);
     jsonimstream* s = (jsonimstream*) obj;	// ** insecure
