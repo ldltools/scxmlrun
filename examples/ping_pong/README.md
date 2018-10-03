@@ -14,7 +14,7 @@ that is defined in *dsl4sc*.
 &ensp;&ensp; **on** ping **do** { console.log ("ping", \_event.data); };  
 &ensp;&ensp; **on** pong **do** { console.log ("pong", \_event.data); };  
 
-![ping\_pong](ping_pong.svg") 
+![ping\_pong](ping_pong.svg)
 
 (3) [*ping\_pong.scxml*](ping_pong.scxml) works as a _monitor_ for the above 2 programs.
 It monitors all events exchanged between _ping.sh_ and _pong.sh_,
@@ -31,4 +31,4 @@ pong 3
 ...
 ```
 
-![ping\_pong](ping_pong.jpg")
+![ping\_pong](ping_pong.jpg)

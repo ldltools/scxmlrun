@@ -22,7 +22,7 @@ Then, it is is delivered to _pong.sh_ and responded with _ping (1)_ and so on.
 from [*ping\_pong.rules*](examples/ping_pong/ping_pong.rules)
 that is defined in *dsl4sc*.
 
-![ping\_pong](examples/ping_pong/ping_pong.svg") 
+![ping\_pong](examples/ping_pong/ping_pong.svg)
 
 (3) [*ping\_pong.scxml*](examples/ping_pong/ping_pong.scxml) works as a _monitor_ for the above 2 programs.
 It monitors all events exchanged between _ping.sh_ and _pong.sh_,
@@ -39,7 +39,7 @@ pong 3
 ...
 ```
 
-![ping\_pong](examples/ping_pong/ping_pong.jpg")
+![ping\_pong](examples/ping_pong/ping_pong.jpg)
 
 # Installation on Docker
 (to be filled in)
