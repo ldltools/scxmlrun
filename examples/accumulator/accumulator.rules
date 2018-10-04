@@ -1,5 +1,8 @@
 // Accumulator Forward
 
+protocol
+(init + day_close + day_open + knockout + terminate)*;;
+
 /*
 // accumulator_mon1
 protocol

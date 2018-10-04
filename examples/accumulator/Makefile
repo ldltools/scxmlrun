@@ -12,17 +12,23 @@ clean::;	rm -f *~
 veryclean::	clean
 	rm -f out/*
 
--include ../Makefile.common
-
 RULES = $(shell echo accumulator*.rules)
 
-dfa:	$(RULES:%.rules=out/%.dfa.png)
-scxml:	$(RULES:%.rules=out/%.scxml)
-	for f in $^; do test $$f -nt `basename $$f` && cp -i $$f .; done; true
-uml:	$(RULES:%.rules=out/%.uml)
-svg:	$(RULES:%.rules=out/%.svg)
-	for f in $^; do test $$f -nt `basename $$f` && cp -i $$f .; done; true
+%.scxml:	%.rules
+	rules2scxml $< -o $@
+%.uml:	%.scxml
+	scxml2uml.sh $< -o $@
+%.svg:	%.uml
+	plantuml.sh $< -tsvg
+
+veryclean::
+	rm -f $(RULES:%.rules=%.uml) $(RULES:%.rules=%.svg)
+
 .PRECIOUS:	%.scxml %.uml %.svg
+
+scxml:	$(RULES:%.rules=%.scxml)
+uml:	$(RULES:%.rules=%.uml)
+svg:	$(RULES:%.rules=%.svg)
 
 check:	$(RULES:%.rules=%.scxml)
 	@for f in $(RULES); do\
