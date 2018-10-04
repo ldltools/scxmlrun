@@ -58,6 +58,7 @@ public:
 protected:
     QCoreApplication* _application;
     QScxmlStateMachine* _machine;
+    QJSEngine* _engine;
     monitor* _monitor;
 
 private:
@@ -89,6 +90,16 @@ private:
     jsonostream* _traceout;
 
     friend class qtscxmlproc;
+};
+
+//
+class _QScxmlStateMachine : public QScxmlStateMachine
+{
+public:
+    QScxmlStateMachinePrivate* d () const
+    {
+        return (reinterpret_cast<QScxmlStateMachinePrivate*>(d_ptr.data ()));
+    }
 };
 
 //

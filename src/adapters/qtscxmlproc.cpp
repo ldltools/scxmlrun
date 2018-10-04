@@ -25,6 +25,7 @@
 #include <QtCore/QtGlobal>
 #include <QtQml/QJSEngine>
 #include <QtScxml/QScxmlEcmaScriptDataModel>
+#include <QtScxml/private/qscxmlstatemachine_p.h>
 
 #include <cassert>
 #include <codecvt>
@@ -44,6 +45,7 @@ qtscxmlproc::qtscxmlproc (void) :
     scxmlproc (),
     _application (nullptr),
     _machine (nullptr),
+    _engine (nullptr),
     _monitor (nullptr)
 {
 }
@@ -52,6 +54,7 @@ qtscxmlproc::qtscxmlproc (QCoreApplication* app) :
     scxmlproc (),
     _application (app),
     _machine (nullptr),
+    _engine (nullptr),
     _monitor (nullptr)
 {
 }
@@ -80,7 +83,7 @@ qtscxmlproc::load (const std::string& scxml_url)
     {
         QTextStream errs (stderr, QIODevice::WriteOnly);
         const auto errors = _machine->parseErrors ();
-        for (const QScxmlError &error : errors) errs << error.toString ();
+        for (const QScxmlError &error : errors) qCritical () << error.toString ();
         throw std::runtime_error ("Parse_error");
     }
 
@@ -97,7 +100,7 @@ qtscxmlproc::load (const std::string& scxml_url)
 
 
     assert (_application);
-    //_machine->setParent (_application);
+    _machine->setParent (_application);
 }
 
 // --------------------------------------------------------------------------------
@@ -140,6 +143,13 @@ qtscxmlproc::step (void)
     //LOGD (USCXML_DEBUG) << interpreter.getImpl ().get ()->serialize () << std::endl;
     //if (_traceout) _datamodel_print (*_traceout);
 
+    QScxmlStateMachinePrivate* smp = ((_QScxmlStateMachine*) _machine)->d ();
+    if (smp->m_isProcessingEvents) return;
+    // ** note:
+    //    when m_isProcessingEvents is true,
+    //    queueProcessEvents, called from submitEvent(e), returns without invoking doProcessEvents.
+    //    then the event, e, could remain in the queue without being processed.
+
     QScxmlEvent* e = new QScxmlEvent ();
     try { event_read (*e); }
     catch (std::runtime_error ex)
@@ -171,6 +181,13 @@ qtscxmlproc::step (void)
     _machine->submitEvent (e);
       // submitEvent (e) -> routeEvent (e) -> postEvent (e)
       // -> m_internalQueue.enqueue (e); m_eventLoopHook.queueProcessEvents
+    {
+        nlohmann::json obj =
+            {{"submitEvent", {{"name", e->name ().toStdString ()},
+                              {"data", e->data ().toString ().toStdString ()},
+                              {"type", e->eventType ()}}}};
+        _traceout->write (obj);
+    }
 
     //assert (_machine->isRunning ());
     // ** could be paused
@@ -476,7 +493,10 @@ qtscxmlproc::setup (void)
 
     // hack
     _hack ();
+    assert (_engine);
 
+    // init
+    _machine->init ();
 }
 
 void
@@ -501,7 +521,7 @@ void
 JSConsole::log (const QString msg)
 {
     std::string str = msg.toStdString ();
-    qDebug() << "jsConsole: "<< str.c_str () << msg.size ();
+    qDebug () << "jsConsole: "<< str.c_str () << msg.size ();
 }
 
 void
@@ -509,20 +529,30 @@ qtscxmlproc::_hack (void)
 {
     QScxmlEcmaScriptDataModel* datamodel = (QScxmlEcmaScriptDataModel*) _machine->dataModel ();
     _QScxmlEcmaScriptDataModel* _datamodel = (_QScxmlEcmaScriptDataModel*)datamodel;
-    QJSEngine* engine = _datamodel->d ()->assertEngine ();
+    _engine = _datamodel->d ()->assertEngine ();
     //QJSEngine* engine = nullptr;
-    assert (engine);
+    assert (_engine);
+
+    QJSValue global = _engine->globalObject ();
+    assert (global.isObject ());
 
     // raiseEvent
 
     // sendEvent
 
+    // _data
+    if (!global.hasProperty ("_data"))
+    {
+        _engine->evaluate ("_data = {}");
+    }
+    assert (global.hasProperty ("_data"));
+
     // console
-    engine->installExtensions (QJSEngine::TranslationExtension | QJSEngine::ConsoleExtension);
+    _engine->installExtensions (QJSEngine::TranslationExtension | QJSEngine::ConsoleExtension);
     return;
 
     // console.log
     JSConsole* console = new JSConsole ();
-    QJSValue console_val =  engine->newQObject (console);
-    engine->globalObject ().setProperty ("console", console_val);
+    QJSValue console_val = _engine->newQObject (console);
+    _engine->globalObject ().setProperty ("console", console_val);
 }

@@ -5,7 +5,6 @@ written in C++
 with the following features:
 
 - it is built on top of [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html)  
-  alternatively, [uSCXML](https://github.com/tklab-tud/uscxml) can be used as the underlying SCXML engine.
 - it can be used as a command-line program that reads from and writes to local files.
 - input/output events can be transmitted over the network via the [MQTT](https://mqtt.org/) protocol.  
 - the underlying [JavaScript engine](http://doc.qt.io/qt-5/qjsengine.html) is extended with several new built-in primitives including:
@@ -25,9 +24,9 @@ that is defined in *dsl4sc*.
 
 (3) When running these together,
 [*ping\_pong.scxml*](examples/ping_pong/ping_pong.scxml) works as a _monitor_
-for _ping.sh_ and _pong.sh_.
+for _ping.sh_ and _pong.sh_.  
 It monitors all events exchanged between _ping.sh_ and _pong.sh_,
-and reports them on the console.
+and reports them onto the console.
 
 ```
 $ ./runtest.sh
@@ -73,6 +72,11 @@ See [more examples](examples/README.md) if you are interested.
   run: `apt-get install mosquitto libmosquitto-dev`  
 
 ## Prerequisites for using uSCXML as the SCXML engine
+
+Instead of [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html),
+[uSCXML](https://github.com/tklab-tud/uscxml) can be used
+as the SCXML engine.
+In that case, the following packages need to be installed.
 
 - [uscxml](http://tklab-tud.github.io/uscxml): another SCXML processor developed at
 [Technische Universität Darmstadt](https://www.informatik.tu-darmstadt.de/telekooperation/telecooperation_group/)
