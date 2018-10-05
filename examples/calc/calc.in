@@ -1,0 +1,5 @@
+{"event" : {"name" : "DIGIT.12"}}
+{"event" : {"name" : "OPER.PLUS"}}
+{"event" : {"name" : "DIGIT.34"}}
+{"event" : {"name" : "EQUALS"}}
+{"event" : {"name" : "terminate"}}

@@ -1,0 +1,9 @@
+{"event" : {"name" : "turn.on"}}
+{"event" : {"name" : "door.open"}}
+{"event" : {"name" : "door.close"}}
+{"event" : {"name" : "time"}}
+{"event" : {"name" : "time"}}
+{"event" : {"name" : "time"}}
+{"event" : {"name" : "time"}}
+{"event" : {"name" : "time"}}
+{"event" : {"name" : "terminate"}}
