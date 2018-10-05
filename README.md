@@ -65,7 +65,7 @@ See [more examples](examples/README.md) if you are interested.
   run: `wget https://github.com/qt/qtscxml/archive/v5.9.5.tar.gz`
 
   expand the archive, then build and install QtSCXML  
-  run: `cd qtscxml-5.9.5; mkdir _build; cd _build; cmake .. && make && make install`
+  run: `cd qtscxml-5.9.5/src/scxml; qmake && make && make install`
 
 - [JSON for C++](https://github.com/nlohmann/json): JSON parser/serializer  
   run: `apt-get install nlohmann-json-dev`
