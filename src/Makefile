@@ -44,14 +44,15 @@ OBJS		+=	adapters/qtscxmlproc.o
 CFLAGS		+=	-DUSE_QTSCXML
 
 # Qt
+QTVERSION	?=	5.9.5
 CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5
 
 CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore
-CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/5.9.5
-CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/5.9.5/QtCore
+CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/$(QTVERSION)
+CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/$(QTVERSION)/QtCore
 
 CFLAGS		+=	-fPIC
-CFLAGS		+=	-fdebug-prefix-map=/build/qtbase-opensource-src-oTRRwM/qtbase-opensource-src-5.9.5+dfsg=.
+CFLAGS		+=	-fdebug-prefix-map=/build/qtbase-opensource-src-oTRRwM/qtbase-opensource-src-$(QTVERSION)+dfsg=.
 LDFLAGS		+=	-lQt5Scxml -lQt5Qml -lQt5Core
 LDFLAGS		+=	-lpthread
 

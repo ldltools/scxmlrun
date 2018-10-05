@@ -8,12 +8,11 @@ refer to [this material](accumulator.pdf).
 
 ## accumulator contract
 
-- [accumulator for scxmlrun](accumulator.scxml)
-- [chaincode for hyperledger](hyperledger/accumulator.go)
+- [single-state accumulator in scxml](accumulator.scxml)
 
 ## monitors for accumulator
 
-- [accumulator_mon1](accumulator_mon1.rules)
-- [accumulator_mon2](accumulator_mon2.rules)
-- [accumulator_mon3](accumulator_mon3.rules)
-- [accumulator_mon4](accumulator_mon4.rules)
+- [accumulator_mon1](monitors/accumulator_mon1.rules)
+- [accumulator_mon2](monitors/accumulator_mon2.rules)
+- [accumulator_mon3](monitors/accumulator_mon3.rules)
+- [accumulator_mon4](monitors/accumulator_mon4.rules)

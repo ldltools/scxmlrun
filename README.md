@@ -44,7 +44,9 @@ pong 3
 See [more examples](examples/README.md) if you are interested.
 
 # Installation on Docker
-(to be filled in)
+
+- run `make docker-build` to build a new docker image for scxmlrun
+- run `make docker-run` to enter into the image
 
 # Installation on Debian/Ubuntu
 
@@ -56,7 +58,7 @@ See [more examples](examples/README.md) if you are interested.
   run: `apt-get install qt5-default qtbase5-dev qtbase5-private-dev`  
   run: `apt-get install qtdeclarative5-dev qtdeclarative5-private-dev`  
 
-  Note: as of Sep 2018, the packages are based on Qt v5.9.5.
+  Note: as of Sep 2018, the packages for Ubuntu are based on Qt v5.9.5.
 
 - [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html)  
   download the corresponding version of the QtSCXML source package  
