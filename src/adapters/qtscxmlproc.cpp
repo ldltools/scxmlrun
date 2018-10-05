@@ -107,7 +107,7 @@ qtscxmlproc::load (const std::string& scxml_url)
 // run
 // --------------------------------------------------------------------------------
 
-void
+int
 qtscxmlproc::run (void)
 {
     if (!_machine->isInitialized ()) _machine->init ();
@@ -124,7 +124,7 @@ qtscxmlproc::run (void)
     assert (_machine->isRunning ());
 
     assert (_application);
-    _application->exec ();
+    return _application->exec ();
 
 }
 
@@ -136,12 +136,9 @@ void
 qtscxmlproc::step (void)
 {
     qDebug () << ";; step";
+
     assert (_eventin);
     //assert (_machine->isRunning ());
-
-    //std::clog << _interpreter.serialize () << std::endl;
-    //LOGD (USCXML_DEBUG) << interpreter.getImpl ().get ()->serialize () << std::endl;
-    //if (_traceout) _datamodel_print (*_traceout);
 
     QScxmlStateMachinePrivate* smp = ((_QScxmlStateMachine*) _machine)->d ();
     if (smp->m_isProcessingEvents) return;
@@ -168,16 +165,15 @@ qtscxmlproc::step (void)
             // no event found
             // there's still a chance that there will be.
         {
-            //usleep (100000);	// 100ms
+            usleep (100000);	// 100ms
             // ** this sometimes causes ignoring submitted events.. why?
             return;
         }
         else
             throw ex;
     }
-    //std::clog << e << std::endl;
-    //_interpreter.receive (e);
-    qDebug () << ";; submitEvent:" << e->name () << e->eventType ();
+
+    qInfo () << ";; submitEvent:" << e->name () << e->eventType ();
     _machine->submitEvent (e);
       // submitEvent (e) -> routeEvent (e) -> postEvent (e)
       // -> m_internalQueue.enqueue (e); m_eventLoopHook.queueProcessEvents
@@ -193,57 +189,6 @@ qtscxmlproc::step (void)
     // ** could be paused
 
     return;
-
-    /*
-    uscxml::InterpreterState state = _interpreter.getState ();
-    switch (state)
-    {
-    case uscxml::USCXML_FINISHED:
-        return (state);    
-
-    case uscxml::USCXML_MACROSTEPPED:
-        // A macrostep is a series of one or more microsteps ending in a configuration where the internal event queue is empty and no transitions are enabled by NULL.
-        {
-            //std::clog << _interpreter.serialize () << std::endl;
-            //LOGD (USCXML_DEBUG) << interpreter.getImpl ().get ()->serialize () << std::endl;
-            if (_traceout) _datamodel_print (*_traceout);
-
-            uscxml::Event e;
-            try { event_read (e); }
-            catch (std::runtime_error ex)
-            {
-                if (strcmp (ex.what (), "End_of_file") == 0)
-                    // events still may arrive later (delayed send)
-                    assert (true);
-                else
-                    throw ex;
-            }
-            //std::clog << e << std::endl;
-            _interpreter.receive (e);
-
-            break;
-        }
-    default:
-        {}
-    }
-
-    state = _interpreter.step ();
-    const char* state_names[] = {"UNDEF", "IDLE", "INITIALIZED", "INSTANTIATED", "MICROSTEPPED", "MACROSTEPPED", "CANCELLED"};
-    const char* state_name = state == uscxml::USCXML_FINISHED ? "FINISHED" : state_names[state];
-    std::clog << ";; InterpreterState: " << state_name << std::endl;
-
-    switch (state)
-    {
-    case uscxml::USCXML_UNDEF:
-        throw std::runtime_error ("Not_found");
-    case uscxml::USCXML_IDLE:
-        return (step ());
-    default:
-        {}
-    }
-
-    return (state);
-    */
 }
 
 // --------------------------------------------------------------------------------
@@ -391,7 +336,8 @@ qtscxmlproc::verbosity_set (int v)
         assert (default_cat->isCriticalEnabled ());
         break;
     case 1:
-        QLoggingCategory::setFilterRules ("qt.scxml.statemachine.debug=false\n");
+        QLoggingCategory::setFilterRules ("default.debug=false\n"
+                                          "qt.scxml.statemachine.debug=false\n");
         break;
     case 2:
         QLoggingCategory::setFilterRules ("*.debug=true\n");
@@ -449,14 +395,14 @@ qtscxmlproc::setup (void)
     //                  _application, &QCoreApplication::quit);
     QObject::connect (_machine, &QScxmlStateMachine::finished,
                       [this]() {
-                          qDebug () << ";; SIGNAL: finished";
+                          qInfo () << ";; SIGNAL: finished";
                           _application->quit (); 
                       });
 
     // SIGNAL: initializedChanged (initialized)
     QObject::connect (_machine, &QScxmlStateMachine::initializedChanged,
                       [this](bool initialized) {
-                          qDebug () << ";; SIGNAL: initializedChanged" << initialized;
+                          qInfo () << ";; SIGNAL: initializedChanged" << initialized;
                       });
 
     // SIGNAL: log
@@ -471,14 +417,14 @@ qtscxmlproc::setup (void)
     // SIGNAL: reachedStableState
     QObject::connect (_machine, &QScxmlStateMachine::reachedStableState,
                       [this]() {
-                          qDebug () << ";; SIGNAL: reachedStableState";
+                          qInfo () << ";; SIGNAL: reachedStableState";
                           step ();
                       });
 
     // SIGNAL: runningChanged (bool running)
     QObject::connect (_machine, &QScxmlStateMachine::runningChanged,
                       [this](bool running) {
-                          qDebug () << ";; SIGNAL: runningChanged: " << running;
+                          qInfo () << ";; SIGNAL: runningChanged: " << running;
                       });
 
     // timer

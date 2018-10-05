@@ -174,7 +174,7 @@ uscxmlproc::step (void)
     return (state);
 }
 
-void
+int
 uscxmlproc::run (void)
 {
     // run interpreter
@@ -184,6 +184,7 @@ uscxmlproc::run (void)
     {
         state = step ();
     }
+    return (0);
 }
 
 // --------------------------------------------------------------------------------

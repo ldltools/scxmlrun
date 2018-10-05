@@ -27,7 +27,7 @@ class scxmlproc
 public:
     virtual void load (const std::string& scxml_url) = 0;
     virtual void setup (void) = 0;
-    virtual void run (void) = 0;
+    virtual int run (void) = 0;
 
 public:
     jsonistream& eventin (void) { return (*_eventin); }

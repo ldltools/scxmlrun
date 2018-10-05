@@ -35,7 +35,7 @@ class qtscxmlproc : public scxmlproc
 public:
     virtual void load (const std::string& scxml_url);
     virtual void setup (void);
-    virtual void run (void);
+    virtual int run (void);
 
     static void version (void);
 
