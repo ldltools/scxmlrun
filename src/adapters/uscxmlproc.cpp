@@ -389,7 +389,7 @@ ConsoleLogCallback (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObje
                     size_t argumentCount, const JSValueRef arguments[],
                     JSValueRef* exception)       
 {
-    assert (argumentCount == 1);
+    assert (argumentCount >= 1);
 
     const JSValueRef value = arguments[0];
 
@@ -417,24 +417,40 @@ uscxmlproc::setup (void)
     switch (_verbosity)
     {
     case -1:
-        proc.cout ().setstate (std::ios_base::badbit);
-        proc.cerr ().setstate (std::ios_base::badbit);
+        cout ().setstate (std::ios_base::badbit);
+        cerr ().setstate (std::ios_base::badbit);
         break;
     case 0:
         std::clog.setstate (std::ios_base::badbit);
         break;
     case 1:
-        proc.cout ().clear ();
-        proc.cerr ().clear ();
+        cout ().clear ();
+        cerr ().clear ();
         std::clog.clear ();
         break;
     case 2:
-        proc.cout ().clear ();
-        proc.cerr ().clear ();
+        cout ().clear ();
+        cerr ().clear ();
         std::clog.clear ();
         break;
     default:
         {}
+    }
+
+
+    // eventin
+    assert (_eventin);
+
+    // trace_monitor
+    if (_traceout)
+    {
+        TraceMonitor* mon = new TraceMonitor ();
+        mon->_proc = this;
+        //mon->_datamodel = (_JSCDataModel*) dm_i;
+        mon->_traceout = _traceout;
+
+        _trace_monitor = mon;
+        _interpreter.addMonitor (_trace_monitor);
     }
 
     // ** quick hack: define & intern "console.log"
@@ -443,7 +459,13 @@ uscxmlproc::setup (void)
     //DataModelImpl* dm_i = ((XDataModel*)dm)->getImpl ();
     //assert (dm_i);
     uscxml::ActionLanguage* al = _interpreter.getActionLanguage ();
-    uscxml::DataModelImpl* dm_i = ((_DataModel*)(&al->dataModel))->getImpl ();
+    uscxml::DataModel* dm = &al->dataModel;
+    bool dm_is_ecmascript = false;
+    for (auto name : dm->getNames ())
+        if (name == "ecmascript") { dm_is_ecmascript = true; break; }
+    if (!dm_is_ecmascript) return;
+
+    uscxml::DataModelImpl* dm_i = ((_DataModel*)dm)->getImpl ();
     assert (dm_i);
     JSGlobalContextRef global_ctx = ((_JSCDataModel*)dm_i)->getContext ();
     assert (global_ctx);
@@ -467,22 +489,6 @@ uscxmlproc::setup (void)
     JSObjectSetProperty (global_ctx, global_obj,
                          consolePairsName, consolePairsObj,
                          kJSPropertyAttributeNone, nullptr);
-
-    // eventin
-    assert (_eventin);
-
-    // trace_monitor
-    if (_traceout)
-    {
-        TraceMonitor* mon = new TraceMonitor ();
-        mon->_proc = this;
-        //mon->_datamodel = (_JSCDataModel*) dm_i;
-        mon->_traceout = _traceout;
-
-        _trace_monitor = mon;
-        _interpreter.addMonitor (_trace_monitor);
-    }
-
 }
 
 void
@@ -498,6 +504,13 @@ uscxmlproc::version (void)
 
     std::cerr << "XercesC:\t"
               << XERCES_FULLVERSIONSTR
+              << std::endl;
+
+    auto json_meta = nlohmann::json::meta ();
+    std::cerr << "JSON for C++:\t"
+              << json_meta["version"]["major"] << "."
+              << json_meta["version"]["minor"] << "."
+              << json_meta["version"]["patch"]
               << std::endl;
 
     std::cerr << "Mosquitto:\t"
