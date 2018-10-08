@@ -20,7 +20,10 @@
 
 // for hacking QScxmlEcmaScriptDataModel
 #include <QtCore/qglobal.h>
+#include <QtCore/QJsonObject>
+#include <QtCore/QJsonValue>
 #include <QtQml/QJSEngine>
+#include <QtQml/QJSValue>
 #include <QtScxml/QScxmlEcmaScriptDataModel>
 #include <QtScxml/private/qscxmldatamodel.h>
 #include <QtScxml/private/qscxmldatamodel_p.h>
@@ -46,6 +49,9 @@ public:
     void event_read (QScxmlEvent&);
     void event_write (jsonostream&, const QScxmlEvent&);
 
+    void event_raise (const QJsonObject& params);
+    void event_send (const QJsonObject& params);
+
 public:
     virtual void verbosity_set (int);
 
@@ -58,6 +64,7 @@ public:
 protected:
     QCoreApplication* _application;
     QScxmlStateMachine* _machine;
+    const char* _datamodel_name;
     QJSEngine* _engine;
     monitor* _monitor;
 
@@ -92,6 +99,8 @@ private:
     friend class qtscxmlproc;
 };
 
+}
+
 //
 class _QScxmlStateMachine : public QScxmlStateMachine
 {
@@ -113,7 +122,7 @@ public:
 
     QJSEngine* assertEngine ()
     {
-        //if (!jsEngine)
+        if (!jsEngine)
         {
             Q_Q (QScxmlEcmaScriptDataModel);
             jsEngine = new QJSEngine (q->stateMachine ());
@@ -145,19 +154,34 @@ public:
     }
 };
 
-}
+//
+class _JSScxml : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit _JSScxml (QObject* parent = nullptr) : QObject (parent) {}
+
+public slots:
+    void _raise (const QString);
+    void _send (const QString);
+
+private:
+    scxml::qtscxmlproc* _proc;
+
+    friend class scxml::qtscxmlproc;
+};
 
 //
-class JSConsole : public QObject
+class _JSConsole : public QObject
 {
     Q_OBJECT
 public:
-    explicit JSConsole (QObject* parent = nullptr) : QObject (parent) {}
+    explicit _JSConsole (QObject* parent = nullptr) : QObject (parent) {}
 
 signals:
-
 public slots:
-    void log (const QString);
+    void _log (const QString);
 };
 
 #endif

@@ -16,6 +16,7 @@
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
+#include <QtCore/QJsonDocument>
 #include <QtCore/QJsonValue>
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QStandardPaths>
@@ -32,7 +33,6 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
-#include <string>
 #include <unistd.h>
 
 using namespace scxml;
@@ -45,6 +45,7 @@ qtscxmlproc::qtscxmlproc (void) :
     scxmlproc (),
     _application (nullptr),
     _machine (nullptr),
+    _datamodel_name (nullptr),
     _engine (nullptr),
     _monitor (nullptr)
 {
@@ -54,6 +55,7 @@ qtscxmlproc::qtscxmlproc (QCoreApplication* app) :
     scxmlproc (),
     _application (app),
     _machine (nullptr),
+    _datamodel_name (nullptr),
     _engine (nullptr),
     _monitor (nullptr)
 {
@@ -93,14 +95,43 @@ qtscxmlproc::load (const std::string& scxml_url)
         //qInfo () << ";; state: " << names.at (i).toLocal8Bit().constData () << std::endl;
         qInfo () << ";; state:" << names.at (i);
 
-    // EcmaScript
-    QScxmlDataModel* datamodel = _machine->dataModel ();
-    assert (datamodel);
-    //_machine->setDataModel (new QScxmlEcmaScriptDataModel ());
-
-
     assert (_application);
     _machine->setParent (_application);
+
+    // datamodel
+    assert (_machine->dataModel ());
+    //QScxmlDataModel* datamodel = _machine->dataModel ();
+    //assert (datamodel);
+    //_machine->setDataModel (new QScxmlEcmaScriptDataModel ());
+    _datamodel_name = "null";
+
+    // look up the "datamodel" attribute of the scxml element
+    const QString filename = QString (scxml_url.c_str ());
+    QFile scxmlfile (filename);
+    auto rslt = scxmlfile.open (QIODevice::ReadOnly);
+    assert (rslt);
+    QXmlStreamReader reader (&scxmlfile);
+    while (reader.readNextStartElement ())
+    {
+        if (!reader.isStartElement ()) continue;
+        assert (reader.isStartElement ());
+        //qInfo () << "element:" << reader.name ();
+        if (reader.name () == "scxml")
+        {
+            for (QXmlStreamAttribute attr : reader.attributes ())
+            {
+                if (attr.name () == "datamodel")
+                {
+                    //qInfo () << "datamodel:" << attr.value ();
+                    const char * str = attr.value ().toString ().toStdString ().c_str ();
+                    _datamodel_name = strdup (str);
+                    break;
+                }
+            }
+            break;
+        }
+    }
+    scxmlfile.close ();
 }
 
 // --------------------------------------------------------------------------------
@@ -131,6 +162,9 @@ qtscxmlproc::run (void)
 // --------------------------------------------------------------------------------
 // step
 // --------------------------------------------------------------------------------
+
+static nlohmann::json to_nlohmann (const QVariant);
+static nlohmann::json to_nlohmann (const QJsonValue);
 
 void
 qtscxmlproc::step (void)
@@ -173,14 +207,14 @@ qtscxmlproc::step (void)
             throw ex;
     }
 
-    qInfo () << ";; submitEvent:" << e->name () << e->eventType ();
+    qInfo () << ";; submitEvent:" << e->name () << e->data () << e->eventType ();
     _machine->submitEvent (e);
       // submitEvent (e) -> routeEvent (e) -> postEvent (e)
       // -> m_internalQueue.enqueue (e); m_eventLoopHook.queueProcessEvents
     {
         nlohmann::json obj =
             {{"submitEvent", {{"name", e->name ().toStdString ()},
-                              {"data", e->data ().toString ().toStdString ()},
+                              {"data", to_nlohmann (e->data ())},
                               {"type", e->eventType ()}}}};
         _traceout->write (obj);
     }
@@ -206,6 +240,8 @@ qtscxmlproc::event_read (QScxmlEvent& e)
 
     qDebug () << ";; event_read:" << obj.dump ().c_str ();
 
+    // name
+    assert (obj.count ("name") == 1);
     if (!obj["name"].is_string ()) throw std::runtime_error ("Invalid_argument");
     assert (obj["name"].is_string ());
     std::string name = obj["name"];
@@ -213,15 +249,31 @@ qtscxmlproc::event_read (QScxmlEvent& e)
     e.setEventType (QScxmlEvent::InternalEvent);	// raise
     //e.setEventType (QScxmlEvent::ExternalEvent);	// send
 
-    auto data = obj["data"];
-    const char* str = data.dump ().c_str ();
-    //const char* str = data.get<std::string> ().c_str ();
-    QJsonValue val (str);
-    e.setData (val.toVariant ());
+    // data
+    nlohmann::json data = obj["data"];
+    QJsonValue data_val;
+    if (obj.count ("data") == 0 || data.is_null ())
+    {
+        data_val = QJsonValue ();
+        assert (data_val.isNull ());
+    }
+    else if (data.is_string ())
+    {
+        std::string str = obj["data"];
+        data_val = QJsonValue (str.c_str ());
+        //data_val = QJsonValue (data.dump ().c_str ());
+    }
+    else
+    {
+        //const char* str = data.get<std::string> ().c_str ();
+        const char* str = data.dump ().c_str ();
+        data_val = QJsonValue (str);
+    }
+    e.setData (data_val.toVariant ());
 
     qDebug () << ";; event_read:"
               << "name:" << name.c_str ()
-              << "data:" << str;
+              << "data:" << data_val;
 }
 
 void
@@ -231,6 +283,69 @@ qtscxmlproc::event_write (jsonostream& s, const QScxmlEvent& e)
 
     nlohmann::json obj = {{"event", {{"name", e.name ().toStdString ()}}}};
     s.write (obj);
+}
+
+void
+qtscxmlproc::event_raise (const QJsonObject& params)
+{
+    qInfo () << ";; event_raise:" << params;
+    QVariantMap map = params.toVariantMap ();
+
+    // event
+    assert (params.contains ("event"));
+    QScxmlEvent* e = new QScxmlEvent ();
+    QVariantMap e_map = map["event"].toMap ();
+    e->setName (e_map["name"].toString ());
+    e->setData (e_map["data"]);
+    e->setEventType (QScxmlEvent::InternalEvent);
+
+    _machine->submitEvent (e);
+}
+
+void
+qtscxmlproc::event_send (const QJsonObject& params)
+{
+    qInfo () << ";; event_send:" << params;
+
+    // event
+    assert (params.contains ("event"));
+    QJsonObject e = params["event"].toObject ();
+    assert (e.contains ("name") && e["name"].isString ());
+
+    std::string name = e["name"].toString ().toStdString ();
+    //qInfo () << ";; event_send:" << map["event"].toMap ();
+
+    nlohmann::json data = e.contains ("data") ? to_nlohmann (e["data"]) : nlohmann::json (nullptr);
+    nlohmann::json obj =
+        {{"event", {{"name", name},
+                    {"data", data},
+                    {"type", QScxmlEvent::ExternalEvent}}}};
+    _eventout->write (obj);
+}
+
+static nlohmann::json
+to_nlohmann (const QJsonValue v)
+{
+    if (v.isNull ())
+        return (nullptr);
+    else if (v.isString ())
+    {
+        //qInfo () << ";; to_nlohmann:" << v.toString () << v.toString ().size ();
+        return (v.toString ().toStdString ().c_str ());
+    }
+    else if (v.isObject ())
+    {
+    }
+
+    return (v.toString ().toStdString ());
+}
+
+static nlohmann::json
+to_nlohmann (const QVariant v)
+{
+    if (v.isNull ()) return (nullptr);
+        
+    return (to_nlohmann (v.toJsonValue ()));
 }
 
 // --------------------------------------------------------------------------------
@@ -312,11 +427,9 @@ monitor::log (const QString &label, const QString &msg)
 void
 qtscxmlproc::verbosity_set (int v)
 {
-    _verbosity = v;
-
     QLoggingCategory* default_cat = QLoggingCategory::defaultCategory ();
     //qDebug () << QStandardPaths::standardLocations (QStandardPaths::GenericConfigLocation);
-    switch (_verbosity)
+    switch (v)
     {
     case -1:
         QLoggingCategory::setFilterRules ("*.debug=false\n"
@@ -437,12 +550,12 @@ qtscxmlproc::setup (void)
                       });
     timer->start ();
 
-    // hack
-    _hack ();
-    assert (_engine);
 
     // init
     _machine->init ();
+
+    // hack
+    _hack ();
 }
 
 void
@@ -471,7 +584,34 @@ qtscxmlproc::version (void)
 // --------------------------------------------------------------------------------
 
 void
-JSConsole::log (const QString msg)
+_JSScxml::_raise (const QString str)
+{
+    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
+
+    //QJSValue js_val (str);
+    //qInfo () << ";; _JSScxml::raise:" << js_val.toString ();
+    //QVariant v = js_val.toVariant ();
+    // cf. http://doc.qt.io/qt-5/qjsvalue.html#toVariant
+
+    assert (_proc);
+    _proc->event_raise (obj);
+}
+
+void
+_JSScxml::_send (const QString str)
+{
+    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
+
+    //QJSValue js_val (str);
+    //qInfo () << ";; _JSScxml::send:" << js_val.toString ().toStdString ().c_str ();
+    //QVariant v = js_val.toVariant ();
+    // cf. http://doc.qt.io/qt-5/qjsvalue.html#toVariant
+    assert (_proc);
+    _proc->event_send (obj);
+}
+
+void
+_JSConsole::_log (const QString msg)
 {
     std::string str = msg.toStdString ();
     qDebug () << "jsConsole: "<< str.c_str () << msg.size ();
@@ -480,18 +620,54 @@ JSConsole::log (const QString msg)
 void
 qtscxmlproc::_hack (void)
 {
-    QScxmlEcmaScriptDataModel* datamodel = (QScxmlEcmaScriptDataModel*) _machine->dataModel ();
+    assert (_datamodel_name);
+    qInfo () << ";; datamodel:" << _datamodel_name;
+    if (strcmp (_datamodel_name, "ecmascript") != 0) return;
+
+    QScxmlDataModel* datamodel = _machine->dataModel ();
+    assert (datamodel && datamodel->stateMachine () == _machine);
     _QScxmlEcmaScriptDataModel* _datamodel = (_QScxmlEcmaScriptDataModel*)datamodel;
+    if (!_datamodel->d ()->engine ()) return;
+    assert (!_engine);
+
+    // set a JSEngine object to _engine
     _engine = _datamodel->d ()->assertEngine ();
-    //QJSEngine* engine = nullptr;
+    // ** assertEngine () creates an engine object if _datamodel does not carry one.
     assert (_engine);
 
     QJSValue global = _engine->globalObject ();
     assert (global.isObject ());
 
-    // raiseEvent
+    // system variables
+    QJSValue _name = global.property ("_name");
+    qInfo () << ";; _name:" << _name.toString ();
+    QJSValue _sessionid = global.property ("_sessionid");
+    qInfo () << ";; _sessionid:" << _sessionid.toString ();
 
-    // sendEvent
+    QJSValue _ioprocessors = global.property ("_ioprocessors");
+    assert (_ioprocessors.isObject ());
+    qInfo () << ";; _ioprocessors:" << _ioprocessors.toString ();
+    QJSValue loc = _engine->evaluate ("_ioprocessors.scxml.location");
+    qInfo () << ";; _ioprocessors.scxml.location:" << loc.toString ();
+    // QtSCXML only supports: <send type="http://www.w3.org/TR/scxml/#SCXMLEventProcessor"...>
+
+    // JSEngine extension
+    QJSEngine::Extensions exts = QJSEngine::TranslationExtension | QJSEngine::ConsoleExtension;
+    _engine->installExtensions (exts);
+
+    _JSScxml* scxml = new _JSScxml ();
+    scxml->_proc = this;
+    QJSValue scxml_val = _engine->newQObject (scxml);
+    global.setProperty ("SCXML", scxml_val);
+
+    // SCXML.raise
+    QJSValue raise_fun = _engine->evaluate ("function (obj) { SCXML._raise (JSON.stringify (obj)) }");
+    assert (raise_fun.isCallable ());
+    scxml_val.setProperty ("raise", raise_fun);
+    // SCXML.send
+    QJSValue send_fun = _engine->evaluate ("function (obj) { SCXML._send (JSON.stringify (obj)) }");
+    assert (send_fun.isCallable ());
+    scxml_val.setProperty ("send", send_fun);
 
     // _data
     if (!global.hasProperty ("_data"))
@@ -501,11 +677,15 @@ qtscxmlproc::_hack (void)
     assert (global.hasProperty ("_data"));
 
     // console
-    _engine->installExtensions (QJSEngine::TranslationExtension | QJSEngine::ConsoleExtension);
-    return;
-
+    //QJSEngine::Extensions exts = QJSEngine::TranslationExtension | QJSEngine::ConsoleExtension;
+    //_engine->installExtensions (exts);
+#if 0
     // console.log
-    JSConsole* console = new JSConsole ();
+    _JSConsole* console = new _JSConsole ();
     QJSValue console_val = _engine->newQObject (console);
-    _engine->globalObject ().setProperty ("console", console_val);
+    global.setProperty ("console", console_val);
+    QJSValue log_fun = _engine->evaluate ("function (obj) { console._log (JSON.stringify (obj)) }");
+    console_val.setProperty ("log", log_fun);
+#endif
+
 }

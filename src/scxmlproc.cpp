@@ -30,7 +30,6 @@ scxmlproc::scxmlproc (void) :
     _eventin (nullptr),
     _eventout (nullptr),
     _traceout (nullptr),
-    _verbosity (0),
     _cout (&std::cout),
     _cerr (&std::cerr)
 {

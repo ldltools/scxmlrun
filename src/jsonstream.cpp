@@ -127,8 +127,23 @@ jsonofstream::write (nlohmann::json& obj)
 {
     assert (_out);
     std::string str = obj.dump ();
+
+    return (write (str));
+
+    /*
     //std::clog << ";; write: '" << str << "'" << std::endl;
     *_out << str << std::endl;
+    return (*this);
+    */
+}
+
+jsonofstream&
+jsonofstream::write (const std::string& str)
+{
+    assert (_out);
+    //std::cerr << ";; write: '" << str << "'" << std::endl;
+    *_out << str << std::endl;
+
     return (*this);
 }
 
@@ -157,10 +172,23 @@ jsonomstream::write (nlohmann::json& obj)
     assert (_mosq && _topic);
 
     std::string str = obj.dump ();
+    return (write (str));
+
+    /*
     const char* msg = str.c_str ();
     int len = str.length ();
     int rslt = mosquitto_publish (_mosq, nullptr, _topic, len, msg, 0, false);
     assert (rslt == MOSQ_ERR_SUCCESS);
 
     return (*this);
+    */
+}
+
+jsonomstream&
+jsonomstream::write (const std::string& str)
+{
+    const char* msg = str.c_str ();
+    int len = str.length ();
+    int rslt = mosquitto_publish (_mosq, nullptr, _topic, len, msg, 0, false);
+    assert (rslt == MOSQ_ERR_SUCCESS);
 }

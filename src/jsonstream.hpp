@@ -76,12 +76,14 @@ class jsonostream : public jsonstream
 public:
     jsonostream& read (nlohmann::json&) {}
     virtual jsonostream& write (nlohmann::json&) = 0;
+    virtual jsonostream& write (const std::string&) = 0;
 };
 
 class jsonofstream : public jsonostream
 {
 public:
     virtual jsonofstream& write (nlohmann::json&);
+    virtual jsonofstream& write (const std::string&);
 
 public:
     jsonofstream (void);
@@ -96,6 +98,7 @@ class jsonomstream : public jsonostream
 {
 public:
     virtual jsonomstream& write (nlohmann::json&);
+    virtual jsonomstream& write (const std::string&);
 
 public:
     jsonomstream (void);

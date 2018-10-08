@@ -7,8 +7,8 @@ with the following features:
 - it is built on top of [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html)  
 - it can be used as a command-line program that reads from and writes to local files.
 - input/output events can be transmitted over the network via the [MQTT](https://mqtt.org/) protocol.  
-- the underlying [JavaScript engine](http://doc.qt.io/qt-5/qjsengine.html) is extended with several new built-in primitives including:
-  \_\__raiseEvent_ (_event_, _data_) and \_\__sendEvent_ (_event_, _data_)
+- the underlying [JavaScript engine](http://doc.qt.io/qt-5/qjsengine.html) is extended with several new built-in functions including:
+  `SCXML.raise` and `SCXML.send` for raising/sending events in the JSON format.
 
 # Example: [ping\_pong](examples/ping_pong/README.md)
 

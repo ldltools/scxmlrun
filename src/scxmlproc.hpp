@@ -42,34 +42,34 @@ public:
     void traceout_open (const char* filename);
     void traceout_open (mosquitto*, const char*);
 
-    std::ostream& cout (void) { assert (_cout); return (*_cout); }
-    std::ostream& cerr (void) { assert (_cerr); return (*_cerr); }
-    void cout (std::ostream& s) { _cout = &s; }
-    void cerr (std::ostream& s) { _cerr = &s; }
-
-public:
-    virtual void verbosity_set (int v) { _verbosity = v; }
-
-public:
-    scxmlproc (void);
-    scxmlproc (const scxmlproc&);
-    ~scxmlproc (void);
+private:
+    static void eventin_message_cb (mosquitto*, void*, const mosquitto_message*);
 
 protected:
     jsonistream* _eventin;
     jsonostream* _eventout;
     jsonostream* _traceout;
 
-    int8_t _verbosity;
+public:
+    scxmlproc (void);
+    scxmlproc (const scxmlproc&);
+    ~scxmlproc (void);
+
+public:
+    virtual void verbosity_set (int v) = 0;
       // -1: silent
       //  0: default
       //  1: verbose
       //  2: extra-verbose
+
+    std::ostream& cout (void) { assert (_cout); return (*_cout); }
+    std::ostream& cerr (void) { assert (_cerr); return (*_cerr); }
+    void cout (std::ostream& s) { _cout = &s; }
+    void cerr (std::ostream& s) { _cerr = &s; }
+
+protected:
     std::ostream* _cout;		// stdout
     std::ostream* _cerr;		// stderr
-
-private:
-    static void eventin_message_cb (mosquitto*, void*, const mosquitto_message*);
 
 };
 
