@@ -15,6 +15,9 @@
     <transition target="q2" event="_init">
       <!--tid t36-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q2">
     <transition target="q4" event="init">
@@ -24,6 +27,9 @@
       <!--rule: r26 event: init certainty: 15-->
       <!--rule.when: true-->
       <!--rule.ensure: true-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <state id="q5">
@@ -51,11 +57,17 @@
     <transition target="q6" event="terminate">
       <!--tid t52-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <final id="q7"/>
   <state id="q6">
     <transition target="q7" event="_accept">
       <!--tid t60-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <state id="q4">
@@ -67,5 +79,9 @@
       <!--rule.when: true-->
       <!--rule.ensure: true-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
+  <final id="_rejected"/>
 </scxml>

@@ -23,15 +23,24 @@
       <!--rule.when: true-->
       <!--rule.ensure: true-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q14">
     <transition target="q10" event="knockout">
       <!--tid t146-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q1">
     <transition target="q3" event="_init">
       <!--tid t157-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <state id="q5">
@@ -47,10 +56,16 @@
       <!--rule.ensure: true-->
       <!--rule.raise_sum: _under_strike _over_strike-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q19">
     <transition target="q17" event="knockout">
       <!--tid t190-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <state id="q7">
@@ -60,10 +75,16 @@
     <transition target="q10" event="terminate">
       <!--tid t206-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q17">
     <transition target="q12" event="_accept">
       <!--tid t212-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <state id="q16">
@@ -80,15 +101,24 @@
       <!--rule.ensure: true-->
       <!--rule.raise_sum: _knockout _not_knockout-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q10">
     <transition target="q12" event="_accept">
       <!--tid t233-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q8">
     <transition target="q4" event="day_open">
       <!--tid t249-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <state id="q9">
@@ -104,6 +134,9 @@
       <!--rule.when: true-->
       <!--rule.ensure: true-->
       <!--rule.raise_sum: _knockout _not_knockout-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <final id="q12"/>
@@ -124,6 +157,9 @@
       <!--rule.when: true-->
       <!--rule.ensure: is_over_strike-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q15">
     <transition target="q16" event="day_open">
@@ -131,6 +167,9 @@
     </transition>
     <transition target="q17" event="terminate">
       <!--tid t296-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <state id="q11">
@@ -148,6 +187,9 @@
     </transition>
     <transition target="q14" event="_knockout">
       <!--tid t306-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <state id="q6">
@@ -167,6 +209,9 @@
       <!--rule.when: true-->
       <!--rule.ensure: is_over_strike-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q18">
     <transition target="q13" event="_not_knockout">
@@ -184,6 +229,9 @@
     <transition target="q19" event="_knockout">
       <!--tid t331-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q4">
     <transition target="q5" event="day_close">
@@ -199,5 +247,9 @@
       <!--rule.ensure: true-->
       <!--rule.raise_sum: _knockout _not_knockout-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
+  <final id="_rejected"/>
 </scxml>

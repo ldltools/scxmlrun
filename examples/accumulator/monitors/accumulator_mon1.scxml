@@ -15,10 +15,16 @@
     <transition target="q2" event="_init">
       <!--tid t32-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q2">
     <transition target="q4" event="init">
       <!--tid t43-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
     </transition>
   </state>
   <state id="q5">
@@ -31,16 +37,26 @@
     <transition target="q6" event="terminate">
       <!--tid t48-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <final id="q7"/>
   <state id="q6">
     <transition target="q7" event="_accept">
       <!--tid t56-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
   <state id="q4">
     <transition target="q5" event="day_close">
       <!--tid t65-->
     </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
   </state>
+  <final id="_rejected"/>
 </scxml>

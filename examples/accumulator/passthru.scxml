@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript">
+  <state id="passing">
+    <transition target="accepted" event="_accept">
+      <script>SCXML.send ({"event" : _event})</script>
+    </transition>
+    <transition target="passing" event="*">
+      <script>SCXML.send ({"event" : _event})</script>
+    </transition>
+  </state>
+  <final id="accepted"/>
+</scxml>
