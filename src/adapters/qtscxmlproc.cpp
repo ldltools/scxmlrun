@@ -299,6 +299,7 @@ qtscxmlproc::event_raise (const QJsonObject& params)
     e->setData (e_map["data"]);
     e->setEventType (QScxmlEvent::InternalEvent);
 
+    assert (_machine);
     _machine->submitEvent (e);
 }
 
@@ -320,6 +321,8 @@ qtscxmlproc::event_send (const QJsonObject& params)
         {{"event", {{"name", name},
                     {"data", data},
                     {"type", QScxmlEvent::ExternalEvent}}}};
+
+    assert (_eventout);
     _eventout->write (obj);
 }
 

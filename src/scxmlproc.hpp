@@ -42,8 +42,13 @@ public:
     void traceout_open (const char* filename);
     void traceout_open (mosquitto*, const char*);
 
+public:
+    void mosq_set_callbacks (mosquitto*);
+
 private:
     static void eventin_message_cb (mosquitto*, void*, const mosquitto_message*);
+    static void mosq_disconnect_cb (mosquitto*, void*, int);
+    static void mosq_publish_cb (mosquitto*, void*, int);
 
 protected:
     jsonistream* _eventin;

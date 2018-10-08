@@ -70,6 +70,34 @@ synopsis (const char* prog)
               << "show version info\n";
 }
 
+static void
+mosq_connect (mosquitto*& mosq, const char* host, scxml::scxmlproc* proc, bool& connected)
+{
+    if (mosq && connected) return;
+
+    if (!mosq)
+    {
+        mosq = mosquitto_new (nullptr, true, nullptr);
+        proc->mosq_set_callbacks (mosq);
+    }
+    assert (mosq && !connected);
+
+    int rslt = mosquitto_connect (mosq, host, 1883, 60);
+    assert (rslt == MOSQ_ERR_SUCCESS);
+    connected = true;
+}
+
+static void
+mosq_start (mosquitto* mosq, bool& started)
+{
+    assert (mosq);
+    if (started) return;
+    
+    int rslt = mosquitto_loop_start (mosq);  // threaded
+    assert (rslt == MOSQ_ERR_SUCCESS);
+    started = true;
+}
+
 int
 main (int argc, char** argv)
 {
@@ -211,7 +239,7 @@ main (int argc, char** argv)
 #endif
     // MQTT broker
     mosquitto* mosq = nullptr;
-    bool mosq_connected = false;
+    bool mosq_connected = false, mosq_started =false;
 
     // verbosity
     proc.verbosity_set (verbosity);
@@ -235,9 +263,15 @@ main (int argc, char** argv)
         break;
     case _MQTT:
         {
+            mosq_connect (mosq, mqtt_host, &proc, mosq_connected);
+            proc.eventin_open (mosq, subs);
+            mosq_start (mosq, mosq_started);
+
+            /*
             if (!mosq)
             {
                 mosq = mosquitto_new (nullptr, true, nullptr);
+                proc.mosq_set_callbacks (mosq);
             }
             assert (mosq);
 
@@ -250,8 +284,14 @@ main (int argc, char** argv)
             assert (mosq_connected);
 
             proc.eventin_open (mosq, subs);
-            int rslt = mosquitto_loop_start (mosq);  // threaded
-            assert (rslt == MOSQ_ERR_SUCCESS);
+            if (!mosq_started)
+            {
+                int rslt = mosquitto_loop_start (mosq);  // threaded
+                assert (rslt == MOSQ_ERR_SUCCESS);
+                mosq_started = true;
+            }
+            proc.eventin_open (mosq, subs);
+            */
         }
         break;
     default:
@@ -268,9 +308,15 @@ main (int argc, char** argv)
         break;
     case _MQTT:
         {
+            mosq_connect (mosq, mqtt_host, &proc, mosq_connected);
+            proc.eventout_open (mosq, pub);
+            mosq_start (mosq, mosq_started);
+
+            /*
             if (!mosq)
             {
                 mosq = mosquitto_new (nullptr, true, nullptr);
+                proc.mosq_set_callbacks (mosq);
             }
             assert (mosq);
 
@@ -282,7 +328,15 @@ main (int argc, char** argv)
             }
             assert (mosq_connected);
 
+            //proc.eventout_open (mosq, pub);
+            if (!mosq_started)
+            {
+                int rslt = mosquitto_loop_start (mosq);  // threaded
+                assert (rslt == MOSQ_ERR_SUCCESS);
+                mosq_started = true;
+            }
             proc.eventout_open (mosq, pub);
+            */
         }
         break;
     default:
@@ -298,9 +352,15 @@ main (int argc, char** argv)
         break;
     case _MQTT:
         {
+            mosq_connect (mosq, mqtt_host, &proc, mosq_connected);
+            proc.traceout_open (mosq, trace_pub);
+            mosq_start (mosq, mosq_started);
+
+            /*
             if (!mosq)
             {
                 mosq = mosquitto_new (nullptr, true, nullptr);
+                proc.mosq_set_callbacks (mosq);
             }
             assert (mosq);
 
@@ -312,7 +372,15 @@ main (int argc, char** argv)
             }
             assert (mosq_connected);
 
+            //proc.traceout_open (mosq, trace_pub);
+            if (!mosq_started)
+            {
+                int rslt = mosquitto_loop_start (mosq);  // threaded
+                assert (rslt == MOSQ_ERR_SUCCESS);
+                mosq_started = true;
+            }
             proc.traceout_open (mosq, trace_pub);
+            */
         }
         break;
     default:

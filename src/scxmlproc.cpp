@@ -78,8 +78,18 @@ scxmlproc::eventin_open (mosquitto* mosq, std::list<const char*>& topics)
         //std::clog << ";; subscribe: " << *it << std::endl;
     }
 
-    mosquitto_user_data_set (mosq, _eventin);
+    //mosq_set_callbacks (mosq);
+    //mosquitto_user_data_set (mosq, this);
+    //mosquitto_message_callback_set (mosq, eventin_message_cb);
+}
+
+void
+scxmlproc::mosq_set_callbacks (mosquitto* mosq)
+{
+    mosquitto_user_data_set (mosq, this);
+    mosquitto_disconnect_callback_set (mosq, mosq_disconnect_cb);
     mosquitto_message_callback_set (mosq, eventin_message_cb);
+    mosquitto_publish_callback_set (mosq, mosq_publish_cb);
 }
 
 void
@@ -93,11 +103,25 @@ scxmlproc::eventin_message_cb (mosquitto* mosq, void* obj, const mosquitto_messa
     //std::clog << *str << std::endl;
 
     assert (obj);
-    jsonimstream* s = (jsonimstream*) obj;	// ** insecure
+    scxmlproc* proc = (scxmlproc*) obj;	// ** insecure
+    assert (proc);
+    jsonimstream* s = (jsonimstream*) proc->_eventin;
     assert (&s->broker () == mosq);
     s->messages (). push (str);
     assert (!s->messages (). empty ());
 
+}
+
+void
+scxmlproc::mosq_disconnect_cb (mosquitto* mosq, void* obj, int rc)
+{
+    //std::cerr << ";; mosquitto on_disconnect " << rc << std::endl;
+}
+
+void
+scxmlproc::mosq_publish_cb (mosquitto* mosq, void* obj, int mid)
+{
+    //std::cerr << ";; mosquitto on_publish " << mid << std::endl;
 }
 
 // --------------------------------------------------------------------------------
@@ -119,6 +143,11 @@ scxmlproc::eventout_open (mosquitto* mosq, const char* topic)
 {
     assert (mosq);
     if (!topic) return;
+
+    //mosq_set_callbacks (mosq);
+    //mosquitto_user_data_set (mosq, this);
+
+    _eventout = new jsonomstream (mosq, topic);
 }
 
 // --------------------------------------------------------------------------------
@@ -162,8 +191,11 @@ scxmlproc::traceout_open (mosquitto* mosq, const char* topic)
     assert (mosq);
     if (!topic) return;
 
+    //mosq_set_callbacks (mosq);
+    //mosquitto_user_data_set (mosq, this);
+
     assert (!_traceout);
-    jsonomstream* s = new jsonomstream (mosq);
+    jsonomstream* s = new jsonomstream (mosq, topic);
     _traceout = s;
 
     /*

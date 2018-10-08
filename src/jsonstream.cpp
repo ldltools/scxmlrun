@@ -169,8 +169,6 @@ jsonomstream::~jsonomstream (void)
 jsonomstream&
 jsonomstream::write (nlohmann::json& obj)
 {
-    assert (_mosq && _topic);
-
     std::string str = obj.dump ();
     return (write (str));
 
@@ -187,8 +185,11 @@ jsonomstream::write (nlohmann::json& obj)
 jsonomstream&
 jsonomstream::write (const std::string& str)
 {
+    assert (_mosq && _topic);
     const char* msg = str.c_str ();
     int len = str.length ();
+    assert (len == strlen (msg));
+    //std::cerr << ";; jsonomstream::write: " << _topic << " " << msg << std::endl;
     int rslt = mosquitto_publish (_mosq, nullptr, _topic, len, msg, 0, false);
     assert (rslt == MOSQ_ERR_SUCCESS);
 }
