@@ -3,16 +3,26 @@
 usage:
 	@echo "usage: make <target>"
 	@echo "where <target> can be either of the following"
-	@echo -e "\tscxml\tgenerate SCXML files (in ./out)"
-	@echo -e "\trun\trun tests using scxmlrun"
-	@echo -e "\t\t(for testing on hyperledger, see hyperledger/README.md)"
+	@echo -e "\trun\t\trun each scenario in the \"scenarios\" directory"
+	@echo -e "\trun-mqtt\tmqtt version"
 
 all::
-clean::;	rm -f *~
+clean::
+	rm -f *~
+	make -C monitors $@
+	make -C scenarios $@
 veryclean::	clean
 	rm -f out/*
 
-RULES = $(shell echo accumulator*.rules)
+run:	check
+	for scxml in monitors/*.scxml; do\
+	  scxml=`readlink -f $$scxml` make -C scenarios $@;\
+	done
+
+run-mqtt:	check
+	for scxml in monitors/*.scxml; do\
+	  scxml=`readlink -f $$scxml` make -C scenarios $@;\
+	done
 
 %.scxml:	%.rules
 	rules2scxml $< -o $@
@@ -21,20 +31,11 @@ RULES = $(shell echo accumulator*.rules)
 %.svg:	%.uml
 	plantuml.sh $< -tsvg
 
-veryclean::
-	rm -f $(RULES:%.rules=%.uml) $(RULES:%.rules=%.svg)
-
 .PRECIOUS:	%.scxml %.uml %.svg
+.PHONY:		check run
 
-scxml:	$(RULES:%.rules=%.scxml)
-uml:	$(RULES:%.rules=%.uml)
-svg:	$(RULES:%.rules=%.svg)
-
-check:	$(RULES:%.rules=%.scxml)
-	@for f in $(RULES); do\
-	  scxml=`basename $$f .rules`.scxml;\
-	  test $$f -nt $$scxml && { echo "** $$scxml is obsolete"; exit 1; };\
+check:
+	@for f in monitors/*.rules; do\
+	  scxml=monitors/`basename $$f .rules`.scxml;\
+	  test $$f -nt $$scxml && { echo "** $$scxml is older than $$f"; exit 1; };\
 	done; exit 0
-
-run:	check
-	make -C tests $@

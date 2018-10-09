@@ -1,5 +1,5 @@
 all::
-	@echo "usage: make run|run-mqtt"
+	@echo "usage: make run | run-mqtt"
 
 clean::
 	rm -f *~

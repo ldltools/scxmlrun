@@ -7,4 +7,6 @@ all::
 clean::;	rm -f *~
 
 run:
-	scxmlrun calc.scxml calc.in -v
+	@echo "compute 12 + 34 = 46"
+#	scxmlrun calc.scxml calc.in -v
+	scxmlrun calc.scxml calc.in -v |& fgrep 'log'
