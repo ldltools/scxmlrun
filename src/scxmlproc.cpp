@@ -73,7 +73,8 @@ scxmlproc::eventin_open (mosquitto* mosq, std::list<const char*>& topics)
 
     for (auto it = topics.begin (); it != topics.end (); it++)
     {
-        int rslt = mosquitto_subscribe (mosq, nullptr, *it, 0);
+        int qos = 1;
+        int rslt = mosquitto_subscribe (mosq, nullptr, *it, qos);
         assert (rslt == MOSQ_ERR_SUCCESS);
         //std::clog << ";; subscribe: " << *it << std::endl;
     }
@@ -81,47 +82,6 @@ scxmlproc::eventin_open (mosquitto* mosq, std::list<const char*>& topics)
     //mosq_set_callbacks (mosq);
     //mosquitto_user_data_set (mosq, this);
     //mosquitto_message_callback_set (mosq, eventin_message_cb);
-}
-
-void
-scxmlproc::mosq_set_callbacks (mosquitto* mosq)
-{
-    mosquitto_user_data_set (mosq, this);
-    mosquitto_disconnect_callback_set (mosq, mosq_disconnect_cb);
-    mosquitto_message_callback_set (mosq, eventin_message_cb);
-    mosquitto_publish_callback_set (mosq, mosq_publish_cb);
-}
-
-void
-scxmlproc::eventin_message_cb (mosquitto* mosq, void* obj, const mosquitto_message* msg)
-{
-    //std::clog << ";; message[" << msg->topic << "]: ";
-    const int len = msg->payloadlen;
-    std::string* str = new std::string ((const char*) msg->payload, 0, len);
-    //char str[len + 1];
-    //memcpy (str, msg->payload, len); str[len] = '\0';
-    //std::clog << *str << std::endl;
-
-    assert (obj);
-    scxmlproc* proc = (scxmlproc*) obj;	// ** insecure
-    assert (proc);
-    jsonimstream* s = (jsonimstream*) proc->_eventin;
-    assert (&s->broker () == mosq);
-    s->messages (). push (str);
-    assert (!s->messages (). empty ());
-
-}
-
-void
-scxmlproc::mosq_disconnect_cb (mosquitto* mosq, void* obj, int rc)
-{
-    //std::cerr << ";; mosquitto on_disconnect " << rc << std::endl;
-}
-
-void
-scxmlproc::mosq_publish_cb (mosquitto* mosq, void* obj, int mid)
-{
-    //std::cerr << ";; mosquitto on_publish " << mid << std::endl;
 }
 
 // --------------------------------------------------------------------------------
@@ -209,4 +169,48 @@ scxmlproc::traceout_open (mosquitto* mosq, const char* topic)
     mosquitto_user_data_set (mosq, _traceoute);
     mosquitto_message_callback_set (mosq, eventin_message_cb);
     */
+}
+
+// --------------------------------------------------------------------------------
+// mosquitto callbacks
+// --------------------------------------------------------------------------------
+
+void
+scxmlproc::mosq_set_callbacks (mosquitto* mosq)
+{
+    mosquitto_user_data_set (mosq, this);
+    mosquitto_disconnect_callback_set (mosq, mosq_disconnect_cb);
+    mosquitto_message_callback_set (mosq, eventin_message_cb);
+    mosquitto_publish_callback_set (mosq, mosq_publish_cb);
+}
+
+void
+scxmlproc::eventin_message_cb (mosquitto* mosq, void* obj, const mosquitto_message* msg)
+{
+    //std::clog << ";; message[" << msg->topic << "]: ";
+    const int len = msg->payloadlen;
+    std::string* str = new std::string ((const char*) msg->payload, 0, len);
+    //char str[len + 1];
+    //memcpy (str, msg->payload, len); str[len] = '\0';
+    //std::clog << *str << std::endl;
+
+    assert (obj);
+    scxmlproc* proc = (scxmlproc*) obj;	// ** insecure
+    assert (proc);
+    jsonimstream* s = (jsonimstream*) proc->_eventin;
+    assert (s && &s->broker () == mosq);
+    s->messages (). push (str);
+    assert (!s->messages (). empty ());
+}
+
+void
+scxmlproc::mosq_disconnect_cb (mosquitto* mosq, void* obj, int rc)
+{
+    //std::cerr << ";; mosquitto on_disconnect " << rc << std::endl;
+}
+
+void
+scxmlproc::mosq_publish_cb (mosquitto* mosq, void* obj, int mid)
+{
+    //std::cerr << ";; mosquitto on_publish " << mid << std::endl;
 }

@@ -564,21 +564,21 @@ qtscxmlproc::setup (void)
 void
 qtscxmlproc::version (void)
 {
-    std::cerr << "QtCore:\t\t"
+    std::cerr << "QtCore\t\t"
               << QT_VERSION_STR
               << std::endl;
 
-    auto json_meta = nlohmann::json::meta ();
-    std::cerr << "JSON for C++:\t"
-              << json_meta["version"]["major"] << "."
-              << json_meta["version"]["minor"] << "."
-              << json_meta["version"]["patch"]
-              << std::endl;
-
-    std::cerr << "Mosquitto:\t"
+    std::cerr << "Mosquitto\t"
               << LIBMOSQUITTO_MAJOR << "."
               << LIBMOSQUITTO_MINOR << "."
               << LIBMOSQUITTO_REVISION
+              << std::endl;
+
+    auto json_meta = nlohmann::json::meta ();
+    std::cerr << "JSON for C++\t"
+              << json_meta["version"]["major"] << "."
+              << json_meta["version"]["minor"] << "."
+              << json_meta["version"]["patch"]
               << std::endl;
 }
 

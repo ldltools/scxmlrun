@@ -190,6 +190,7 @@ jsonomstream::write (const std::string& str)
     int len = str.length ();
     assert (len == strlen (msg));
     //std::cerr << ";; jsonomstream::write: " << _topic << " " << msg << std::endl;
-    int rslt = mosquitto_publish (_mosq, nullptr, _topic, len, msg, 0, false);
+    int qos = 1;
+    int rslt = mosquitto_publish (_mosq, nullptr, _topic, len, msg, qos, false);
     assert (rslt == MOSQ_ERR_SUCCESS);
 }

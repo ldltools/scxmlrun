@@ -75,14 +75,14 @@ mosq_connect (mosquitto*& mosq, const char* host, scxml::scxmlproc* proc, bool& 
 {
     if (mosq && connected) return;
 
-    if (!mosq)
-    {
-        mosq = mosquitto_new (nullptr, true, nullptr);
-        proc->mosq_set_callbacks (mosq);
-    }
+    assert (!mosq);
+    mosquitto_lib_init ();
+    mosq = mosquitto_new (nullptr, true, nullptr);
+    proc->mosq_set_callbacks (mosq);
     assert (mosq && !connected);
 
-    int rslt = mosquitto_connect (mosq, host, 1883, 60);
+    //int rslt = mosquitto_connect (mosq, host, 1883, 60);
+    int rslt = mosquitto_connect_async (mosq, host, 1883, 60);
     assert (rslt == MOSQ_ERR_SUCCESS);
     connected = true;
 }
@@ -96,6 +96,17 @@ mosq_start (mosquitto* mosq, bool& started)
     int rslt = mosquitto_loop_start (mosq);  // threaded
     assert (rslt == MOSQ_ERR_SUCCESS);
     started = true;
+}
+
+static void
+mosq_terminate (mosquitto* mosq)
+{
+    if (!mosq) return;
+
+    mosquitto_disconnect (mosq);
+    mosquitto_loop_stop (mosq, false);
+    mosquitto_destroy (mosq);
+    mosquitto_lib_cleanup ();
 }
 
 int
@@ -242,13 +253,18 @@ main (int argc, char** argv)
     bool mosq_connected = false, mosq_started =false;
 
     // verbosity
-    proc.verbosity_set (verbosity);
-    if (verbosity < 0)
+    switch (verbosity)
     {
+    case -1:
         std::cout.setstate (std::ios_base::badbit);
         std::cerr.setstate (std::ios_base::badbit);
+    case 0:
         std::clog.setstate (std::ios_base::badbit);
+        break;
+    default:
+        {}
     }
+    proc.verbosity_set (verbosity);
 
     // load scxml
     assert (scxmlfile);
@@ -311,32 +327,6 @@ main (int argc, char** argv)
             mosq_connect (mosq, mqtt_host, &proc, mosq_connected);
             proc.eventout_open (mosq, pub);
             mosq_start (mosq, mosq_started);
-
-            /*
-            if (!mosq)
-            {
-                mosq = mosquitto_new (nullptr, true, nullptr);
-                proc.mosq_set_callbacks (mosq);
-            }
-            assert (mosq);
-
-            if (!mosq_connected)
-            {
-                int rslt = mosquitto_connect (mosq, mqtt_host, 1883, 60);
-                assert (rslt == MOSQ_ERR_SUCCESS);
-                mosq_connected = true;
-            }
-            assert (mosq_connected);
-
-            //proc.eventout_open (mosq, pub);
-            if (!mosq_started)
-            {
-                int rslt = mosquitto_loop_start (mosq);  // threaded
-                assert (rslt == MOSQ_ERR_SUCCESS);
-                mosq_started = true;
-            }
-            proc.eventout_open (mosq, pub);
-            */
         }
         break;
     default:
@@ -355,32 +345,6 @@ main (int argc, char** argv)
             mosq_connect (mosq, mqtt_host, &proc, mosq_connected);
             proc.traceout_open (mosq, trace_pub);
             mosq_start (mosq, mosq_started);
-
-            /*
-            if (!mosq)
-            {
-                mosq = mosquitto_new (nullptr, true, nullptr);
-                proc.mosq_set_callbacks (mosq);
-            }
-            assert (mosq);
-
-            if (!mosq_connected)
-            {
-                int rslt = mosquitto_connect (mosq, mqtt_host, 1883, 60);
-                assert (rslt == MOSQ_ERR_SUCCESS);
-                mosq_connected = true;
-            }
-            assert (mosq_connected);
-
-            //proc.traceout_open (mosq, trace_pub);
-            if (!mosq_started)
-            {
-                int rslt = mosquitto_loop_start (mosq);  // threaded
-                assert (rslt == MOSQ_ERR_SUCCESS);
-                mosq_started = true;
-            }
-            proc.traceout_open (mosq, trace_pub);
-            */
         }
         break;
     default:
@@ -389,16 +353,18 @@ main (int argc, char** argv)
     }
 
     proc.setup ();
+    int rslt = 0;
     try
     {
-        proc.run ();
+        rslt = proc.run ();
     }
     catch (const std::exception& e)
     {
         std::cerr << "** exception: " << e.what () << std::endl;
-        return (-1);
+        rslt = -1;
     }
+    mosq_terminate (mosq);
 
-    return (0);
+    return (rslt);
 
 }
