@@ -45,7 +45,7 @@ run-mqtt-passthru:	check
 %.scxml:	%.rules
 	rules2scxml $< -o $@
 %.uml:	%.scxml
-	scxml2uml.sh $< -o $@
+	scxml2uml.sh $< -o $@ -landscape
 %.svg:	%.uml
 	plantuml.sh $< -tsvg
 

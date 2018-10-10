@@ -63,7 +63,6 @@ echo "start $(basename $monitor) ($topic)"
  touch .monitor_done;\
  echo "$(basename $monitor) done") &
 sleep 1
-mosquitto_pub -t $topic -m '{"event" : {"name" : "_init"}}'
 
 # $scenario -> $accumulator -> mqtt($topic)
 rm -f .accumulator_done

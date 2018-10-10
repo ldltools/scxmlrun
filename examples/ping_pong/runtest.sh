@@ -24,7 +24,6 @@ pkill scxmlrun
 (scxmlrun ./ping_pong.scxml --sub ping --sub pong --sub ping_pong;\
  echo "ping_pong done") &
 sleep 1
-mosquitto_pub -t ping_pong -m "{\"event\":{\"name\":\"_init\"}}"
 
 #echo sending a message to ping
 mosquitto_pub -t ping -m "{\"event\":{\"name\":\"ping\", \"data\":0}}"
