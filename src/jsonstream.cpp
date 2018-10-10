@@ -37,19 +37,34 @@ jsonifstream::~jsonifstream (void)
 }
 
 jsonifstream&
-jsonifstream::read (nlohmann::json& obj)
+jsonifstream::read (std::string& obj)
 {
     assert (_in);
 
     char str[0x4000];	// 4KB
     _in->getline (str, 0x4000);
     if (_in->eof ())
-    {
-        //std::clog << ";; read: eof\n";
-        obj = nullptr;
         throw std::runtime_error ("End_of_file");
-        return (*this);
-    }
+    if (_in->fail ())
+        throw std::runtime_error ("Failure: jsonifstream::read");
+
+    assert (obj.empty ());
+    obj += str;
+
+    return (*this);
+}
+
+jsonifstream&
+jsonifstream::read (nlohmann::json& obj)
+{
+    assert (_in);
+
+    obj = nullptr;
+
+    char str[0x4000];	// 4KB
+    _in->getline (str, 0x4000);
+    if (_in->eof ())
+        throw std::runtime_error ("End_of_file");
     if (_in->fail ())
         throw std::runtime_error ("Failure: jsonifstream::read");
 
@@ -75,6 +90,22 @@ jsonimstream::~jsonimstream (void)
         mosquitto_disconnect (_mosq);
         mosquitto_destroy (_mosq);
     }
+}
+
+jsonimstream&
+jsonimstream::read (std::string& obj)
+{
+    assert (obj.empty ());
+    if (_messages.empty ()) return (*this);
+    assert (!_messages.empty ());
+
+    std::string* msg = _messages.front ();
+    _messages.pop ();
+
+    obj += msg->c_str ();
+    delete msg;
+
+    return (*this);
 }
 
 jsonimstream&

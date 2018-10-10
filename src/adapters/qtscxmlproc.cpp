@@ -90,10 +90,11 @@ qtscxmlproc::load (const std::string& scxml_url)
     }
 
     qInfo () << ";; statechart:" << _machine->name ();
-    QStringList names = _machine->stateNames ();
-    for (int i = 0; i < names.size (); i++)
+    std::string names = "";
+    for (QString name : _machine->stateNames ())
         //qInfo () << ";; state: " << names.at (i).toLocal8Bit().constData () << std::endl;
-        qInfo () << ";; state:" << names.at (i);
+        names.append (name.toStdString ()).append (" ");
+    qInfo () << ";; states:" << names.c_str ();
 
     assert (_application);
     _machine->setParent (_application);
@@ -164,7 +165,10 @@ qtscxmlproc::run (void)
 // --------------------------------------------------------------------------------
 
 static nlohmann::json to_nlohmann (const QVariant);
+static nlohmann::json to_nlohmann (const QVariantMap);
 static nlohmann::json to_nlohmann (const QJsonValue);
+static nlohmann::json to_nlohmann (const QJsonObject);
+static QVariant to_qvariant (const nlohmann::json);
 
 void
 qtscxmlproc::step (void)
@@ -229,6 +233,37 @@ qtscxmlproc::step (void)
 // event in/out
 // --------------------------------------------------------------------------------
 
+// jsonstream -> QJsonDocument -> QVariant -> QScxmlEvent
+void
+qtscxmlproc::event_read (QScxmlEvent& e)
+{
+    std::string str;
+    _eventin->read (str);
+
+    if (str.empty ()) throw std::runtime_error ("Not_found");
+
+    qDebug () << ";; event_read:" << str.c_str ();
+
+    QVariant v = QJsonDocument::fromJson (str.c_str ()).toVariant ();
+    assert (v.type () == QVariant::Map);
+    QVariantMap m = (v.toMap())["event"].toMap ();
+
+    // name
+    assert (m.contains ("name"));
+    QVariant name = m["name"];
+    assert (name.type () == QVariant::String);
+    e.setName (name.toString ());
+
+    // data
+    QVariant data = m.contains ("data") ? m["data"] : QVariant ();
+    e.setData (data);
+
+    // type
+    e.setEventType (QScxmlEvent::InternalEvent);
+}
+
+// jsonstream -> nlohmann::json -> QScxmlEvent
+/*
 void
 qtscxmlproc::event_read (QScxmlEvent& e)
 {
@@ -251,31 +286,29 @@ qtscxmlproc::event_read (QScxmlEvent& e)
 
     // data
     nlohmann::json data = obj["data"];
-    QJsonValue data_val;
+    QVariant data_var = QVariant ();
     if (obj.count ("data") == 0 || data.is_null ())
     {
-        data_val = QJsonValue ();
-        assert (data_val.isNull ());
-    }
-    else if (data.is_string ())
-    {
-        std::string str = obj["data"];
-        data_val = QJsonValue (str.c_str ());
-        //data_val = QJsonValue (data.dump ().c_str ());
+        //QJsonValue data_val = QJsonValue ();
+        //assert (data_val.isNull ());
+        data_var = QVariant ();
+        assert (data_var.isNull ());
     }
     else
     {
-        //const char* str = data.get<std::string> ().c_str ();
-        const char* str = data.dump ().c_str ();
-        data_val = QJsonValue (str);
+        data_var = to_qvariant (data);
     }
-    e.setData (data_val.toVariant ());
+    //fflush (nullptr);
+    assert (data_var.isNull () || data_var.isValid ());
+    e.setData (data_var);
 
     qDebug () << ";; event_read:"
               << "name:" << name.c_str ()
-              << "data:" << data_val;
+              << "data:" << data_var;
 }
+*/
 
+// QScxmlEvent -> nlohmann::json -> jsonstream
 void
 qtscxmlproc::event_write (jsonostream& s, const QScxmlEvent& e)
 {
@@ -285,6 +318,7 @@ qtscxmlproc::event_write (jsonostream& s, const QScxmlEvent& e)
     s.write (obj);
 }
 
+// QJsonObject -> QVariantMap -> QScxmlEvent
 void
 qtscxmlproc::event_raise (const QJsonObject& params)
 {
@@ -303,57 +337,173 @@ qtscxmlproc::event_raise (const QJsonObject& params)
     _machine->submitEvent (e);
 }
 
+// QJsonObject -> std::string (or nlohmann::json) -> jsonstream
 void
 qtscxmlproc::event_send (const QJsonObject& params)
 {
     qInfo () << ";; event_send:" << params;
+    assert (_eventout);
 
     // event
     assert (params.contains ("event"));
     QJsonObject e = params["event"].toObject ();
+
+#if 0
+    std::string str = "{\"event\":" + QJsonValue (e).toString ().toStdString () + "}";
+    // ** as with QtScxml 5.9.5, "toString" does not work.
+    _eventout->write (str);
+#else
+    // name
     assert (e.contains ("name") && e["name"].isString ());
-
     std::string name = e["name"].toString ().toStdString ();
-    //qInfo () << ";; event_send:" << map["event"].toMap ();
 
-    nlohmann::json data = e.contains ("data") ? to_nlohmann (e["data"]) : nlohmann::json (nullptr);
+    // data
+    nlohmann::json data =
+        (e.contains ("data") && !e["data"].isNull ())? to_nlohmann (e["data"].toVariant ()) : nlohmann::json (nullptr);
     nlohmann::json obj =
         {{"event", {{"name", name},
                     {"data", data},
                     {"type", QScxmlEvent::ExternalEvent}}}};
-
-    assert (_eventout);
     _eventout->write (obj);
+#endif
+
 }
 
-static nlohmann::json
-to_nlohmann (const QJsonValue v)
-{
-    if (v.isNull ())
-        return (nullptr);
-    else if (v.isString ())
-    {
-        //qInfo () << ";; to_nlohmann:" << v.toString () << v.toString ().size ();
-        return (v.toString ().toStdString ().c_str ());
-    }
-    else if (v.isObject ())
-    {
-    }
+// --------------------------------------------------------------------------------
+// conversion: nlohmann::json <-> qt
+// --------------------------------------------------------------------------------
 
-    return (v.toString ().toStdString ());
+static QVariant to_qvariant (const nlohmann::json j)
+{
+    qDebug () << ";; to_qvariant (json):" << j.dump ().c_str ();
+
+    QVariant data_var;
+    if (j.is_null ())
+    {
+        QJsonValue data_val = QJsonValue ();
+        assert (data_val.isNull ());
+        return (data_val.toVariant ());
+    }
+    else if (j.is_string ())
+    {
+        std::string str = j;
+        QJsonValue data_val = QJsonValue (str.c_str ());
+        //data_val = QJsonValue (data.dump ().c_str ());
+        return (data_val.toVariant ());
+    }
+    else if (j.is_number ())
+    {
+        qDebug () << ";; to_qvariant (json.number)";
+        if (j.is_number_integer ())
+        {
+            int i = j;
+            return (QVariant (i));
+        }
+        else if (j.is_number_unsigned ())
+        {
+            unsigned int i = j;
+            return (QVariant (i));
+        }
+        else if (j.is_number_float ())
+        {
+            float f = j;
+            return (QVariant (f));
+        }
+        assert (false);
+        return (QVariant ());
+    }
+    else if (j.is_object ())
+    {
+        std::string str = j.dump ();
+        //const char* str = data.get<std::string> ().c_str ();
+        qDebug () << ";; event_read (object):" << str.c_str ();
+        //data_val = QJsonValue (str);
+        return (QJsonDocument::fromJson (str.c_str ()).toVariant ());
+    }
+    else
+    {
+        const char* str = j.dump ().c_str ();
+        qDebug () << ";; event_read (unknown):" << str;
+        return (QJsonDocument::fromJson (str).toVariant ());
+    }
 }
 
 static nlohmann::json
 to_nlohmann (const QVariant v)
 {
+    qDebug () << ";; to_nlohmann (QVariant):" << v << v.typeName ();
+
     if (v.isNull ()) return (nullptr);
-        
+
+    switch (v.type ())
+    {
+    case QVariant::String:
+        return nlohmann::json (v.toString ().toStdString ());
+    case QVariant::Int:
+        return nlohmann::json (v.toInt ());
+    case QVariant::Double:
+        return nlohmann::json (v.toDouble ());
+    case QVariant::Map:
+        // object
+        //return to_nlohmann (v.toJsonObject ());
+        return to_nlohmann (v.toMap ());
+    default:
+        {}
+    }
+
     return (to_nlohmann (v.toJsonValue ()));
 }
 
-// --------------------------------------------------------------------------------
-// traceout
-// --------------------------------------------------------------------------------
+static nlohmann::json
+to_nlohmann (const QVariantMap map)
+{
+    qDebug () << ";; to_nlohmann (QVariantMap):" << map;
+
+    nlohmann::json j = {};
+    for (QString key : map.keys ())
+    {
+        j[key.toStdString()] = to_nlohmann (map[key]);
+    }
+
+    return (j);
+}
+
+static nlohmann::json
+to_nlohmann (const QJsonValue v)
+{
+    qDebug () << ";; to_nlohmann (QJsonValue):" << v;
+    if (v.isNull ())
+    {
+        qDebug () << ";; to_nlohmann (null)";
+        return (nlohmann::json (nullptr));
+    }
+    else if (v.isString ())
+    {
+        std::string str = v.toString ().toStdString ();
+        qDebug () << ";; to_nlohmann (QJsonValue.string);" << str.c_str ();
+        //qInfo () << ";; to_nlohmann:" << v.toString () << v.toString ().size ();
+        return (nlohmann::json (str));
+    }
+    else if (v.isObject ())
+    {
+        qDebug () << ";; to_nlohmann (QJsonValue.object)";
+    }
+
+    return (nlohmann::json (v.toString ().toStdString ()));
+}
+
+static nlohmann::json
+to_nlohmann (const QJsonObject obj)
+{
+    qDebug () << ";; to_nlohmann (QJsonObject):" << obj;
+
+    nlohmann::json j = {};
+    for (QString key : obj.keys ())
+    {
+        j[key.toStdString()] = nullptr;
+    }
+    return (j);
+}
 
 // --------------------------------------------------------------------------------
 // monitor

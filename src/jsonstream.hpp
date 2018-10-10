@@ -23,7 +23,9 @@
 class jsonstream
 {
 public:
+    virtual jsonstream& read (std::string&) = 0;
     virtual jsonstream& read (nlohmann::json&) = 0;
+    virtual jsonstream& write (const std::string&) = 0;
     virtual jsonstream& write (nlohmann::json&) = 0;
 };
 
@@ -32,13 +34,16 @@ public:
 class jsonistream : public jsonstream
 {
 public:
+    virtual jsonistream& read (std::string&) = 0;
     virtual jsonistream& read (nlohmann::json&) = 0;
-    jsonistream& write (nlohmann::json&) {}
+    jsonstream& write (const std::string&) {}
+    jsonstream& write (nlohmann::json&) {}
 };
 
 class jsonifstream : public jsonistream
 {
 public:
+    virtual jsonifstream& read (std::string&);
     virtual jsonifstream& read (nlohmann::json&);
 
 public:
@@ -53,6 +58,7 @@ private:
 class jsonimstream : public jsonistream
 {
 public:
+    virtual jsonimstream& read (std::string&);
     virtual jsonimstream& read (nlohmann::json&);
 
 public:
@@ -74,16 +80,17 @@ private:
 class jsonostream : public jsonstream
 {
 public:
+    jsonistream& read (std::string&) {}
     jsonostream& read (nlohmann::json&) {}
-    virtual jsonostream& write (nlohmann::json&) = 0;
     virtual jsonostream& write (const std::string&) = 0;
+    virtual jsonostream& write (nlohmann::json&) = 0;
 };
 
 class jsonofstream : public jsonostream
 {
 public:
-    virtual jsonofstream& write (nlohmann::json&);
     virtual jsonofstream& write (const std::string&);
+    virtual jsonofstream& write (nlohmann::json&);
 
 public:
     jsonofstream (void);
@@ -97,8 +104,8 @@ private:
 class jsonomstream : public jsonostream
 {
 public:
-    virtual jsonomstream& write (nlohmann::json&);
     virtual jsonomstream& write (const std::string&);
+    virtual jsonomstream& write (nlohmann::json&);
 
 public:
     jsonomstream (void);
