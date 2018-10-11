@@ -29,20 +29,23 @@ public:
     virtual void setup (void);
     virtual int run (void);
 
-    static void version (void);
-
 public:
     uscxml::InterpreterState step (void);
     uscxml::InterpreterState state_get (void) { return (_interpreter.getState ()); }
     uscxml::Interpreter& interpreter (void) { return (_interpreter); }
 
 public:
-    void eventin_read (uscxml::Event&);
+    void event_read (uscxml::Event&);
+    void event_write (jsonostream&, const uscxml::Event&);
 
 public:
     uscxmlproc (void);
     uscxmlproc (const uscxmlproc&);
     ~uscxmlproc (void);
+
+public:
+    virtual void verbosity_set (int);
+    static void version (void);
 
 private:
     void _common_init (void);

@@ -40,8 +40,6 @@ public:
     virtual void setup (void);
     virtual int run (void);
 
-    static void version (void);
-
 public:
     void step (void);
 
@@ -53,13 +51,14 @@ public:
     void event_send (const QJsonObject& params);
 
 public:
-    virtual void verbosity_set (int);
-
-public:
     qtscxmlproc (void);
     qtscxmlproc (QCoreApplication* app = nullptr);
     qtscxmlproc (const qtscxmlproc&);
     ~qtscxmlproc (void);
+
+public:
+    virtual void verbosity_set (int);
+    static void version (void);
 
 protected:
     QCoreApplication* _application;

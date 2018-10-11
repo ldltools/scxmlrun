@@ -1,0 +1,56 @@
+# -*-Makefile-*-
+
+all::
+
+BUILD_DIR	?= _build
+SRC_DIR		?= .
+SRC_DIRS	?= $(shell find $(SRC_DIR) -type d | xargs -I {} bash -c "test -f {}/.ignore || echo {}")
+
+SRCS_hpp	?= $(shell find $(SRC_DIRS) -maxdepth 1 -name '*.hpp' | $(SED) -r 's/^(\.\/)?//')
+SRCS_cpp	?= $(shell find $(SRC_DIRS) -maxdepth 1 -name '*.cpp' | $(SED) -r 's/^(\.\/)?//')
+
+OBJS		?= $(SRCS_cpp:%.cpp=$(BUILD_DIR)/%.o)
+
+CPP		?= g++
+CPPFLAGS	?=
+
+INC_DIRS	?= $(shell find $(SRC_DIRS) -type d)
+INC_FLAGS	?= $(addprefix -I$(BUILD_DIR)/,$(INC_DIRS))
+
+SED		?= sed
+AWK		?= awk
+
+.PRECIOUS:	%.o
+
+$(BUILD_DIR)/%.o: %.cpp
+	$(MKDIR_P) $(dir $@)
+	$(CPP) $(CPPFLAGS) $(INC_FLAGS) -c -o $@ $<
+
+all::	$(OBJS)
+install::
+
+#
+Makefile.depend:	$(SRCS_hpp) $(SRCS_cpp)
+	@rm -f $@ && touch $@
+	@echo "# SRC_DIRS = $(SRC_DIRS)" >> $@
+	$(CPP) -I. -MM $^ 2> /dev/null |\
+	while read LINE; do \
+	echo $$LINE | $(SED) -r 's/:/ : /g' |\
+	$(AWK) -v dir=$(BUILD_DIR) 'BEGIN{FS="[ \t:]+"}/^[^:]/{printf("%s/%s ",dir,gensub(/^(\.\/)?(.*)/,"\\2","1",$$0));next}{printf("%s ",$$0)}END{printf("\n")}';\
+	done >> $@
+	@echo >> $@
+	@echo "# generated at: `date +%Y-%m-%dT%H:%M:%S%z`" >> $@
+
+all::	Makefile.depend
+veryclean::
+	rm -f Makefile.depend
+-include Makefile.depend
+
+clean::
+#	find . -name '*~' -or -name '*.o' | xargs rm -f
+	rm -f $(OBJS)
+
+veryclean::
+	rm -rf $(BUILD_DIR)
+
+MKDIR_P ?= mkdir -p

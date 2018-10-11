@@ -1,35 +1,35 @@
 #
 
 all::
-clean::;	rm -f *~
-install::
 
-PREFIX		?=	/usr/local
-
-CPP		=	g++
-
-#CFLAGS		=	-std=c++11
-CFLAGS		=	-std=c++14
-#CFLAGS		=	-std=c++17
-CFLAGS		+=	-g
-#CFLAGS		+=	-Wall -W
-CFLAGS		+=	-I.
-CFLAGS		+=	-fstack-protector-strong
-
-LDFLAGS		=
-
-# Mosquitto
-LDFLAGS		+=	-lmosquitto
+TOP_DIR		=	$(shell readlink -f ..)
+BUILD_DIR	=	$(TOP_DIR)/_build/scxmlrun
+PREFIX		?=	$(TOP_DIR)/_build/install
+SRC_DIRS	=	. ./adapters
 
 BINS		=	scxmlrun
-OBJS		=	jsonstream.o scxmlproc.o
+BINS		:=	$(BINS:%=$(BUILD_DIR)/%)
 
-%.o:	%.cpp
-	$(CPP) $(CFLAGS) -c $< -o $@
+CPP		=	g++
+#CPPFLAGS	=	-std=c++11
+CPPFLAGS	=	-std=c++14
+#CPPFLAGS	=	-std=c++17
+CPPFLAGS	+=	-g
+#CPPFLAGS	+=	-Wall -W
+CPPFLAGS	+=	-I.
+CPPFLAGS	+=	-fstack-protector-strong
 
-all::	$(BINS)
+LDFLAGS		=
+LDFLAGS		+=	-lmosquitto
+
+#
+SRCS_hpp	=	jsonstream.hpp scxmlproc.hpp
+SRCS_cpp	=	jsonstream.cpp scxmlproc.cpp
 
 # ================================================================================
+# use QtSCXML (default)
+# ================================================================================
+
 ifndef	PROCESSOR
 PROCESSOR	=	qtscxml
 endif
@@ -39,71 +39,73 @@ endif
 # -------
 ifeq	($(PROCESSOR), qtscxml)
 
-OBJS		+=	adapters/qtscxmlproc.o
-
-CFLAGS		+=	-DUSE_QTSCXML
+CPPFLAGS	+=	-DUSE_QTSCXML
 
 # Qt
 QTVERSION	?=	5.9.5
-CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5
+CPPFLAGS 	+=	-I/usr/include/x86_64-linux-gnu/qt5
 
-CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore
-CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/$(QTVERSION)
-CFLAGS	 	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/$(QTVERSION)/QtCore
+CPPFLAGS	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore
+CPPFLAGS	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/$(QTVERSION)
+CPPFLAGS	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/$(QTVERSION)/QtCore
 
-CFLAGS		+=	-fPIC
-CFLAGS		+=	-fdebug-prefix-map=/build/qtbase-opensource-src-oTRRwM/qtbase-opensource-src-$(QTVERSION)+dfsg=.
+CPPFLAGS	+=	-fPIC
+CPPFLAGS	+=	-fdebug-prefix-map=/build/qtbase-opensource-src-oTRRwM/qtbase-opensource-src-$(QTVERSION)+dfsg=.
 LDFLAGS		+=	-lQt5Scxml -lQt5Qml -lQt5Core
 LDFLAGS		+=	-lpthread
 
-adapters/moc_%.hpp:	adapters/%.hpp
-	moc $< -o $@
-adapters/moc_%.cpp:	adapters/%.cpp
+SRCS_hpp	+=	adapters/qtscxmlproc.hpp
+SRCS_cpp	+=	adapters/qtscxmlproc.cpp
+
+$(BUILD_DIR)/adapters/qtscxmlproc.o:	adapters/moc_qtscxmlproc.hpp
+adapters/moc_qtscxmlproc.hpp:	adapters/qtscxmlproc.hpp
 	moc $< -o $@
 
 endif
 
-# -------
-# uScxml
-# -------
-ifeq	($(PROCESSOR), uscxml)
+# ================================================================================
+# use uScxml (experimental)
+# ================================================================================
 
-OBJS		+=	adapters/uscxmlproc.o
+ifeq	($(PROCESSOR), uscxml)
 
 # uSCXML
 #CPP		:=	g++-5
 CPP		:=	g++-6
 
-CFLAGS		+=	-DUSE_USCXML
-CFLAGS	 	+=	-I/usr/local/include
+CPPFLAGS	+=	-DUSE_USCXML
+CPPFLAGS	+=	-I/usr/local/include
 LDFLAGS		+=	-luscxml
 
 # WebKit JavaScriptCore
-CFLAGS 		+=	-I/usr/include/webkitgtk-4.0
+CPPFLAGS	+=	-I/usr/include/webkitgtk-4.0
 LDFLAGS		+=	-ljavascriptcoregtk-4.0
 
 # XERCES-C
 LDFLAGS		+=	-lxerces-c
 
+SRCS_hpp	+=	adapters/uscxmlproc.hpp
+SRCS_cpp	+=	adapters/uscxmlproc.cpp
+
 endif
 
 # ================================================================================
 
-scxmlrun:	$(OBJS) scxmlrun.o
+-include Makefile.common
+
+all::	$(BINS)
+
+$(BUILD_DIR)/scxmlrun:	$(OBJS) $(BUILD_DIR)/scxmlrun.o
 	$(CPP) $^ -o $@ $(LDFLAGS)
 
--include Makefile.depend
-Makefile.depend::
-	$(CPP) $(CFLAGS) -MM {.,adapters}/*.[ch]pp > $@
-
 install::	all
+	@test -d $(PREFIX)/bin -a \( ! -w $(PREFIX)/bin \) && exit 1 || true
+	@mkdir -p $(PREFIX)/bin
 	for f in $(BINS); do \
 	  cmp -s $$f $(PREFIX)/bin/$$f && continue;\
 	  cp -fp $(BINS) $(PREFIX)/bin;\
 	done
 
 clean::
-	rm -f {.,adapters}/*.o
-
 veryclean::	clean
 	rm -f $(BINS)

@@ -97,7 +97,7 @@ uscxmlproc::_init (void)
 // --------------------------------------------------------------------------------
 
 void
-uscxmlproc::eventin_read (uscxml::Event& e)
+uscxmlproc::event_read (uscxml::Event& e)
 {
     nlohmann::json obj;
     _eventin->read (obj);
@@ -109,6 +109,12 @@ uscxmlproc::eventin_read (uscxml::Event& e)
     uscxml::Data data;
     json_to_data (obj, data);
     e = uscxml::Event::fromData (data);
+}
+
+void
+uscxmlproc::event_write (jsonostream&, const uscxml::Event&)
+{
+    assert (!"not yet implemented");
 }
 
 // --------------------------------------------------------------------------------
@@ -138,7 +144,7 @@ uscxmlproc::step (void)
             if (_traceout) _datamodel_print (*_traceout);
 
             uscxml::Event e;
-            try { eventin_read (e); }
+            try { event_read (e); }
             catch (std::runtime_error ex)
             {
                 if (strcmp (ex.what (), "End_of_file") == 0)
@@ -412,9 +418,9 @@ ConsoleLogCallback (JSContextRef ctx, JSObjectRef function, JSObjectRef thisObje
 }
 
 void
-uscxmlproc::setup (void)
+uscxmlproc::verbosity_set (int v)
 {
-    switch (_verbosity)
+    switch (v)
     {
     case -1:
         cout ().setstate (std::ios_base::badbit);
@@ -436,8 +442,11 @@ uscxmlproc::setup (void)
     default:
         {}
     }
+}
 
-
+void
+uscxmlproc::setup (void)
+{
     // eventin
     assert (_eventin);
 

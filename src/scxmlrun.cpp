@@ -246,7 +246,7 @@ main (int argc, char** argv)
 #elif defined (USE_USCXML)
     SCXMLPROC proc;
 #else
-#error
+#error "scxml processor is unknown"
 #endif
     // MQTT broker
     mosquitto* mosq = nullptr;
