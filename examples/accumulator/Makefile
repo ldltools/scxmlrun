@@ -11,9 +11,10 @@ usage:
 
 all::
 clean::
-	rm -f *~
+	rm -f *~ .*done
 	make -C monitors $@
 	make -C scenarios $@
+
 veryclean::	clean
 	rm -f out/*
 

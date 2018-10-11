@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0">
-  <datamodel/>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript">
   <final id="hello">
-    <onentry><log label="hello" expr="world!"/></onentry>
+    <onentry><script>console.log ("hello")</script></onentry>
   </final>
 </scxml>

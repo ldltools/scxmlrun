@@ -2,14 +2,19 @@
 
 ## [hello.scxml](hello.scxml)
 
-```xml
-<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0">
-  <final id="hello">
-    <onentry><log label="hello" expr="world!"/></onentry>
-  </final>
+```
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript">  
+<final id="hello">  
+    <onentry>  
+      <script>console.log ("hello")</script>  
+    </onentry>  
+</final>  
 </scxml>
 ```
 
-## scxmlrun
+## run [hello.scxml](hello.scxml) using `scxmlrun`
 
-`scxmlrun hello.scxml`
+```
+$ scxmlrun hello.scxml  
+hello
+```

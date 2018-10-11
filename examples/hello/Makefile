@@ -5,4 +5,4 @@ clean::
 	rm -f *~
 
 run:
-	scxmlrun hello.scxml -v
+	scxmlrun hello.scxml

@@ -7,8 +7,7 @@ with the following features:
 - it is built on top of [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html)  
 - it can be used as a command-line program that reads from and writes to local files.
 - input/output events can also be transmitted over the network via the [MQTT](https://mqtt.org/) protocol.  
-- the underlying [JavaScript engine](http://doc.qt.io/qt-5/qjsengine.html) is extended with several new built-in functions including:
-  `SCXML.raise` and `SCXML.send` for raising/sending events in the JSON format.
+- several JavaScript functions, including `SCXML.raise` and `SCXML.send` for raising/sending events in the JSON format, have been introduced for interfacing with the underlying SCXML engine.
 
 # Example: [ping\_pong](examples/ping_pong/README.md)
 
@@ -18,9 +17,10 @@ upon which _ping.sh_ emits _pong (1)_.
 Then, it is is delivered to _pong.sh_ and responded with _ping (1)_,
 and interaction goes on that way.
 
-(2) [_ping\_pong.scxml_](examples/ping_pong/ping_pong.scxml) is generated
-from [_ping\_pong.rules_](examples/ping_pong/ping_pong.rules)
-that is defined in *dsl4sc*.
+(2) [_ping\_pong.scxml_](examples/ping_pong/ping_pong.scxml) defines
+a state machine that responds to incoming _ping_ and _pong_ events.
+
+![statechart](examples/ping_pong/ping_pong.svg)
 
 (3) When running these together,
 [*ping\_pong.scxml*](examples/ping_pong/ping_pong.scxml) works as a _monitor_
@@ -41,7 +41,7 @@ pong 3
 
 ![ping\_pong](examples/ping_pong/ping_pong.jpg)
 
-See [more examples](examples/README.md) if you are interested.
+Check out [more examples](examples/README.md) if you are interested.
 
 # Installation on Docker
 
@@ -67,11 +67,11 @@ See [more examples](examples/README.md) if you are interested.
   expand the archive, then build and install QtSCXML  
   run: `cd qtscxml-5.9.5/src/scxml; qmake && make && make install`
 
+- [Mosquitto](https://mosquitto.org): MQTT broker and development library  
+  run: `apt-get install mosquitto mosquitto-clients libmosquitto-dev`  
+
 - [JSON for C++](https://github.com/nlohmann/json): JSON parser/serializer  
   run: `apt-get install nlohmann-json-dev`
-
-- [mosquitto](https://mosquitto.org): MQTT broker and development library  
-  run: `apt-get install mosquitto mosquitto-clients libmosquitto-dev`  
 
 ## Build
 - run: `make && make install` in this directory  

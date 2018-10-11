@@ -3,7 +3,7 @@
 all::
 	@echo "usage: make run"
 
-clean::
+clean::;	rm -f *~
 
 SCXMLFILES	= $(shell echo test*.txml.scxml)
 TESTFILES 	= $(shell echo test*.txml.json)
@@ -41,9 +41,8 @@ check:
 
 clean::
 	pkill scxmlrun || true
-
-veryclean::	clean
 	rm -f out/*
 
+veryclean::	clean
 realclean::	veryclean
 	rm -f $(SCENARIOFILES)
