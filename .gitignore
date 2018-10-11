@@ -11,4 +11,5 @@ README.html
 *.jpg
 *.png
 *.pptx
+*.puml
 *.uml

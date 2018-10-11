@@ -1,3 +1,5 @@
+# ping\_pong
+
 (1) [ping.sh](ping.sh) and [pong.sh](pong.sh) interact with each other by emitting _ping_ and _pong_ events via MQTT.  
 They start communication when an initial _ping (0)_ event is received by _ping.sh_,
 upon which _ping.sh_ emits _pong (1)_.
