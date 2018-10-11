@@ -1,3 +1,6 @@
-The SCXML definition originates from [this](https://www.w3.org/TR/scxml/#N11619).
+The [SCXML definition](microwave-01.scxml) originates from [this](https://www.w3.org/TR/scxml/#N11619).
 
-![statechart](microwave-01.svg)
+<details>
+<summary>Statechart</summary>
+<div><img src="microwave-01.svg?sanitize=true"/></div>
+</details>

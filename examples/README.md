@@ -9,7 +9,7 @@
 ## Those that appear in [the SCXML specification](https://www.w3.org/TR/scxml/)
 - [microwave](microwave/README.md)
 - [calc](calc/README.md)
-- [traffic report](traffice_report/README.md)
+- [traffic report](traffic_report/README.md)
 - [blackjack](blackjack/README.md)
 
 ## Smart contracts and their monitors

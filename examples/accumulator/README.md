@@ -15,18 +15,30 @@ refer to [this material](accumulator.pdf).
 
 ## monitors for accumulator
 
-- [monitor 1](monitors/accumulator_mon1.rules)
+- [monitor 1](monitors/accumulator_mon1.scxml): simple event-pattern checking
 
-  ![monitor 1](accumulator_mon1.svg)
+  <details>
+  <summary>monitor 1</summary>
+  <div><img src="monitors/accumulator_mon1.svg?sanitize=true"/></div>
+  </details>
 
-- [monitor 2](monitors/accumulator_mon2.rules)
+- [monitor 2](monitors/accumulator_mon2.scxml): 1 + parameter validation
 
-  ![monitor 2](accumulator_mon2.svg)
+  <details>
+  <summary>monitor 1</summary>
+  <div><img src="monitors/accumulator_mon2.svg?sanitize=true"/></div>
+  </details>
 
-- [monitor 3](monitors/accumulator_mon3.rules)
+- [monitor 3](monitors/accumulator_mon3.scxml): safety and liveness
 
-  ![monitor 3](accumulator_mon3.svg)
+  <details>
+  <summary>monitor 1</summary>
+  <div><img src="monitors/accumulator_mon3.svg?sanitize=true"/></div>
+  </details>
 
-- [monitor 4](monitors/accumulator_mon4.rules)
+- [monitor 4](monitors/accumulator_mon4.scxml): anomaly detection, a sort of
 
-  ![monitor 4](accumulator_mon4.svg)
+  <details>
+  <summary>monitor 1</summary>
+  <div><img src="monitors/accumulator_mon4.svg?sanitize=true"/></div>
+  </details>
