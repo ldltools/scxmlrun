@@ -5,7 +5,7 @@ all::
 TOP_DIR		=	$(shell readlink -f ..)
 BUILD_DIR	=	$(TOP_DIR)/_build/scxmlrun
 PREFIX		?=	$(TOP_DIR)/_build/install
-SRC_DIRS	=	. ./adapters
+SRC_DIRS	=	.
 
 BINS		=	scxmlrun
 BINS		:=	$(BINS:%=$(BUILD_DIR)/%)
@@ -23,8 +23,8 @@ LDFLAGS		=
 LDFLAGS		+=	-lmosquitto
 
 #
-SRCS_hpp	=	jsonstream.hpp scxmlproc.hpp
-SRCS_cpp	=	jsonstream.cpp scxmlproc.cpp
+#SRCS_hpp	=	jsonstream.hpp scxmlproc.hpp
+#SRCS_cpp	=	jsonstream.cpp scxmlproc.cpp
 
 # ================================================================================
 # use QtSCXML (default)
@@ -54,11 +54,13 @@ CPPFLAGS	+=	-fdebug-prefix-map=/build/qtbase-opensource-src-oTRRwM/qtbase-openso
 LDFLAGS		+=	-lQt5Scxml -lQt5Qml -lQt5Core
 LDFLAGS		+=	-lpthread
 
-SRCS_hpp	+=	adapters/qtscxmlproc.hpp
-SRCS_cpp	+=	adapters/qtscxmlproc.cpp
+SRC_DIRS	+=	qtscxml
 
-$(BUILD_DIR)/adapters/qtscxmlproc.o:	adapters/moc_qtscxmlproc.hpp
-adapters/moc_qtscxmlproc.hpp:	adapters/qtscxmlproc.hpp
+#SRCS_hpp	+=	qtscxml/qtscxmlproc.hpp
+#SRCS_cpp	+=	qtscxml/qtscxmlproc.cpp
+
+$(BUILD_DIR)/qtscxml/qtscxmlproc.o:	qtscxml/moc_qtscxmlproc.hpp
+qtscxml/moc_qtscxmlproc.hpp:	qtscxml/qtscxmlproc.hpp
 	moc $< -o $@
 
 endif
@@ -84,8 +86,10 @@ LDFLAGS		+=	-ljavascriptcoregtk-4.0
 # XERCES-C
 LDFLAGS		+=	-lxerces-c
 
-SRCS_hpp	+=	adapters/uscxmlproc.hpp
-SRCS_cpp	+=	adapters/uscxmlproc.cpp
+SRC_DIRS	+=	uscxml
+
+#SRCS_hpp	+=	adapters/uscxmlproc.hpp
+#SRCS_cpp	+=	adapters/uscxmlproc.cpp
 
 endif
 

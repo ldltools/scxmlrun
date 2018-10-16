@@ -14,13 +14,13 @@
 #include "scxmlproc.hpp"
 
 #ifdef USE_QTSCXML
-#include "adapters/qtscxmlproc.hpp"
+#include "qtscxml/qtscxmlproc.hpp"
 #include <QtCore/QCoreApplication>
 #define SCXMLPROC scxml::qtscxmlproc
 #endif
 
 #ifdef USE_USCXML
-#include "adapters/uscxmlproc.hpp"
+#include "uscxml/uscxmlproc.hpp"
 #define SCXMLPROC scxml::uscxmlproc
 #endif
 

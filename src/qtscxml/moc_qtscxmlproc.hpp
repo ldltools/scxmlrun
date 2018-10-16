@@ -87,8 +87,8 @@ int scxml::monitor::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     return _id;
 }
 struct qt_meta_stringdata__JSScxml_t {
-    QByteArrayData data[4];
-    char stringdata0[23];
+    QByteArrayData data[6];
+    char stringdata0[39];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -100,10 +100,12 @@ static const qt_meta_stringdata__JSScxml_t qt_meta_stringdata__JSScxml = {
 QT_MOC_LITERAL(0, 0, 8), // "_JSScxml"
 QT_MOC_LITERAL(1, 9, 6), // "_raise"
 QT_MOC_LITERAL(2, 16, 0), // ""
-QT_MOC_LITERAL(3, 17, 5) // "_send"
+QT_MOC_LITERAL(3, 17, 5), // "_send"
+QT_MOC_LITERAL(4, 23, 7), // "_cancel"
+QT_MOC_LITERAL(5, 31, 7) // "_invoke"
 
     },
-    "_JSScxml\0_raise\0\0_send"
+    "_JSScxml\0_raise\0\0_send\0_cancel\0_invoke"
 };
 #undef QT_MOC_LITERAL
 
@@ -113,7 +115,7 @@ static const uint qt_meta_data__JSScxml[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       2,   14, // methods
+       4,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -121,10 +123,14 @@ static const uint qt_meta_data__JSScxml[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,   24,    2, 0x0a /* Public */,
-       3,    1,   27,    2, 0x0a /* Public */,
+       1,    1,   34,    2, 0x0a /* Public */,
+       3,    1,   37,    2, 0x0a /* Public */,
+       4,    1,   40,    2, 0x0a /* Public */,
+       5,    1,   43,    2, 0x0a /* Public */,
 
  // slots: parameters
+    QMetaType::Void, QMetaType::QString,    2,
+    QMetaType::Void, QMetaType::QString,    2,
     QMetaType::Void, QMetaType::QString,    2,
     QMetaType::Void, QMetaType::QString,    2,
 
@@ -139,6 +145,8 @@ void _JSScxml::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         switch (_id) {
         case 0: _t->_raise((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 1: _t->_send((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 2: _t->_cancel((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 3: _t->_invoke((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -169,13 +177,13 @@ int _JSScxml::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 2)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 2;
+        _id -= 4;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 2)
+        if (_id < 4)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 2;
+        _id -= 4;
     }
     return _id;
 }

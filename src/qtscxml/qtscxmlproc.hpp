@@ -25,9 +25,9 @@
 #include <QtQml/QJSEngine>
 #include <QtQml/QJSValue>
 #include <QtScxml/QScxmlEcmaScriptDataModel>
-#include <QtScxml/private/qscxmldatamodel.h>
+#include <QtScxml/qscxmldatamodel.h>
 #include <QtScxml/private/qscxmldatamodel_p.h>
-#include <QtScxml/private/qscxmlecmascriptdatamodel.h>
+#include <QtScxml/qscxmlecmascriptdatamodel.h>
 
 namespace scxml {
 
@@ -46,9 +46,14 @@ public:
 public:
     void event_read (QScxmlEvent&);
     void event_write (jsonostream&, const QScxmlEvent&);
+    // _event keys: name, type, sendid, origin, origintype, invokeid, data
+    // https://www.w3.org/TR/scxml/#InternalStructureofEvents
 
-    void event_raise (const QJsonObject& params);
-    void event_send (const QJsonObject& params);
+public:
+    void js_raise (const QJsonObject& params);
+    void js_send (const QJsonObject& params);
+    void js_cancel (const QJsonObject& params);
+    void js_invoke (const QJsonObject& params);
 
 public:
     qtscxmlproc (void);
@@ -164,6 +169,8 @@ public:
 public slots:
     void _raise (const QString);
     void _send (const QString);
+    void _cancel (const QString);
+    void _invoke (const QString);
 
 private:
     scxml::qtscxmlproc* _proc;

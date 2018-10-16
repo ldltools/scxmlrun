@@ -212,6 +212,7 @@ qtscxmlproc::step (void)
     }
 
     qInfo () << ";; submitEvent:" << e->name () << e->data () << e->eventType ();
+    e->setEventType (QScxmlEvent::InternalEvent);
     _machine->submitEvent (e);
       // submitEvent (e) -> routeEvent (e) -> postEvent (e)
       // -> m_internalQueue.enqueue (e); m_eventLoopHook.queueProcessEvents
@@ -219,7 +220,11 @@ qtscxmlproc::step (void)
         nlohmann::json obj =
             {{"submitEvent", {{"name", e->name ().toStdString ()},
                               {"data", to_nlohmann (e->data ())},
-                              {"type", e->eventType ()}}}};
+                              {"type", e->eventType ()},
+                              {"origin", e->origin ().toStdString ()},
+                              {"origintype", e->originType ().toStdString ()},
+                              {"sendid", e->sendId ().toStdString ()},
+                              {"invokeid", e->invokeId ().toStdString ()}}}};
         _traceout->write (obj);
     }
 
@@ -248,6 +253,8 @@ qtscxmlproc::event_read (QScxmlEvent& e)
     assert (v.type () == QVariant::Map);
     QVariantMap m = (v.toMap())["event"].toMap ();
 
+    // keys: name, data, type, origin, origintype, sendid, invokeid
+
     // name
     assert (m.contains ("name"));
     QVariant name = m["name"];
@@ -259,7 +266,26 @@ qtscxmlproc::event_read (QScxmlEvent& e)
     e.setData (data);
 
     // type
-    e.setEventType (QScxmlEvent::InternalEvent);
+    QVariant type = m.contains ("type") ? m["type"] : QVariant (QScxmlEvent::ExternalEvent);
+    assert (type.type () == QVariant::Int);
+    e.setEventType ((QScxmlEvent::EventType) type.toInt ());
+
+    // origin
+    QVariant origin = m.contains ("origin") ? m["origin"] : QVariant ("");
+    //e.setOrigin ();
+
+    // origintype
+    QVariant origintype = m.contains ("origintype") ? m["origintype"] : QVariant ("");
+    //e.setOriginType ();
+
+    // sendid
+    QVariant sendid = m.contains ("sendid") ? m["sendid"] : QVariant ("");
+    //e.setSendId ();
+
+    // invokeid
+    QVariant invokeid = m.contains ("invokeid") ? m["invokeid"] : QVariant ("");
+    //e.setInvokeId ();
+
 }
 
 // jsonstream -> nlohmann::json -> QScxmlEvent
@@ -314,16 +340,22 @@ qtscxmlproc::event_write (jsonostream& s, const QScxmlEvent& e)
 {
     if (e.eventType () != QScxmlEvent::ExternalEvent) return;
 
+    // keys: name, type, sendid, origin, origintype, invokeid, data
+
     nlohmann::json obj = {{"event", {{"name", e.name ().toStdString ()}}}};
     s.write (obj);
 }
 
-// QJsonObject -> QVariantMap -> QScxmlEvent
+// cf. https://www.w3.org/TR/scxml/#raise
 void
-qtscxmlproc::event_raise (const QJsonObject& params)
+qtscxmlproc::js_raise (const QJsonObject& params)
 {
     qInfo () << ";; event_raise:" << params;
     QVariantMap map = params.toVariantMap ();
+
+    // QJsonObject -> QVariantMap -> QScxmlEvent
+
+    // keys: name, type, sendid, origin, origintype, invokeid, data
 
     // event
     assert (params.contains ("event"));
@@ -337,15 +369,31 @@ qtscxmlproc::event_raise (const QJsonObject& params)
     _machine->submitEvent (e);
 }
 
-// QJsonObject -> std::string (or nlohmann::json) -> jsonstream
+// keys
+// - event/eventexpr
+// - target/targetexpr
+// - type/typeexpr (default: http://www.w3.org/TR/scxml/#SCXMLEventProcessor)
+// - id
+// - idlocation
+// - delay/delayexpr
+// - namelist
+//
+// children
+// - param
+// - content
+//
+// cf. https://www.w3.org/TR/scxml/#send
 void
-qtscxmlproc::event_send (const QJsonObject& params)
+qtscxmlproc::js_send (const QJsonObject& params)
 {
     qInfo () << ";; event_send:" << params;
     assert (_eventout);
 
+    // QJsonObject -> std::string (or nlohmann::json) -> jsonstream
+
+    assert (params.contains ("event") || params.contains ("eventexpr"));
     // event
-    assert (params.contains ("event"));
+    // keys: name, type, sendid, origin, origintype, invokeid, data
     QJsonObject e = params["event"].toObject ();
 
 #if 0
@@ -363,10 +411,47 @@ qtscxmlproc::event_send (const QJsonObject& params)
     nlohmann::json obj =
         {{"event", {{"name", name},
                     {"data", data},
-                    {"type", QScxmlEvent::ExternalEvent}}}};
+                    {"type", QScxmlEvent::ExternalEvent},
+                    {"origin", ""},
+                    {"origintype", ""},
+                    {"sendid", ""},
+                    {"invokeid", ""}}}};
     _eventout->write (obj);
 #endif
 
+}
+
+// keys
+// - sendid/sendidexpr
+//
+// cf. https://www.w3.org/TR/scxml/#invoke
+void
+qtscxmlproc::js_cancel (const QJsonObject& params)
+{
+    assert (!"not yet implemented");
+}
+
+// keys
+// - src/srcexpr
+// - type/typeexpr
+// - id
+// - idlocation
+// - delay/delayexpr
+// - namelist
+// - autoforward
+//
+// children
+// - param
+// - finalize
+// - content
+//
+// cf. https://www.w3.org/TR/scxml/#invoke
+void
+qtscxmlproc::js_invoke (const QJsonObject& params)
+{
+    assert (params.contains ("src") || params.contains ("srcexpr"));
+
+    assert (!"not yet implemented");
 }
 
 // --------------------------------------------------------------------------------
@@ -645,8 +730,11 @@ qtscxmlproc::setup (void)
     // ** note: only those events of the ExternalEvent type are captured
     _machine->connectToEvent ("*",
                               [this](const QScxmlEvent& e) {
-                                  qDebug () << ";; event:" << e.name () << e.eventType ();
-                                  event_write (*_eventout, e);
+                                  qDebug () << ";; event:" << e.name ()
+                                            << e.origin () << e.originType ()
+                                            << e.scxmlType ()
+                                            << e.eventType ();
+                                  //event_write (*_eventout, e);
                               });
 
     // SIGNAL: dataModelChanged (QScxmlDataModel* datamodel)
@@ -747,7 +835,7 @@ _JSScxml::_raise (const QString str)
     // cf. http://doc.qt.io/qt-5/qjsvalue.html#toVariant
 
     assert (_proc);
-    _proc->event_raise (obj);
+    _proc->js_raise (obj);
 }
 
 void
@@ -760,7 +848,23 @@ _JSScxml::_send (const QString str)
     //QVariant v = js_val.toVariant ();
     // cf. http://doc.qt.io/qt-5/qjsvalue.html#toVariant
     assert (_proc);
-    _proc->event_send (obj);
+    _proc->js_send (obj);
+}
+
+void
+_JSScxml::_cancel (const QString str)
+{
+    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
+    assert (_proc);
+    _proc->js_cancel (obj);
+}
+
+void
+_JSScxml::_invoke (const QString str)
+{
+    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
+    assert (_proc);
+    _proc->js_invoke (obj);
 }
 
 void
@@ -821,8 +925,16 @@ qtscxmlproc::_hack (void)
     QJSValue send_fun = _engine->evaluate ("function (obj) { SCXML._send (JSON.stringify (obj)) }");
     assert (send_fun.isCallable ());
     scxml_val.setProperty ("send", send_fun);
+    // SCXML.cancel
+    QJSValue cancel_fun = _engine->evaluate ("function (obj) { SCXML._cancel (JSON.stringify (obj)) }");
+    assert (cancel_fun.isCallable ());
+    scxml_val.setProperty ("cancel", cancel_fun);
+    // SCXML.invoke
+    QJSValue invoke_fun = _engine->evaluate ("function (obj) { SCXML._invoke (JSON.stringify (obj)) }");
+    assert (invoke_fun.isCallable ());
+    scxml_val.setProperty ("invoke", invoke_fun);
 
-    // _data
+    // declare _data as a global variable
     if (!global.hasProperty ("_data"))
     {
         _engine->evaluate ("_data = {}");
