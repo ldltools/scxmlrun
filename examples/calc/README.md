@@ -12,22 +12,47 @@ The [SCXML definition](calc.scxml) originates from [this](https://www.w3.org/TR/
 The following input events are included in [calc.in](calc.in).
 
 ```
-{"event" : {"name" : "DIGIT.12"}}  
+{"event" : {"name" : "DIGIT.1"}}  
+{"event" : {"name" : "DIGIT.2"}}  
 {"event" : {"name" : "OPER.PLUS"}}  
-{"event" : {"name" : "DIGIT.34"}}  
+{"event" : {"name" : "DIGIT.3"}}  
+{"event" : {"name" : "DIGIT.4"}}  
 {"event" : {"name" : "EQUALS"}}  
 {"event" : {"name" : "terminate"}}
 ```
 
-## running of the statechart
+## running the statechart against the scenario
 
 ```
-$ scxmlrun calc.scxml calc.in  
-[log] "'result'"  :  "0"  
-[log] "'result'"  :  "0"  
-[log] "'result'"  :  "12"  
-[log] ""  :  "OPER.PLUS"  
-[log] "'result'"  :  "12"  
-[log] "'result'"  :  "34"  
-[log] "'result'"  :  "46"
+$ scxmlrun calc.scxml calc.in -o /dev/null  
+result: 0  
+result: 0  
+result: 1  
+result: 12  
+result: 12  
+result: 3  
+result: 34  
+result: 46
+```
+
+## web ui for calc
+
+You can also try a [web ui](calc-ui.html) for the calc statemachine
+that runs on your browser.
+
+<div><img src="calc_ui.jpg" width="320"/></div>
+
+First, you need to configure mosquitto to work as a bridge between MQTT and Websocket.  
+Follow [this instruction](../../docs/websocket.md).
+
+Once it is done, invoke the ui by running `runtest.sh`.  
+The fancy calculator shown above should pop up.
+
+```
+$ ./runtest.sh  
+
+calc.scxml has been invoked successfully  
+OPEN: "calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"  
+
+$ firefox --new-tab "calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"
 ```

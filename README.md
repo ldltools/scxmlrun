@@ -5,9 +5,9 @@ written in C++
 with the following features:
 
 - it is built on top of [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html)  
-- it can be used as a command-line program that reads from and writes to local files.
-- input/output events can also be transmitted over the network via the [MQTT](https://mqtt.org/) protocol.  
-- several JavaScript functions, including `SCXML.raise` and `SCXML.send` for raising/sending events in the JSON format, have been introduced for interfacing with the underlying SCXML engine.
+- it can be used as a command-line program that simply reads from and writes to local files.
+- input/output events can also be received/transmitted over the network via the [MQTT](https://mqtt.org/) protocol.  
+- several JavaScript functions, including `SCXML.raise` and `SCXML.send` for raising/sending events in the JSON format, are introduced for interfacing with the underlying SCXML engine.
 
 # Example: [ping\_pong](examples/ping_pong/README.md)
 
@@ -18,7 +18,7 @@ Then, it is is delivered to _pong.sh_ and responded with _ping (1)_,
 and interaction goes on that way.
 
 (2) [_ping\_pong.scxml_](examples/ping_pong/ping_pong.scxml) defines
-a state machine that responds to incoming _ping_ and _pong_ events.
+a state machine that switches states in response to incoming _ping_ and _pong_ events.
 
 ![statechart](examples/ping_pong/ping_pong.svg)
 

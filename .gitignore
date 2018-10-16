@@ -10,6 +10,9 @@ README.html
 *.svg
 *.jpg
 *.png
+*.xcf
 *.pptx
 *.puml
 *.uml
+*.orig
+*.bak

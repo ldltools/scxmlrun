@@ -144,10 +144,16 @@
             <send event="DISPLAY.UPDATE" />
         </transition>
         <transition event="DISPLAY.UPDATE">
+	    <!--
             <log label="'result'" expr="short_expr==''?res:short_expr" />
             <send event="updateDisplay">
                 <param name="display" expr="short_expr==''?res:short_expr"/>
             </send>
+	    -->
+	    <script>
+	      console.log ("result:", short_expr==''?res:short_expr);
+	      SCXML.send ({"event":{"name":"updateDisplay", "data":{"display":(short_expr == ''?res:short_expr)}}});
+	    </script>
         </transition>
         <transition event="OP.INSERT">
             <log expr="_event.data.operator" />
