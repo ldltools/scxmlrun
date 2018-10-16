@@ -18,6 +18,7 @@
       <!--transition: curr_world: true label: true next_world: true-->
       <script>_trace_append (" true ");     SCXML.send ({"event" : _event}); // to external processes
     // knockout price
+    // note that _data will be declared as a global variable (set to {} initially) in scxml generation
     _data.ko_price = _event.data.ko_price;
     // strike price that affects leveraged stock purchase at the end of each day
     _data.strike_price = _event.data.strike_price;

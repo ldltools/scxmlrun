@@ -37,7 +37,7 @@ result: 46
 
 ## web ui for calc
 
-You can also try a [web ui](calc-ui.html) for the calc statemachine
+You can also try a [web ui](calc_ui.html) for the calc statemachine
 that runs on your browser.
 
 <div><img src="calc_ui.jpg" width="320"/></div>
@@ -52,7 +52,7 @@ The fancy calculator shown above should pop up.
 $ ./runtest.sh  
 
 calc.scxml has been invoked successfully  
-OPEN: "calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"  
+OPEN: "file:/.../calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"  
 
-$ firefox --new-tab "calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"
+$ firefox --new-tab "file:/.../calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"
 ```

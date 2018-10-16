@@ -57,11 +57,11 @@ test $(pgrep -u mosquitto mosquitto | wc -l) -eq 0 && { echo "** mosquitto is no
 
 # scxml
 rm -f .calc_done
-(scxmlrun $scxml --mqtt ${host} --sub ${topic_ui} --pub ${topic_scxml} $verbose && { touch .calc_done; echo "$scxml done"}) &
+(scxmlrun $scxml --mqtt ${host} --sub ${topic_ui} --pub ${topic_scxml} $verbose && { touch .calc_done; echo "$scxml terminated"; }) &
 sleep 1
 
 # ui
-url="${ui}?host=${host}&port=${port}&sub=${topic_scxml}&pub=${topic_ui}"
+url="file:$(readlink -f ${ui})?host=${host}&port=${port}&sub=${topic_scxml}&pub=${topic_ui}"
 if test ${no_browser} -eq 1 -o ! -x $browser
 then
     echo -e "\n${scxml} has been invoked successfully"
