@@ -249,6 +249,7 @@ qtscxmlproc::event_read (QScxmlEvent& e)
 
     qDebug () << ";; event_read:" << str.c_str ();
 
+    // json parse
     QVariant v = QJsonDocument::fromJson (str.c_str ()).toVariant ();
     assert (v.type () == QVariant::Map);
     QVariantMap m = (v.toMap())["event"].toMap ();
@@ -267,7 +268,7 @@ qtscxmlproc::event_read (QScxmlEvent& e)
 
     // type
     QVariant type = m.contains ("type") ? m["type"] : QVariant (QScxmlEvent::ExternalEvent);
-    assert (type.type () == QVariant::Int);
+    assert (type.canConvert<int> ());
     e.setEventType ((QScxmlEvent::EventType) type.toInt ());
 
     // origin

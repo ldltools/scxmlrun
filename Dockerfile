@@ -9,7 +9,8 @@ RUN echo "dash dash/sh boolean false" | debconf-set-selections;\
     dpkg-reconfigure -f noninteractive dash;\
     echo "/usr/local/lib" > /etc/ld.so.conf.d/usr-local-lib.conf
 RUN apt-get update;\
-    apt-get install -y build-essential g++ flex bison gawk file rsync wget
+    apt-get install -y build-essential g++ flex bison gawk;\
+    apt-get install -y file rsync wget net-tools nmap
 
 # Qt5
 RUN apt-get install -y qt5-default qtbase5-dev qtbase5-private-dev;\
@@ -34,8 +35,9 @@ RUN apt-get install -y nlohmann-json-dev
 
 # MQTT
 RUN apt-get install -y mosquitto mosquitto-clients libmosquitto-dev
-RUN test -d /etc/mosquitto/conf.d &&\
-    echo -e "listener 1883\nlistener 9001\nprotocol websockets" > /etc/mosquitto/conf.d/websockets.conf &&\
+RUN dir=/etc/mosquitto/conf.d; conf=${dir}/websockets.conf;\
+    test -d $dir -a ! -f $conf &&\
+    echo -e "listener 1883\nlistener 9001\nprotocol websockets" > $conf &&\
     service mosquitto restart
 
 # SCXMLRUN
@@ -46,3 +48,7 @@ RUN make && make install
 #
 WORKDIR /root
 CMD ["/bin/bash"]
+
+# MQTT/Websocket ports
+EXPOSE 1883
+EXPOSE 9001
