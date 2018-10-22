@@ -33,10 +33,10 @@ A simplified version of _accumulator_ is defined as a statechart as follows.
     </div>
   </details>
 
+![accumulator](accumulator.svg)
+
 For the detail of the definition (and its monitors listed below),
 refer to [this material](accumulator.pdf).
-
-![accumulator](accumulator.svg)
 
 ## monitors for accumulator
 
@@ -97,7 +97,7 @@ to ensure that the accumulator works exactly as intended.
   </div>
   </details>
 
-## senarios
+## scenarios
 
 - valid cases:
   [scenario1](scenarios/scenario1.txt),

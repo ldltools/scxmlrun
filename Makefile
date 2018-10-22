@@ -12,7 +12,7 @@ install::	all
 	for d in $(SUBDIRS); do make -C $$d PREFIX=$(PREFIX) $@; done
 
 clean::
-	find . -name '#*' -or -name '*~' -or -name '*.log' | xargs rm -f
+#	find . -name '#*' -or -name '*~' -or -name '*.log' | xargs rm -f
 	for d in $(SUBDIRS); do make -C $$d PREFIX=$(PREFIX) $@; done
 
 veryclean::	clean
@@ -22,7 +22,7 @@ veryclean::	clean
 GITHOME ?= $(HOME)/git/github.com/ldltools/scxmlrun
 rsync::	clean
 	test -d $(GITHOME) || exit 1
-	rsync -avzop --exclude=_build --exclude=.git --exclude=out --exclude=obsolete ./ $(GITHOME)
+	rsync -avzop --exclude=_build --exclude=.git --exclude=out --exclude=obsolete --exclude=node_modules ./ $(GITHOME)
 tar:	veryclean
 	(dir=`basename $$PWD`; cd ..; tar cvJf scxmlrun`date +%y%m%d`.tar.xz --exclude=.git --exclude=_build --exclude=RCS --exclude=obsolete $$dir)
 

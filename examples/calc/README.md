@@ -21,7 +21,7 @@ The following input events are included in [calc.in](calc.in).
 {"event" : {"name" : "terminate"}}
 ```
 
-## running the statechart against the scenario
+## testing the statechart against the scenario
 
 ```
 $ scxmlrun calc.scxml calc.in -o /dev/null  
@@ -45,7 +45,11 @@ that runs on your browser.
 First, you need to configure mosquitto to work as a bridge between MQTT and Websocket.  
 Follow [this instruction](../../docs/websocket.md).
 
-Once it is done, invoke the ui by running `runtest.sh`.  
+In addition, you need a local copy of
+[mqttws31](https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js)
+in this directory.
+
+Once these are done, invoke the ui along with the state machine by running `runtest.sh`.  
 The fancy calculator shown above should pop up.
 
 ```

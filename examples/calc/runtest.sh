@@ -9,15 +9,15 @@ topic_ui=calcui${random}
 host=127.0.0.1
 port=9001
 
-browser=${browser:-/usr/bin/firefox}
-url=
 no_browser=1
+# this is potentially dangerous
+browser=${browser:-/usr/bin/firefox}
 
 verbose=
 
 usage ()
 {
-    echo "usage: $(basename $0) [-v] [--host <host>] [--port <port>] [--launch-browser]"
+    echo "usage: $(basename $0) [-v] [--host <host>] [--port <port>]"
 }
 
 #test $# -eq 0 && { usage; exit 0; }
@@ -33,7 +33,7 @@ do
 	    port=$2
 	    shift
 	    ;;
-	--launch*)
+	--open-url)
 	    no_browser=0
 	    ;;
 	-v)
@@ -55,28 +55,30 @@ done
 # check
 test $(pgrep -u mosquitto mosquitto | wc -l) -eq 0 && { echo "** mosquitto is not running" > /dev/stderr; exit 1; }
 
-# scxml
+# start scxmlrun
 rm -f .calc_done
 (scxmlrun $scxml --mqtt ${host} --sub ${topic_ui} --pub ${topic_scxml} $verbose && { touch .calc_done; echo "$scxml terminated"; }) &
 sleep 1
 
-# ui
+# gen url for ui
 url="file:$(readlink -f ${ui})?host=${host}&port=${port}&sub=${topic_scxml}&pub=${topic_ui}"
-if test ${no_browser} -eq 1 -o ! -x $browser
+if test ${no_browser} -eq 1 -o ! -x "$browser"
 then
     echo -e "\n${scxml} has been invoked successfully"
     echo -e "OPEN: \"$url\"\n"
+    test -f ./mqttws31.min.js || echo "** note that you need a local copy of \"mqttws31\""
 else
     $browser --new-tab "$url" &
 fi
 
+# wait for termination
 n=0
 while test ! -f .calc_done
 do
     sleep 1m
     let n=n+1; test $n -gt 60 && break
 done
-rm -f .calc_done
 
 # clean up
+rm -f .calc_done
 test $(pgrep -u $USER scxmlrun | wc -l) -eq 0 || { echo "** scxmlrun is running" > /dev/stderr; pkill -u $USER scxmlrun; exit 1; }

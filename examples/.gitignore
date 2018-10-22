@@ -1,0 +1,4 @@
+build/
+migrations/
+node_modules/
+package*json
