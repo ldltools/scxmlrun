@@ -32,7 +32,27 @@ contract Ballot {
     uint _countmax;
 
     /// Create a new ballot to choose one of `proposalNames`.
-    constructor(bytes32[] proposalNames) public {
+    constructor() public {
+        chairperson = msg.sender;
+        voters[chairperson].weight = 1;
+        _init (3);
+        _count = 0; _countmax = 0;
+    }
+
+    function _init(uint n) public {
+	require (n < 10);
+        for (uint i = 0; i < n; i++) {
+            // `Proposal({...})` creates a temporary
+            // Proposal object and `proposals.push(...)`
+            // appends it to the end of `proposals`.
+            proposals.push(Proposal({
+                name: bytes32 (n),
+                voteCount: 0
+            }));
+        }
+    }
+
+    function _init(bytes32[] proposalNames) public {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
 
@@ -48,8 +68,6 @@ contract Ballot {
                 voteCount: 0
             }));
         }
-
-        _count = 0; _countmax = 0;
     }
 
     event GiveRightTo (address indexed _voter);

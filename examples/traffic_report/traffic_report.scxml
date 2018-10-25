@@ -1,37 +1,50 @@
 <?xml version="1.0"?>
 <?access-control allow="*"?>
-<scxml version="1.0" initial="Intro" datamodel="ecmascript">
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" initial="Intro" datamodel="ecmascript">
+  <datamodel>
+    <data id="sessionChrome" expr="{'playAds':false}"/>
+    <data id="ANIQuality" expr="true"/>
+  </datamodel>
+
   <state id="Intro">
+    <!--
     <invoke src="dialog.vxml#Intro" type="vxml2"/>
+    -->
     <transition event="success" cond="sessionChrome.playAds" target="PlayAds"/>
     <transition event="success" cond="!sessionChrome.playAds &amp;&amp; ANIQuality" 
                     target="ShouldGoBack"/>
     <transition event="success" cond="!sessionChrome.playAds &amp;&amp; !ANIQuality" 
                     target="StartOver"/>
+    <transition event="terminate" target="final"/>
   </state>
 
   <state id="PlayAds">
+    <!--
     <invoke src="dialog.vxml#PlayAds" type="vxml2"/>
+    -->
     <transition event="success" cond="ANIQuality" target="ShouldGoBack"/>
     <transition event="success" cond="!ANIQuality" target="StartOver"/>
   </state>
 
   <state id="StartOver">
-    <onenter>
+    <onentry>
       <script>enterStartOver();</script>
-    </onenter>
+    </onentry>
+    <!--
     <invoke src="dialog.vxml#StartOver" type="vxml2">
       <param name="gotItFromANI" expr="gotItFromANI"/>
       <finalize>
         <script>finalizeStartOver();</script>
       </finalize>
     </invoke>
+    -->
     <transition event="success" target="ShouldGoBack"/>
     <transition event="doOver" target="StartOver"/>
     <transition event="restart" target="Intro"/> <!-- bail out to caller -->
   </state>
 
   <state id="ShouldGoBack">
+    <!--
     <invoke src="dialog.vxml#ShouldGoBack" type="vxml2">
       <param name="cityState" expr="cityState"/>
       <param name="gotItFromANI" expr="gotItFromANI"/>
@@ -39,6 +52,7 @@
         <script>finalizeShouldGoBack();</script>
       </finalize>
     </invoke>
+    -->
     <transition event="highWay" target="HighwayReport"/>
     <transition event="go_back" target="StartOver"/>
     <transition event="doOver" target="ShouldGoBack"/>
@@ -46,6 +60,7 @@
   </state>
 
   <state id="HighwayReport">
+    <!--
     <invoke src="dialog.vxml#HighwayReport" type="vxml2">
       <param name="cityState" expr="cityState"/>
       <param name="gotItFromANI" expr="gotItFromANI"/>
@@ -55,6 +70,7 @@
         <script>finalizeHighwayReport();</script>
       </finalize>
     </invoke>
+    -->
     <transition event="highway" target="PlayHighway"/>
     <transition event="go_back" target="StartOver"/>
     <transition event="doOver" target="HighwayReport"/>
@@ -63,6 +79,7 @@
   </state>
 
   <state id="FullReport">
+    <!--
     <invoke src="dialog.vxml#FullReport" type="vxml2">
       <param name="cityState" expr="cityState"/>
       <param name="metroArea" expr="metroArea"/>
@@ -70,11 +87,13 @@
         <script>finalizeFullReport();</script>
       </finalize>
     </invoke>
+    -->
     <transition event="go_back" target="HighwayReport"/>
     <transition event="new_city" target="StartOver"/>
   </state>
 
   <state id="PlayHighway">
+    <!--
     <invoke src="dialog.vxml#PlayHighway" type="vxml2">
       <param name="cityState" expr="cityState"/>
       <param name="curHighway" expr="curHighway"/>
@@ -82,6 +101,9 @@
         <script>finalizePlayHighway();</script>
       </finalize>
     </invoke>
+    -->
     <transition event="go_back" target="HighwayReport"/>
   </state>
+
+  <final id="final"/>
 </scxml>

@@ -1,0 +1,11 @@
+{"event" : {"name" : "success"}}
+{"event" : {"name" : "doOver"}}
+{"event" : {"name" : "highway"}}
+{"event" : {"name" : "fullreport"}}
+{"event" : {"name" : "new_city"}}
+{"event" : {"name" : "success"}}
+{"event" : {"name" : "highway"}}
+{"event" : {"name" : "highway"}}
+{"event" : {"name" : "go_back"}}
+{"event" : {"name" : "restart"}}
+{"event" : {"name" : "terminate"}}

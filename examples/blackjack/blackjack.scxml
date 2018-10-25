@@ -1,18 +1,34 @@
 <?xml version="1.0"?>
 <?access-control allow="*"?>
-<scxml version="1.0" datamodel="ecmascript" initial="master"> <state id="master">
-    <initial id="init1">
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="master">
+  <script>
+    function enterNewDealer () {
+      console.log ("enterNewDealer");
+    }
+    function enterEvalDeal () {
+      console.log ("enterEvalDeal");
+    }
+    function enterPlayDone () {
+      console.log ("enterPlayDone");
+    }
+  </script>
+
+  <state id="master" initial="init1">
+    <state id="init1">
       <transition target="_home"/>
-    </initial>
+    </state>
+
     <transition event="new_dealer" target="NewDealer"/>
     <transition event="mumble" target="_home"/> <!-- bail out to caller -->
     <transition event="silence" target="_home"/> <!-- bail out to caller -->
+
     <state id="_home">
-      <onenter>
+      <onentry>
         <script>
         _data = {};
         </script>
-      </onenter>
+      </onentry>
+      <!--
       <invoke src="datamodel.v3#InitDataModel" type="vxml3">
         <finalize>
           <script>
@@ -23,27 +39,34 @@
           </script>
         </finalize>
       </invoke>
+      -->
       <transition event="success" target="Welcome"/>
     </state>
 
     <state id="Welcome">
+      <!--
       <invoke src="dialog.vxml#Welcome" type="vxml3">
         <param name="skinpath" expr="skinpath"/>
       </invoke>
+      -->
+      <onentry><script>console.log ("Welcome")</script></onentry>
       <transition event="success" target="Intro2"/>
     </state>
 
     <state id="Intro2">
+      <!--
       <invoke src="dialog.vxml#Intro2" type="vxml3">
         <param name="skinpath" expr="skinpath"/>
       </invoke>
+      -->
       <transition event="success" target="EvalDeal"/>
     </state>
 
     <state id="EvalDeal">
-      <onenter>
+      <onentry>
         <script>enterEvalDeal();</script>
-      </onenter>
+      </onentry>
+      <!--
       <invoke src="dialog.vxml#EvalDeal" type="vxml3">
         <param name="skinpath" expr="skinpath"/>
         <param name="playercard1" expr="playercard1"/>
@@ -51,49 +74,62 @@
         <param name="playertotal" expr="blackjack.GetTotalOf('caller').toString()"/>
         <param name="dealercardshowing" expr="dealercardshowing"/>
       </invoke>
+      -->
       <transition event="success" target="AskHit"/>
     </state>
 
     <state id="AskHit">
+      <!--
       <invoke src="dialog.vxml#AskHit" type="vxml3">
         <param name="skinpath" expr="skinpath"/>
         <finalize>
           <script>finalizeAskHit();</script>
         </finalize>
       </invoke>
+      -->
+      <onentry><script>console.log ("AskHit")</script></onentry>
       <transition event="hit" target="PlayNewCard"/>
       <transition event="stand" target="PlayDone"/>
     </state>
 
     <state id="PlayNewCard">
+      <!--
       <invoke src="dialog.vxml#PlayNewCard" type="vxml3">
         <param name="skinpath" expr="skinpath"/>
         <param name="playernewcard" expr="playernewcard"/>
         <param name="playertotal" expr="blackjack.GetTotalOf('caller').toString()"/>
       </invoke>
+      -->
+      <onentry><script>console.log ("PlayNewCard")</script></onentry>
       <transition event="success" cond="blackjack.GetTotalOf('caller') &gt;= 21" target="PlayDone"/>
       <transition event="success" target="AskHit"/> <!-- less than 21 -->
     </state>
 
     <state id="PlayDone">
-      <onenter>
+      <onentry>
         <script>enterPlayDone();</script>
-      </onenter>
+      </onentry>
+      <!--
       <invoke src="dialog.vxml#PlayDone" type="vxml3">
         <param name="skinpath" expr="skinpath"/>
         <param name="gameresult" expr="blackjack.GetGameResult()"/>
         <param name="dealertotal" expr="blackjack.GetTotalOf('dealer').toString()"/>
       </invoke>
+      -->
       <transition event="playagain" target="Intro2"/>
-      <transition event="quit" target="_home"/>
+      <transition event="quit" target="final"/>
     </state>
 
     <state id="NewDealer">
-      <onenter>
+      <onentry>
        <script>enterNewDealer();</script>
-      </onenter>
+      </onentry>
+      <!--
       <invoke src="dialog.vxml#Dummy" type="vxml3"/>
+      -->
       <transition event="success" target="Welcome"/>
     </state>
+
   </state>
+  <final id="final"/>
 </scxml>

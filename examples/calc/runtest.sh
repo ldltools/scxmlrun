@@ -9,6 +9,8 @@ topic_ui=calcui${random}
 host=127.0.0.1
 port=9001
 
+mqttws=./mqttws31.min.js
+
 no_browser=1
 # this is potentially dangerous
 browser=${browser:-/usr/bin/firefox}
@@ -61,12 +63,13 @@ rm -f .calc_done
 sleep 1
 
 # gen url for ui
+test -f $mqttws || wget https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js -O $mqttws
 url="file:$(readlink -f ${ui})?host=${host}&port=${port}&sub=${topic_scxml}&pub=${topic_ui}"
 if test ${no_browser} -eq 1 -o ! -x "$browser"
 then
     echo -e "\n${scxml} has been invoked successfully"
     echo -e "OPEN: \"$url\"\n"
-    test -f ./mqttws31.min.js || echo "** note that you need a local copy of \"mqttws31\""
+    test -f "$mqttws" || echo "** note that you need a local copy of \"mqttws31\""
 else
     $browser --new-tab "$url" &
 fi

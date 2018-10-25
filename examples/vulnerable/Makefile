@@ -8,8 +8,9 @@ clean::
 install::
 
 # truffle
-CONTRACTS	= $(shell echo contracts/*.sol)
-TESTS		= $(shell echo scenarios/*.sol)
+CONTRACTS	= $(shell echo contracts/{SimpleDAO,SimpleDAO_exploit}.sol)
+SCENARIOS	= $(shell echo scenarios/*.js)
+TESTS		= $(shell echo scenarios/swc107*.js)
 # ganache
 PORT		= 7545
 NETWORK		= 5777

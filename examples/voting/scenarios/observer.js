@@ -13,7 +13,8 @@ web3.eth.defaultAccount = web3.eth.accounts[0];
 
 // contract
 const fs = require ('fs');
-const json = JSON.parse (fs.readFileSync ('../build/contracts/Ballot.json', 'utf8'));
+const root = (process.env.ROOT != undefined) ? process.env.ROOT : ".";
+const json = JSON.parse (fs.readFileSync (root + '/build/contracts/Ballot.json', 'utf8'));
 const abi = json.abi;
 const address = json.networks[network].address;
 const Contract = web3.eth.contract (abi);

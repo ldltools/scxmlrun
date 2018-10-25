@@ -1,4 +1,6 @@
 build/
 migrations/
 node_modules/
+test/
 package*json
+truffle*js

@@ -2,8 +2,7 @@
 
 PREFIX		?= /usr/local
 
-#SUBDIRS	= src examples tests
-SUBDIRS		= src examples
+SUBDIRS	= src examples tests docs
 
 all::
 	for d in $(SUBDIRS); do make -C $$d $@; done
@@ -14,6 +13,7 @@ install::	all
 clean::
 #	find . -name '#*' -or -name '*~' -or -name '*.log' | xargs rm -f
 	for d in $(SUBDIRS); do make -C $$d PREFIX=$(PREFIX) $@; done
+	rm -f *~
 
 veryclean::	clean
 	rm -rf _build/*

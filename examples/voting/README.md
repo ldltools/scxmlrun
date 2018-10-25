@@ -2,9 +2,9 @@
 
 ## contract: [Ballot](contracts/Ballot.sol)
 
-This example appears in the [official Solidity manual](https://solidity.readthedocs.io/en/v0.4.24/solidity-by-example.html#voting).
+This example originally appears in some [Solidity tutorial material](https://solidity.readthedocs.io/en/v0.4.24/solidity-by-example.html#voting).
 
-## monitors
+## monitors for the contract
 
 - [monitor1](monitors/monitor1.rules)
 
@@ -16,14 +16,17 @@ This example appears in the [official Solidity manual](https://solidity.readthed
 
 - [scenario1](scenarios/scenario1.js)
 
-  `GiveRightTo` x3, followed by `Vote` x3
+  `GiveRightTo` (3 times), followed by `Vote` (3 times)
 
 - [invalid1](scenarios/invalid1.js)
 
-  `GiveRightTo` x3, followed by `Vote` x2
+  `GiveRightTo` (3 times), followed by `Vote` (2 times)
 
 
 ## running each scenario
+
+Note that if you have never tested smart contracts on a local Ethereum network,
+please take a look at [this memo](../../docs/ethereum.md).
 
 - launch `ganache-cli`, a local Ethereum network
 
@@ -40,5 +43,6 @@ This example appears in the [official Solidity manual](https://solidity.readthed
 - run the observer script for briding Ethereum and MQTT
 
   ```
+  $ npm install mqtt  
   $ ./runtest.sh scenarios/scenario1.js
   ```

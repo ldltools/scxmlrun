@@ -14,4 +14,5 @@
 
 ## Smart contracts and their monitors
 
-- [voting](voting/README.md)
+- [voting](voting/README.md) (ethereum)
+- [vulnerable](vulnerable/README.md) (ethereum)
