@@ -70,7 +70,7 @@ contract Ballot {
         }
     }
 
-    event GiveRightTo (address indexed _voter);
+    event GiveRightToVote (address indexed _voter);
     event Delegate (address indexed _from, address indexed _to, uint _weight);
     event Vote (address indexed _sender, uint _proposal, uint _weight);
     event VotingClosed ();
@@ -100,7 +100,7 @@ contract Ballot {
         voters[voter].weight = 1;
 
         _countmax++;
-        emit GiveRightTo (voter);
+        emit GiveRightToVote (voter);
     }
 
     /// Delegate your vote to the voter `to`.

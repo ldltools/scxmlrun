@@ -1,0 +1,8 @@
+{"event":{"name":"Propose", "data":{"nproposal":3}, "origin":"chair"}}
+{"event":{"name":"GiveRightToVote", "data":{"voter":"voter1"}, "origin":"chair"}}
+{"event":{"name":"GiveRightToVote", "data":{"voter":"voter2"}, "origin":"chair"}}
+{"event":{"name":"GiveRightToVote", "data":{"voter":"voter3"}, "origin":"chair"}}
+{"event":{"name":"Vote", "data":{"proposal":0}, "origin":"voter1"}}
+{"event":{"name":"Vote", "data":{"proposal":1}, "origin":"voter2"}}
+{"event":{"name":"Delegate", "data":{"voter":"voter1"}, "origin":"voter3"}}
+{"event":{"name":"_accept"}}

@@ -1,0 +1,74 @@
+# -*-Makefile-*-
+
+all::
+
+PROJECT_DIR	?= .
+BUILD_DIR	?= $(PROJECT_DIR)/_build
+
+# truffle
+CONTRACTS	?= $(shell echo contracts/*.sol)
+TESTS		?= $(shell echo scenarios/*.js)
+
+# ganache
+HOST		?= "127.0.0.1"
+PORT		?= 7545
+NETWORK		?= 5777
+GAS_LIMIT	?= 8000000
+PID_FILE	?= $(BUILD_DIR)/.ganache_pid
+
+build:	clean compile launch deploy
+
+launch:	check-ganache
+	test -s $(PID_FILE) && echo "ganache is running" ||\
+	{ (ganache-cli -h $(HOST) -p $(PORT) --networkId $(NETWORK) --gasLimit $(GAS_LIMIT) &);\
+	  while test $$(pgrep -a node | grep ganache-cli | wc -l) -eq 0; do sleep 1; done;\
+	  pgrep -a node | grep ganache-cli | gawk '{print($$1)}' > $(PID_FILE); }
+
+# ganache is running?
+check-ganache:
+	@test -s $(PID_FILE) -a -d "/proc/$$(cat $(PID_FILE))" ||\
+	{ pgrep -a node | grep ganache-cli | gawk '{print($$1)}' > $(PID_FILE); }
+
+clean::
+	rm -f $(PID_FILE)
+
+init:
+	test -d $(BUILD_DIR)/contracts ||\
+	(mkdir -p $(BUILD_DIR); cd $(BUILD_DIR); truffle init; mv -f truffle.js{,.bak})
+
+compile:	init
+	rsync $(CONTRACTS) $(BUILD_DIR)/contracts
+	rm -f $(BUILD_DIR)/build/contracts/*
+	(cd $(BUILD_DIR); truffle compile)
+
+deploy:	compile $(BUILD_DIR)/migrations/2_deploy_contracts.js $(BUILD_DIR)/truffle.js check-ganache
+	@test -s $(PID_FILE) || { echo "** ganache is not running" > /dev/stderr; exit 1; }
+	(cd $(BUILD_DIR); truffle deploy)
+
+test:	check-ganache
+	@test -s $(PID_FILE) || { echo "** ganache is not running" > /dev/stderr; exit 1; }
+	rsync $(TESTS) $(BUILD_DIR)/test
+	(cd $(BUILD_DIR); truffle test)
+
+$(BUILD_DIR)/truffle.js:
+	rm -f $@; touch $@
+	echo "module.exports = {"	>> $@
+	echo " networks: {"		>> $@
+	echo "  development: {"		>> $@
+	echo "   host: \"$(HOST)\", port: $(PORT), network_id: \"*\"" >> $@
+	echo "}}};"			>> $@
+
+$(BUILD_DIR)/migrations/2_deploy_contracts.js:	$(CONTRACTS)
+	mkdir -p $(BUILD_DIR)/migrations
+	rm -f $@; touch $@
+	for f in $(CONTRACTS); do \
+	  echo "var $$(basename $$f .sol) = artifacts.require (\"./$$(basename $$f)\");" >> $@;\
+	done
+	echo "module.exports = function (deployer) {" >> $@
+	for f in $(CONTRACTS); do \
+	  echo "deployer.deploy($$(basename $$f .sol));" >> $@;\
+	done
+	echo "}" >> $@
+
+veryclean:	clean
+	rm -rf $(BUILD_DIR)

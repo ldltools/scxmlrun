@@ -3,8 +3,39 @@ their monitors to detect their exploitation.
 
 ## Reentrancy ([SWC-107](https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-107))
 
+- [contract](contracts/SimpleDAO.sol)
+- [exploit](contracts/SimpleDAO_exploit.sol)
+- [monitor]()
+
 ## Transaction Order Dependence ([SWC-114](https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-114))
 
+- [contract]()
+- [exploit]()
+- [monitor]()
+
+## Running scenarios
+
+### Prerequisites
+
+We need `truffle` and `ganache-cli` for testing.
+
+Note that if you have never tested smart contracts on a local Ethereum network,
+please take a look at [this memo](../../docs/ethereum.md).
+
+### _without_ monitors
+
+```
+$ make launch  
+$ make build  
+$ make test
+```
+
+### _with_ monitors
+
+```
+$ make launch  
+$ make build  
+```
 
 ## References
 - SmartContractSecurity,

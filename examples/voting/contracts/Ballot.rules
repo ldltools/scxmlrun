@@ -1,0 +1,107 @@
+// Ballot.rules
+// this module fairly simulates what Ballot.sol does.
+// it can also run as a monitor for Ballot.sol.
+//
+// EVENTS
+// - Propose (nproposal)
+// - GiveRightToVote (voter)
+// - Vote (proposal)
+// - Delegate (voter)
+// - _success
+//    internal event that indicates its preceding Vote/Delegate event
+//    has been processed successfully
+//
+
+protocol
+  Propose;
+  GiveRightToVote;
+  (GiveRightToVote + Delegate; _success + Vote; _success)*;
+  (Delegate + Vote); _success
+;;
+
+variable
+{
+  proposals = []; nproposal = 0;
+  voters = {}; nvoter = 0; nvoted = 0;
+  chairperson = "";
+}
+
+rule
+
+// Propose (int nproposal)
+on Propose
+do
+{
+  nproposal = _event.data.nproposal;
+  var i; for (i = 0; i < nproposal; i++) proposals[i] = {voteCount:0};
+  chairperson = _event.origin;
+  voters[chairperson] = {weight : 1, voted : false, delegate : "0", vote : 0};
+  nvoter = 1;
+  console.log ("chair=", chairperson, ", nvoter=", nvoter);
+}
+
+// GiveRightToVote (address from, address to)
+on GiveRightToVote
+do
+{
+  if (_event.origin != chairperson)
+    SCXML.raise ({name : "error.execution"});
+
+  var voter_addr = _event.data.voter; // string
+  voters[voter_addr] = {weight : 1, voted : false, delegate : "0", vote : 0};
+  nvoter++;
+}
+
+// Vote (int proposal)
+on Vote
+raise _success
+{
+  var voter_addr = _event.origin;
+  if (voters[voter_addr] == undefined || voters[voter_addr].voted)
+    SCXML.raise ({name : "error.execution"});
+  console.assert (!voters[voter_addr].voted);
+
+  var proposal = _event.data.proposal;
+  voters[voter_addr].voted = true;
+  voters[voter_addr].vote = proposal;
+  proposals[proposal].voteCount += voters[voter_addr].weight;
+  nvoted += voters[voter_addr].weight;
+
+  console.log ("Vote: nvoted=", nvoted);
+  SCXML.raise ({name : "_success"});
+}
+
+// Delegate (address voter)
+on Delegate
+raise _success
+{
+  var sender_addr = _event.origin;
+  if (voters[sender_addr] == undefined || voters[sender_addr].voted)
+    SCXML.raise ({name : "error.execution"});
+  var voter_addr = _event.data.voter;
+  if (voters[voter_addr] == undefined || voter_addr == sender_addr)
+    SCXML.raise ({name : "error.execution"});
+  console.assert (voter_addr != sender_addr);
+
+  while (voters[voter_addr].delegate != "0")
+  {
+    voter_addr = voters[voter_addr].delegate;
+    if (voter_addr == sender_addr) SCXML.raise ({name : "error.execution"});
+  }
+
+  voters[sender_addr].voted = true;
+  voters[sender_addr].delegate = voter_addr;
+
+  if (voters[voter_addr].voted)
+  {
+    proposals[voters[voter_addr].vote] += voters[sender_addr].weight;
+    nvoted += voters[sender_addr].weight;
+  }
+  else
+  {
+    voters[voter_addr].weight += voters[sender_addr].weight;
+  }
+
+  console.log ("Delegate: nvoted=", nvoted);
+  SCXML.raise ({name : "_success"});
+}
