@@ -46,12 +46,14 @@ public:
 public:
     void event_read (QScxmlEvent&);
     void event_write (jsonostream&, const QScxmlEvent&);
-    // _event keys: name, type, sendid, origin, origintype, invokeid, data
-    // https://www.w3.org/TR/scxml/#InternalStructureofEvents
+      // _event keys: name, type, sendid, origin, origintype, invokeid, data
+      // https://www.w3.org/TR/scxml/#InternalStructureofEvents
 
 public:
     void js_raise (const QJsonObject& params);
+      // params = {name: <name>, ..event_attrs..}
     void js_send (const QJsonObject& params);
+      // params = {event: <event>, ..send_opts..}
     void js_cancel (const QJsonObject& params);
     void js_invoke (const QJsonObject& params);
 
