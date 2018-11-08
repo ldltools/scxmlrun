@@ -36,7 +36,7 @@ console.log ('mqtt connecting: ' + mqtt_host + ':' + mqtt_port);
 const opts = {fromBlock: 'latest', toBlock: 'latest'};
 const mqtt_topic = "voting";
 
-contract.GiveRightTo ({}, opts, function (err, log) {
+contract.GiveRightToVote ({}, opts, function (err, log) {
     if (err) { console.log ("err:", err); return; }
     payload = "{\"event\":{";
     payload += "\"name\":\"" + log.event + "\"";

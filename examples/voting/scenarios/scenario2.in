@@ -4,5 +4,5 @@
 {"event":{"name":"GiveRightToVote", "data":{"voter":"voter3"}, "origin":"chair"}}
 {"event":{"name":"Vote", "data":{"proposal":0}, "origin":"voter1"}}
 {"event":{"name":"Vote", "data":{"proposal":1}, "origin":"voter2"}}
-{"event":{"name":"Vote", "data":{"proposal":0}, "origin":"voter3"}}
+{"event":{"name":"Delegate", "data":{"voter":"voter2"}, "origin":"voter3"}}
 {"event":{"name":"_accept"}}

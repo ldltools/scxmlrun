@@ -1,3 +1,5 @@
+# Vulnerable contracts
+
 Contracts with several well-known vulnerabilities and
 their monitors to detect their exploitation.
 
@@ -9,9 +11,7 @@ their monitors to detect their exploitation.
 
 ## Transaction Order Dependence ([SWC-114](https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-114))
 
-- [contract]()
-- [exploit]()
-- [monitor]()
+(to be filled in)
 
 ## Running scenarios
 
@@ -35,6 +35,7 @@ $ make test
 ```
 $ make launch  
 $ make build  
+$ ./runtest.sh monitors/monitor1.scxml scenarios/scenario1.js
 ```
 
 ## References

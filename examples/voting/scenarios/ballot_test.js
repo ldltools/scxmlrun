@@ -1,4 +1,4 @@
-//
+// test case definitions in mocha
 
 const Ballot = artifacts.require("Ballot");
 

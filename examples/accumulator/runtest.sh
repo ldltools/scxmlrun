@@ -41,7 +41,7 @@ do
 	-h | --help)
 	    usage; exit 0
 	    ;;
-	-)
+	-*)
 	    echo "unknown option: $1"
 	    exit 1
 	    ;;

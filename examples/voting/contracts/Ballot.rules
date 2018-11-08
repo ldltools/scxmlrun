@@ -1,6 +1,7 @@
 // Ballot.rules
 // this module fairly simulates what Ballot.sol does.
-// it can also run as a monitor for Ballot.sol.
+// - it can replace Ballot.sol and run as a smart contruct on ethereum when combined with proxy.sol.
+// - it can coexist with Ballot.sol and run as a monitor for Ballot.sol.
 //
 // EVENTS
 // - Propose (nproposal)
@@ -8,8 +9,11 @@
 // - Vote (proposal)
 // - Delegate (voter)
 // - _success
-//    internal event that indicates its preceding Vote/Delegate event
-//    has been processed successfully
+//   internal event that indicates its preceding Vote/Delegate event
+//   has been processed successfully
+// - error.execution
+//   this indicates a runtime error.
+//   Notice that this appears only within "{..}" blocks.
 //
 
 protocol
@@ -18,13 +22,6 @@ protocol
   (GiveRightToVote + Delegate; _success + Vote; _success)*;
   (Delegate + Vote); _success
 ;;
-
-variable
-{
-  proposals = []; nproposal = 0;
-  voters = {}; nvoter = 0; nvoted = 0;
-  chairperson = "";
-}
 
 rule
 
@@ -36,8 +33,8 @@ do
   var i; for (i = 0; i < nproposal; i++) proposals[i] = {voteCount:0};
   chairperson = _event.origin;
   voters[chairperson] = {weight : 1, voted : false, delegate : "0", vote : 0};
-  nvoter = 1;
-  console.log ("chair=", chairperson, ", nvoter=", nvoter);
+  nvoter = 0;
+  console.log ("chair=", chairperson, "nproposal=", nproposal);
 }
 
 // GiveRightToVote (address from, address to)
@@ -67,8 +64,13 @@ raise _success
   proposals[proposal].voteCount += voters[voter_addr].weight;
   nvoted += voters[voter_addr].weight;
 
-  console.log ("Vote: nvoted=", nvoted);
   SCXML.raise ({name : "_success"});
+
+  console.log ("Vote: ", _event.origin, _event.data.proposal, "nvoted=", nvoted, "/", nvoter);
+  if (nvoted == nvoter) {
+    var i;
+    for (i = 0; i < nproposal; i++) console.log ("proposals[", i, "]=", proposals[i].voteCount);
+  }
 }
 
 // Delegate (address voter)
@@ -94,7 +96,7 @@ raise _success
 
   if (voters[voter_addr].voted)
   {
-    proposals[voters[voter_addr].vote] += voters[sender_addr].weight;
+    proposals[voters[voter_addr].vote].voteCount += voters[sender_addr].weight;
     nvoted += voters[sender_addr].weight;
   }
   else
@@ -102,6 +104,24 @@ raise _success
     voters[voter_addr].weight += voters[sender_addr].weight;
   }
 
-  console.log ("Delegate: nvoted=", nvoted);
   SCXML.raise ({name : "_success"});
+
+  console.log ("Delegate: ", _event.origin, _event.data.voter, voters[sender_addr].weight, "nvoted=", nvoted, "/", nvoter);
+  if (nvoted == nvoter) {
+    var i;
+    for (i = 0; i < nproposal; i++) console.log ("proposals[", i, "]=", proposals[i].voteCount);
+  }
+}
+
+// implementation-specific
+implementation
+{
+  <datamodel>
+    <data id="proposals" expr="[]"/>
+    <data id="nproposal" expr="0"/>
+    <data id="voters" expr="{}"/>
+    <data id="nvoter" expr="0"/>
+    <data id="nvoted" expr="0"/>
+    <data id="chairperson" expr=""/>
+  </datamodel>
 }

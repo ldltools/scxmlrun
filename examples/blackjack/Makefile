@@ -1,3 +1,8 @@
+#
+
+usage:
+	@echo "usage: make run"
+
 all::
 clean::
 install::

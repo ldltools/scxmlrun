@@ -6,7 +6,7 @@
     <data id="voters" expr="{}"/>
     <data id="nvoter" expr="0"/>
     <data id="nvoted" expr="0"/>
-    <data id="chairperson" expr="&quot;&quot;"/>
+    <data id="chairperson" expr=""/>
     <!-- _trace for each 'run' is a sequence of 'possible worlds' generated/tracked at run-time -->
     <data id="_trace"/>
     <!-- _trace_matches (guard) examines whether _trace ⊨ [true*]guard holds or not -->
@@ -14,9 +14,6 @@
     <!-- _trace_append (next_world) appends next_world to _trace -->
     <data id="_trace_append" expr="function (next_world) { }"/>
   </datamodel>
-  <!--proposition 0 _b0-->
-  <!--proposition 1 _b1-->
-  <!--proposition 2 _b2-->
   <state id="q2">
     <transition target="q4" event="Propose">
       <!--tid t54-->
@@ -25,8 +22,8 @@
   var i; for (i = 0; i &lt; nproposal; i++) proposals[i] = {voteCount:0};
   chairperson = _event.origin;
   voters[chairperson] = {weight : 1, voted : false, delegate : "0", vote : 0};
-  nvoter = 1;
-  console.log ("chair=", chairperson, ", nvoter=", nvoter); ;</script>
+  nvoter = 0;
+  console.log ("chair=", chairperson, "nproposal=", nproposal); ;</script>
       <!--rule: r33 event: Propose certainty: 15-->
       <!--rule.when: true-->
       <!--rule.ensure: true-->
@@ -45,8 +42,12 @@
   voters[voter_addr].vote = proposal;
   proposals[proposal].voteCount += voters[voter_addr].weight;
   nvoted += voters[voter_addr].weight;
-  console.log ("Vote: nvoted=", nvoted);
-  SCXML.raise ({name : "_success"}); ;</script>
+  SCXML.raise ({name : "_success"});
+  console.log ("Vote: ", _event.origin, _event.data.proposal, "nvoted=", nvoted, "/", nvoter);
+  if (nvoted == nvoter) {
+    var i;
+    for (i = 0; i &lt; nproposal; i++) console.log ("proposals[", i, "]=", proposals[i].voteCount);
+  } ;</script>
       <!--rule: r35 event: Vote certainty: 15-->
       <!--rule.when: true-->
       <!--rule.ensure: true-->
@@ -83,15 +84,19 @@
   voters[sender_addr].delegate = voter_addr;
   if (voters[voter_addr].voted)
   {
-    proposals[voters[voter_addr].vote] += voters[sender_addr].weight;
+    proposals[voters[voter_addr].vote].voteCount += voters[sender_addr].weight;
     nvoted += voters[sender_addr].weight;
   }
   else
   {
     voters[voter_addr].weight += voters[sender_addr].weight;
   }
-  console.log ("Delegate: nvoted=", nvoted);
-  SCXML.raise ({name : "_success"}); ;</script>
+  SCXML.raise ({name : "_success"});
+  console.log ("Delegate: ", _event.origin, _event.data.voter, voters[sender_addr].weight, "nvoted=", nvoted, "/", nvoter);
+  if (nvoted == nvoter) {
+    var i;
+    for (i = 0; i &lt; nproposal; i++) console.log ("proposals[", i, "]=", proposals[i].voteCount);
+  } ;</script>
       <!--rule: r36 event: Delegate certainty: 15-->
       <!--rule.when: true-->
       <!--rule.ensure: true-->
@@ -114,8 +119,12 @@
   voters[voter_addr].vote = proposal;
   proposals[proposal].voteCount += voters[voter_addr].weight;
   nvoted += voters[voter_addr].weight;
-  console.log ("Vote: nvoted=", nvoted);
-  SCXML.raise ({name : "_success"}); ;</script>
+  SCXML.raise ({name : "_success"});
+  console.log ("Vote: ", _event.origin, _event.data.proposal, "nvoted=", nvoted, "/", nvoter);
+  if (nvoted == nvoter) {
+    var i;
+    for (i = 0; i &lt; nproposal; i++) console.log ("proposals[", i, "]=", proposals[i].voteCount);
+  } ;</script>
       <!--rule: r35 event: Vote certainty: 15-->
       <!--rule.when: true-->
       <!--rule.ensure: true-->
@@ -152,15 +161,19 @@
   voters[sender_addr].delegate = voter_addr;
   if (voters[voter_addr].voted)
   {
-    proposals[voters[voter_addr].vote] += voters[sender_addr].weight;
+    proposals[voters[voter_addr].vote].voteCount += voters[sender_addr].weight;
     nvoted += voters[sender_addr].weight;
   }
   else
   {
     voters[voter_addr].weight += voters[sender_addr].weight;
   }
-  console.log ("Delegate: nvoted=", nvoted);
-  SCXML.raise ({name : "_success"}); ;</script>
+  SCXML.raise ({name : "_success"});
+  console.log ("Delegate: ", _event.origin, _event.data.voter, voters[sender_addr].weight, "nvoted=", nvoted, "/", nvoter);
+  if (nvoted == nvoter) {
+    var i;
+    for (i = 0; i &lt; nproposal; i++) console.log ("proposals[", i, "]=", proposals[i].voteCount);
+  } ;</script>
       <!--rule: r36 event: Delegate certainty: 15-->
       <!--rule.when: true-->
       <!--rule.ensure: true-->

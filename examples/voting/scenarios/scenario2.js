@@ -42,7 +42,7 @@ contract.vote.sendTransaction (0, {from: web3.eth.accounts[1], gas: 100000});
 console.log ("acc2.vote (0)");
 contract.vote.sendTransaction (1, {from: web3.eth.accounts[2], gas: 100000});
 console.log ("acc3.vote (1)");
-contract.vote.sendTransaction (0, {from: web3.eth.accounts[3], gas: 100000});
+contract.delegate.sendTransaction (1, {from: web3.eth.accounts[3], gas: 100000});
 
 const winner = contract.winnerName.call ();
 //console.log ("result:", winner);
