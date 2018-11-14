@@ -1,0 +1,71 @@
+\documentclass[fancy]{article}
+\setDate{November 2018}
+\begin{document}
+
+\begin{Name}{1}{scxmlrun}{author}{LDL Tools}{title}
+scxmlrun -- MQTT-enabled SCXML interpreter
+\end{Name}
+
+\section{Synopsis}
+scxmlrun <option>* <scxmlfile>? <infile>?
+
+\section{Description}
+scxmlrun reads a state-chart in SCXML from <scxmlfile> and
+runs it against input events,
+which can be provided from <infile> or via MQTT.
+
+\section{Options}
+\begin{description}
+%
+\item[\Opt{--model} <scxmlfile>]
+reads a state-chart in SCXML from <scxmlfile>
+
+% -----
+\item[\Opt{-i} <infile>]
+reads lines of SCXML events (in JSON) from <infile>
+%
+\item[\Opt{-o} <outfile>]
+write output events (in JSON) to <outfile>
+%
+\item[\Opt{--trace} <tracefile>]
+write trace info to <tracefile>
+%
+
+% -----
+\item[\Opt{--mqtt} <host>]
+specifiy <host> as the MQTT broker to connect to
+%
+\item[\Opt{--sub} <topic>]
+subscribe to <topic> for input events
+%
+\item[\Opt{--pub} <topic>]
+specify <topic> for output events
+%
+\item[\Opt{--trace-pub} <topic>]
+specify <topic> for publishing trace info
+
+% -----
+\item[\Opt{-v}, \Opt{--verbose}]
+become verbose
+%
+\item[\Opt{-q}, \Opt{--silent}]
+stay quiet
+%
+\item[\Opt{-V}, \Opt{--version}]
+show version info
+%
+\item[\Opt{-h}, \Opt{--help}]
+show usage
+\end{description}
+
+\section{See Also}
+rules2scxml
+
+\section{Author}
+\URL{https://ldltools.github.io}\\
+\Email{ldltools@outlook.com}
+
+\section{Copyright}
+(C) Copyright IBM Corp. 2018.
+
+\end{document}

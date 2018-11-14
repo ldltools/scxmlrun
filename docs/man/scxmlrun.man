@@ -1,0 +1,84 @@
+'\" t
+.\" Manual page created with latex2man on Wed Nov 14 15:50:21 JST 2018
+.\" NOTE: This file is generated, DO NOT EDIT.
+.de Vb
+.ft CW
+.nf
+..
+.de Ve
+.ft R
+
+.fi
+..
+.TH "SCXMLRUN" "1" "November 2018" "LDL Tools " "LDL Tools "
+.SH NAME
+
+scxmlrun \-\- MQTT\-enabled SCXML interpreter 
+.PP
+.SH SYNOPSIS
+
+scxmlrun <option>* <scxmlfile>? <infile>? 
+.PP
+.SH DESCRIPTION
+
+scxmlrun reads a state\-chart in SCXML from <scxmlfile> and 
+runs it against input events, 
+which can be provided from <infile> or via MQTT. 
+.PP
+.SH OPTIONS
+
+.TP
+\fB\-\-model\fP <scxmlfile>
+ reads a state\-chart in SCXML from <scxmlfile> 
+.PP
+.TP
+\fB\-i\fP <infile>
+ reads lines of SCXML events (in JSON) from <infile> 
+.TP
+\fB\-o\fP <outfile>
+ write output events (in JSON) to <outfile> 
+.TP
+\fB\-\-trace\fP <tracefile>
+ write trace info to <tracefile> 
+.PP
+.TP
+\fB\-\-mqtt\fP <host>
+ specifiy <host> as the MQTT broker to connect to 
+.TP
+\fB\-\-sub\fP <topic>
+ subscribe to <topic> for input events 
+.TP
+\fB\-\-pub\fP <topic>
+ specify <topic> for output events 
+.TP
+\fB\-\-trace\-pub\fP <topic>
+ specify <topic> for publishing trace info 
+.PP
+.TP
+\fB\-v\fP, \fB\-\-verbose\fP
+ become verbose 
+.TP
+\fB\-q\fP, \fB\-\-silent\fP
+ stay quiet 
+.TP
+\fB\-V\fP, \fB\-\-version\fP
+ show version info 
+.TP
+\fB\-h\fP, \fB\-\-help\fP
+ show usage 
+.PP
+.SH SEE ALSO
+
+rules2scxml 
+.PP
+.SH AUTHOR
+
+\fBhttps://ldltools.github.io\fP
+.br
+\fBldltools@outlook.com\fP
+.PP
+.SH COPYRIGHT
+
+(C) Copyright IBM Corp. 2018. 
+.PP
+.\" NOTE: This file is generated, DO NOT EDIT.
