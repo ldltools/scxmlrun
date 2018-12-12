@@ -2,11 +2,13 @@
 <?access-control allow="*"?>
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" initial="Intro" datamodel="ecmascript">
   <datamodel>
+    <!-- work-around -->
     <data id="sessionChrome" expr="{'playAds':false}"/>
     <data id="ANIQuality" expr="true"/>
   </datamodel>
 
   <state id="Intro">
+    <onentry><script>console.log ("Intro")</script></onentry>
     <!--
     <invoke src="dialog.vxml#Intro" type="vxml2"/>
     -->
@@ -19,6 +21,7 @@
   </state>
 
   <state id="PlayAds">
+    <onentry><script>console.log ("PlayAds")</script></onentry>
     <!--
     <invoke src="dialog.vxml#PlayAds" type="vxml2"/>
     -->
@@ -27,6 +30,7 @@
   </state>
 
   <state id="StartOver">
+    <onentry><script>console.log ("StartOver")</script></onentry>
     <onentry>
       <script>enterStartOver();</script>
     </onentry>
@@ -44,6 +48,7 @@
   </state>
 
   <state id="ShouldGoBack">
+    <onentry><script>console.log ("ShouldGoBack")</script></onentry>
     <!--
     <invoke src="dialog.vxml#ShouldGoBack" type="vxml2">
       <param name="cityState" expr="cityState"/>
@@ -60,6 +65,7 @@
   </state>
 
   <state id="HighwayReport">
+    <onentry><script>console.log ("HighwayReport")</script></onentry>
     <!--
     <invoke src="dialog.vxml#HighwayReport" type="vxml2">
       <param name="cityState" expr="cityState"/>
@@ -79,6 +85,7 @@
   </state>
 
   <state id="FullReport">
+    <onentry><script>console.log ("FullReport")</script></onentry>
     <!--
     <invoke src="dialog.vxml#FullReport" type="vxml2">
       <param name="cityState" expr="cityState"/>
@@ -93,6 +100,7 @@
   </state>
 
   <state id="PlayHighway">
+    <onentry><script>console.log ("PlayHighway")</script></onentry>
     <!--
     <invoke src="dialog.vxml#PlayHighway" type="vxml2">
       <param name="cityState" expr="cityState"/>

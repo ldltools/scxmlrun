@@ -1,0 +1,14 @@
+# v0.11.0rc
+
+- add/update examples
+- add `test/*.conf` files for testing with [shelltest](https://github.com/simonmichael/shelltestrunner)
+
+# v0.10.0 (2018-11-08)
+
+- introduce JS functions: `SCXML.raise` and `SCXML.send`
+- add examples: microwave, calc (with web ui), traffic-control, and blackjack
+- add examples: voting and vulnerable
+
+# v0.9.0 (2018-10-06)
+
+initial public release

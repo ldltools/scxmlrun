@@ -5,14 +5,14 @@ PREFIX		?= /usr/local
 SUBDIRS	= src examples tests docs
 
 all::
-	for d in $(SUBDIRS); do make -C $$d $@; done
+	for d in $(SUBDIRS); do $(MAKE) -C $$d $@; done
 
 install::	all
-	for d in $(SUBDIRS); do make -C $$d PREFIX=$(PREFIX) $@; done
+	for d in $(SUBDIRS); do $(MAKE) -C $$d PREFIX=$(PREFIX) $@; done
 
 clean::
 #	find . -name '#*' -or -name '*~' -or -name '*.log' | xargs rm -f
-	for d in $(SUBDIRS); do make -C $$d PREFIX=$(PREFIX) $@; done
+	for d in $(SUBDIRS); do $(MAKE) -C $$d PREFIX=$(PREFIX) $@; done
 	rm -f *~
 
 veryclean::	clean

@@ -183,17 +183,23 @@ main (int argc, char** argv)
     // INPUT
     if (infile && subs.size () > 0)
     {
+        // more than one input sources: file and mqtt
         std::cerr << "** invalid input specification\n";
         return (-1);
     }
+    if (!infile && subs.size () == 0)
+        // fall-back
+        infile = "/dev/stdin";
     if (infile)
         intype = _FILE;
-    if (subs.size () > 0)
+
+    if (subs.size () > 0 && intype != _FILE)
     {
         assert (intype == _NONE);
         assert (mqtt_host);
         intype = _MQTT;
     }
+
     if (intype == _NONE)
     {
         infile = "/dev/null";
@@ -203,6 +209,7 @@ main (int argc, char** argv)
     // OUTPUT
     if (outfile && pub)
     {
+        // more than one output targets: file and mqtt
         std::cerr << "** invalid output specification\n";
         return (-1);
     }

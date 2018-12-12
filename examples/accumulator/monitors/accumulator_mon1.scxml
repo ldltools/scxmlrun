@@ -1,42 +1,12 @@
 <?xml version="1.0"?>
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q2">
-  <datamodel>
-    <!-- _trace for each 'run' is a sequence of 'possible worlds' generated/tracked at run-time -->
-    <data id="_trace"/>
-    <!-- _trace_matches (guard) examines whether _trace ⊨ [true*]guard holds or not -->
-    <data id="_trace_matches" expr="function (guard) { return true; }"/>
-    <!-- _trace_append (next_world) appends next_world to _trace -->
-    <data id="_trace_append" expr="function (next_world) { }"/>
-  </datamodel>
-  <!--proposition 0 _b0-->
-  <!--proposition 1 _b1-->
-  <!--proposition 2 _b2-->
-  <state id="q2">
-    <transition target="q4" event="init">
-      <!--tid t43-->
-    </transition>
-    <transition target="_rejected" event="*">
-      <!--tid-->
-    </transition>
-  </state>
-  <state id="q5">
-    <transition target="q6" event="knockout">
-      <!--tid t45-->
-    </transition>
-    <transition target="q4" event="day_open">
-      <!--tid t46-->
-    </transition>
-    <transition target="q6" event="terminate">
-      <!--tid t48-->
-    </transition>
-    <transition target="_rejected" event="*">
-      <!--tid-->
-    </transition>
-  </state>
-  <final id="q7"/>
+  <datamodel/>
+  <final id="q7">
+    <formula xmlns="https://github.com/ldltools/dsl4sc">true</formula>
+  </final>
   <state id="q6">
     <transition target="q7" event="_accept">
-      <!--tid t56-->
+      <!--tid t21_1-->
     </transition>
     <transition target="_rejected" event="*">
       <!--tid-->
@@ -44,11 +14,41 @@
   </state>
   <state id="q4">
     <transition target="q5" event="day_close">
-      <!--tid t65-->
+      <!--tid t11_1-->
     </transition>
     <transition target="_rejected" event="*">
       <!--tid-->
     </transition>
   </state>
-  <final id="_rejected"/>
+  <state id="q2">
+    <transition target="q4" event="init">
+      <!--tid t7_1-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
+  </state>
+  <state id="q5">
+    <transition target="q6" event="knockout">
+      <!--tid t15_1-->
+    </transition>
+    <transition target="q4" event="day_open">
+      <!--tid t16_1-->
+    </transition>
+    <transition target="q6" event="terminate">
+      <!--tid t19_1-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
+  </state>
+  <final id="_rejected">
+    <onentry>
+      <!--raise event="error.execution"/-->
+      <script>
+              SCXML.send ({"event" : {"name" : "error.execution"}});
+              console.log ("_rejected");
+            </script>
+    </onentry>
+  </final>
 </scxml>

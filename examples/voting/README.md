@@ -13,7 +13,7 @@ through a series of 3 different sorts of transactions, namely
 In addition to the Solidity version,
 we also provide another [DSL4SC version](contracts/Ballot.rules) of the contract:
 
-- it can replace `Ballot.sol` and run as an Ethereum smart contruct (when combined with [`proxy.sol`](contracts/proxy.sol)).
+- it can replace `Ballot.sol` and run as an Ethereum smart contract (when combined with [`proxy.sol`](contracts/proxy.sol)).
 - alternatively, it can coexist with `Ballot.sol` and run as a _monitor_ for `Ballot.sol`.
 
 ![Ballot (SCXML)](contracts/Ballot.svg?sanitize=true)

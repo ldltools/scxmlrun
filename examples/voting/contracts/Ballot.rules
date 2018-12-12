@@ -114,7 +114,7 @@ raise _success
 }
 
 // implementation-specific
-implementation
+script
 {
   <datamodel>
     <data id="proposals" expr="[]"/>

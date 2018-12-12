@@ -18,6 +18,7 @@ PID_FILE	?= $(BUILD_DIR)/.ganache_pid
 
 build:	clean compile launch deploy
 
+# launch a ganache process
 launch:	check-ganache
 	test -s $(PID_FILE) && echo "ganache is running" ||\
 	{ (ganache-cli -h $(HOST) -p $(PORT) --networkId $(NETWORK) --gasLimit $(GAS_LIMIT) &);\
@@ -32,15 +33,18 @@ check-ganache:
 clean::
 	rm -f $(PID_FILE)
 
+# truffle init
 init:
 	test -d $(BUILD_DIR)/contracts ||\
 	(mkdir -p $(BUILD_DIR); cd $(BUILD_DIR); truffle init; mv -f truffle.js{,.bak})
 
+# truffle compile
 compile:	init
 	rsync $(CONTRACTS) $(BUILD_DIR)/contracts
 	rm -f $(BUILD_DIR)/build/contracts/*
 	(cd $(BUILD_DIR); truffle compile)
 
+# truffle deploy
 deploy:	compile $(BUILD_DIR)/migrations/2_deploy_contracts.js $(BUILD_DIR)/truffle.js check-ganache
 	@test -s $(PID_FILE) || { echo "** ganache is not running" > /dev/stderr; exit 1; }
 	(cd $(BUILD_DIR); truffle deploy)

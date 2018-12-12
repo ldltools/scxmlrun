@@ -1,43 +1,56 @@
 <?xml version="1.0"?>
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q2">
-  <datamodel>
-    <!-- _trace for each 'run' is a sequence of 'possible worlds' generated/tracked at run-time -->
-    <data id="_trace"/>
-    <!-- _trace_matches (guard) examines whether _trace ⊨ [true*]guard holds or not -->
-    <data id="_trace_matches" expr="function (guard) { return true; }"/>
-    <!-- _trace_append (next_world) appends next_world to _trace -->
-    <data id="_trace_append" expr="function (next_world) { }"/>
-  </datamodel>
-  <!--proposition 0 _b0-->
-  <!--proposition 1 _b1-->
-  <!--proposition 2 _b2-->
-  <!--proposition 3 knockedout-->
-  <!--proposition 4 terminated-->
+  <datamodel/>
+  <final id="q6">
+    <formula xmlns="https://github.com/ldltools/dsl4sc">(knockedout | terminated) &amp; (!knockedout | !terminated)</formula>
+  </final>
+  <state id="q4">
+    <transition target="q6" event="_accept">
+      <!--tid t33_1-->
+    </transition>
+    <transition target="q4" event="knockout">
+      <!--tid t36_1-->
+      <!--transition: curr_world: knockedout & (knockedout | !terminated) & !terminated label: knockedout & !terminated next_world: knockedout & (knockedout | !terminated) & !terminated-->
+      <!--rule: r1 event: knockout certainty: 7-->
+      <!--rule.when: true-->
+      <!--rule.ensure: knockedout-->
+    </transition>
+    <transition target="q4" event="day_open">
+      <!--tid t39_1-->
+    </transition>
+    <transition target="q4" event="day_close">
+      <!--tid t46_1-->
+    </transition>
+    <transition target="q4" event="init">
+      <!--tid t50_1-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
+  </state>
   <state id="q2">
     <transition target="q4" event="knockout">
-      <!--tid t74-->
-      <!--transition: curr_world: !knockedout & !terminated label: knockedout & !terminated next_world: knockedout & !terminated-->
-      <script>_trace_append (" knockedout &amp; !terminated ");</script>
-      <!--rule: r56 event: knockout certainty: 7-->
+      <!--tid t9_1-->
+      <!--transition: curr_world: !knockedout & (!knockedout | !terminated) & !terminated label: knockedout & !terminated next_world: knockedout & (knockedout | !terminated) & !terminated-->
+      <!--rule: r1 event: knockout certainty: 7-->
       <!--rule.when: true-->
       <!--rule.ensure: knockedout-->
     </transition>
     <transition target="q2" event="day_open">
-      <!--tid t76-->
+      <!--tid t11_1-->
     </transition>
     <transition target="q2" event="day_close">
-      <!--tid t79-->
+      <!--tid t18_1-->
     </transition>
     <transition target="q5" event="terminate">
-      <!--tid t83-->
-      <!--transition: curr_world: !knockedout & !terminated label: !knockedout & terminated next_world: !knockedout & terminated-->
-      <script>_trace_append (" !knockedout &amp; terminated ");</script>
-      <!--rule: r57 event: terminate certainty: 7-->
+      <!--tid t22_1-->
+      <!--transition: curr_world: !knockedout & (!knockedout | !terminated) & !terminated label: !knockedout & terminated next_world: !knockedout & (!knockedout | terminated) & terminated-->
+      <!--rule: r2 event: terminate certainty: 7-->
       <!--rule.when: true-->
       <!--rule.ensure: terminated-->
     </transition>
     <transition target="q2" event="init">
-      <!--tid t85-->
+      <!--tid t24_1-->
     </transition>
     <transition target="_rejected" event="*">
       <!--tid-->
@@ -45,54 +58,35 @@
   </state>
   <state id="q5">
     <transition target="q6" event="_accept">
-      <!--tid t89-->
+      <!--tid t57_1-->
     </transition>
     <transition target="q5" event="day_open">
-      <!--tid t93-->
+      <!--tid t61_1-->
     </transition>
     <transition target="q5" event="day_close">
-      <!--tid t97-->
+      <!--tid t68_1-->
     </transition>
     <transition target="q5" event="terminate">
-      <!--tid t98-->
-      <!--transition: curr_world: !knockedout & terminated label: !knockedout & terminated next_world: !knockedout & terminated-->
-      <script>_trace_append (" !knockedout &amp; terminated ");</script>
-      <!--rule: r57 event: terminate certainty: 7-->
+      <!--tid t68_2-->
+      <!--transition: curr_world: !knockedout & (!knockedout | terminated) & terminated label: !knockedout & terminated next_world: !knockedout & (!knockedout | terminated) & terminated-->
+      <!--rule: r2 event: terminate certainty: 7-->
       <!--rule.when: true-->
       <!--rule.ensure: terminated-->
     </transition>
     <transition target="q5" event="init">
-      <!--tid t102-->
+      <!--tid t71_1-->
     </transition>
     <transition target="_rejected" event="*">
       <!--tid-->
     </transition>
   </state>
-  <final id="q6"/>
-  <state id="q4">
-    <transition target="q6" event="_accept">
-      <!--tid t111-->
-    </transition>
-    <transition target="q4" event="knockout">
-      <!--tid t114-->
-      <!--transition: curr_world: knockedout & !terminated label: knockedout & !terminated next_world: knockedout & !terminated-->
-      <script>_trace_append (" knockedout &amp; !terminated ");</script>
-      <!--rule: r56 event: knockout certainty: 7-->
-      <!--rule.when: true-->
-      <!--rule.ensure: knockedout-->
-    </transition>
-    <transition target="q4" event="day_open">
-      <!--tid t117-->
-    </transition>
-    <transition target="q4" event="day_close">
-      <!--tid t121-->
-    </transition>
-    <transition target="q4" event="init">
-      <!--tid t122-->
-    </transition>
-    <transition target="_rejected" event="*">
-      <!--tid-->
-    </transition>
-  </state>
-  <final id="_rejected"/>
+  <final id="_rejected">
+    <onentry>
+      <!--raise event="error.execution"/-->
+      <script>
+              SCXML.send ({"event" : {"name" : "error.execution"}});
+              console.log ("_rejected");
+            </script>
+    </onentry>
+  </final>
 </scxml>

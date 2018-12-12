@@ -82,3 +82,7 @@ Instead of [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html),
 [uSCXML](https://github.com/tklab-tud/uscxml) can be used
 as the SCXML engine.  
 To try this option, see [this note](docs/uScxml.md).
+
+# Installation on Darwin
+
+Refer to [this note](docs/macos.md).

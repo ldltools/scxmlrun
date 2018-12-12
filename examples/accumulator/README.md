@@ -109,22 +109,34 @@ to ensure that the accumulator works exactly as intended.
   [invalid3](scenarios/invalid3.txt),
   [invalid4](scenarios/invalid4.txt)
 
-## running the statechart against the scenarios
+## running the accumulator statechart and its monitors against valid/invalid scenarios
 
 - to run the accumulator against the valid scenarios
 
   ```
-  $ make run-accumulator
+  $ shelltest accumulator.conf
   ```
 
-- to run the monitors against the scenarios
+  send input events to accumulator via MQTT
 
   ```
-  $ make run-monitors
+  $ shelltest passthru_accumulator.conf
+  ```
+
+- to run the monitors against the all valid/invalid scenarios
+
+  ```
+  $ shelltest monitors.conf
+  ```
+
+  send input events to monitors via MQTT
+
+  ```
+  $ shelltest passthru_monitors.conf
   ```
 
 - to run the accumulator and each monitor connected via MQTT against the scenarios
 
   ```
-  $ make run-mqtt
+  $ shelltest accumulator_monitors.conf
   ```
