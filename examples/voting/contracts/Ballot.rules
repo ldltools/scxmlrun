@@ -1,4 +1,5 @@
 // Ballot.rules
+// 
 // this module fairly simulates what Ballot.sol does.
 // - it can replace Ballot.sol and run as a smart contruct on ethereum when combined with proxy.sol.
 // - it can coexist with Ballot.sol and run as a monitor for Ballot.sol.
@@ -15,6 +16,8 @@
 //   this indicates a runtime error.
 //   Notice that this appears only within "{..}" blocks.
 //
+// REFERENCE
+// https://solidity.readthedocs.io/en/v0.4.24/solidity-by-example.html#voting
 
 protocol
   Propose;

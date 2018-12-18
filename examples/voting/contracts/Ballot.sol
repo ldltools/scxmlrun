@@ -97,6 +97,9 @@ contract Ballot {
             "The voter already voted."
         );
         require(voters[voter].weight == 0);
+        // this means: chairperson cannot vote
+        // since the constructor does: voters[chairperson].weight = 1;
+
         voters[voter].weight = 1;
 
         _countmax++;

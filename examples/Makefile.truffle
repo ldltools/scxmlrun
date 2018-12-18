@@ -2,77 +2,118 @@
 
 all::
 
-PROJECT_DIR	?= .
-BUILD_DIR	?= $(PROJECT_DIR)/_build
+# truffle (v4.1.14)
+T_BUILD_DIR	?= ./_build
+T_CONTRACTS	?= $(shell echo contracts/*.sol)
+T_CONTRACTS_js	= $(T_CONTRACTS:%.sol=$(T_BUILD_DIR)/build/%.json)
+T_TESTS		?= $(shell echo scenarios/*.js)
 
-# truffle
-CONTRACTS	?= $(shell echo contracts/*.sol)
-TESTS		?= $(shell echo scenarios/*.js)
+# ganache (ganache-cli v6.1.8)
+G_HOST		?= "127.0.0.1"
+#G_HOST		?= localhost
+G_PORT		?= 8545
+G_NETWORK	?= 5777
+G_GAS_LIMIT	?= 8000000
+G_PID_FILE	?= $(T_BUILD_DIR)/.ganache_pid
 
+build::	truffle_compile truffle_deploy
+
+veryclean::	clean
+	rm -rf $(T_BUILD_DIR)
+
+version::
+	@echo "[truffle/ganache]"
+	@truffle version
+	@ganache-cli --version
+
+# --------------------------------------------------------------------------------
 # ganache
-HOST		?= "127.0.0.1"
-PORT		?= 7545
-NETWORK		?= 5777
-GAS_LIMIT	?= 8000000
-PID_FILE	?= $(BUILD_DIR)/.ganache_pid
 
-build:	clean compile launch deploy
+# start a new ganache process
+ganache-start:	fail-if-ganache-is-running
+	(ganache-cli -h $(G_HOST) -p $(G_PORT) --networkId $(G_NETWORK) --gasLimit $(G_GAS_LIMIT) &);\
+	while test $$(pgrep -a node | grep ganache-cli | wc -l) -eq 0; do sleep 1; done
 
-# launch a ganache process
-launch:	check-ganache
-	test -s $(PID_FILE) && echo "ganache is running" ||\
-	{ (ganache-cli -h $(HOST) -p $(PORT) --networkId $(NETWORK) --gasLimit $(GAS_LIMIT) &);\
-	  while test $$(pgrep -a node | grep ganache-cli | wc -l) -eq 0; do sleep 1; done;\
-	  pgrep -a node | grep ganache-cli | gawk '{print($$1)}' > $(PID_FILE); }
+ganache-stop:	fail-if-ganache-is-not-running
+	kill -9 $$(cat $(G_PID_FILE)); rm -f $(G_PID_FILE)
+
+ganache-restart:	ganache-stop ganache-start
 
 # ganache is running?
-check-ganache:
-	@test -s $(PID_FILE) -a -d "/proc/$$(cat $(PID_FILE))" ||\
-	{ pgrep -a node | grep ganache-cli | gawk '{print($$1)}' > $(PID_FILE); }
+fail-if-ganache-is-running:
+	@pgrep -a node | grep ganache-cli | gawk '{print($$1)}' > $(G_PID_FILE)
+	@test -s $(G_PID_FILE) -a -d "/proc/$$(cat $(G_PID_FILE))" &&\
+	{ echo -e "\n** ganache is running. try \"make ganache-stop\"\n" > /dev/stderr; exit 1; } || exit 0
+
+fail-if-ganache-is-not-running:
+	@pgrep -a node | grep ganache-cli | gawk '{print($$1)}' > $(G_PID_FILE)
+	@test -s $(G_PID_FILE) -a -d "/proc/$$(cat $(G_PID_FILE))" ||\
+	{ echo -e "\n** ganache is not running. try \"make ganache-start\"\n" > /dev/stderr; exit 1; }
 
 clean::
-	rm -f $(PID_FILE)
+	rm -f $(G_PID_FILE)
+
+# --------------------------------------------------------------------------------
+# truffle
+
+truffle-usage:
+	@echo "make truffle-[init | compile | deploy | test]"
 
 # truffle init
-init:
-	test -d $(BUILD_DIR)/contracts ||\
-	(mkdir -p $(BUILD_DIR); cd $(BUILD_DIR); truffle init; mv -f truffle.js{,.bak})
+truffle-init::
+	test -d $(T_BUILD_DIR)/contracts ||\
+	{ mkdir -p $(T_BUILD_DIR); cd $(T_BUILD_DIR);\
+	  truffle init;\
+	  rm -f ./truffle.js; }
+	test -f $(T_BUILD_DIR)/package.json || echo '{}' > $(T_BUILD_DIR)/package.json
 
 # truffle compile
-compile:	init
-	rsync $(CONTRACTS) $(BUILD_DIR)/contracts
-	rm -f $(BUILD_DIR)/build/contracts/*
-	(cd $(BUILD_DIR); truffle compile)
+truffle-compile::	truffle-init $(T_CONTRACTS_js)
+
+$(T_CONTRACTS_js):	$(T_BUILD_DIR)/.compiled
+$(T_BUILD_DIR)/.compiled:	$(T_CONTRACTS:%=$(T_BUILD_DIR)/%)
+#	rm -f $(T_BUILD_DIR)/build/contracts/*
+	(cd $(T_BUILD_DIR); truffle compile)
+	touch $@
+
+$(T_CONTRACTS:%=$(T_BUILD_DIR)/%):	$(T_CONTRACTS)
+	rsync $(T_CONTRACTS) $(T_BUILD_DIR)/contracts
+
+clean::
+	rm -f $(T_BUILD_DIR)/.compiled
+	rm -f $(T_BUILD_DIR)/build/contracts/*.json
 
 # truffle deploy
-deploy:	compile $(BUILD_DIR)/migrations/2_deploy_contracts.js $(BUILD_DIR)/truffle.js check-ganache
-	@test -s $(PID_FILE) || { echo "** ganache is not running" > /dev/stderr; exit 1; }
-	(cd $(BUILD_DIR); truffle deploy)
+truffle-deploy::	truffle-compile $(T_BUILD_DIR)/migrations/2_deploy_contracts.js $(T_BUILD_DIR)/truffle.js fail-if-ganache-is-not-running
+	(cd $(T_BUILD_DIR); truffle deploy)
 
-test:	check-ganache
-	@test -s $(PID_FILE) || { echo "** ganache is not running" > /dev/stderr; exit 1; }
-	rsync $(TESTS) $(BUILD_DIR)/test
-	(cd $(BUILD_DIR); truffle test)
-
-$(BUILD_DIR)/truffle.js:
+$(T_BUILD_DIR)/truffle.js:
 	rm -f $@; touch $@
 	echo "module.exports = {"	>> $@
 	echo " networks: {"		>> $@
 	echo "  development: {"		>> $@
-	echo "   host: \"$(HOST)\", port: $(PORT), network_id: \"*\"" >> $@
+	echo "   host: \"$(G_HOST)\", port: $(G_PORT), network_id: \"*\"" >> $@
 	echo "}}};"			>> $@
 
-$(BUILD_DIR)/migrations/2_deploy_contracts.js:	$(CONTRACTS)
-	mkdir -p $(BUILD_DIR)/migrations
+ifeq ($(shell test -f migrations/2_deploy_contracts.js && echo 1 || echo 0), 1)
+$(T_BUILD_DIR)/migrations/2_deploy_contracts.js:	migrations/2_deploy_contracts.js
+	mkdir -p $(T_BUILD_DIR)/migrations
+	cp -f $< $@
+else
+$(T_BUILD_DIR)/migrations/2_deploy_contracts.js:
+	mkdir -p $(T_BUILD_DIR)/migrations
 	rm -f $@; touch $@
-	for f in $(CONTRACTS); do \
+	for f in $(T_CONTRACTS); do \
 	  echo "var $$(basename $$f .sol) = artifacts.require (\"./$$(basename $$f)\");" >> $@;\
 	done
 	echo "module.exports = function (deployer) {" >> $@
-	for f in $(CONTRACTS); do \
+	for f in $(T_CONTRACTS); do \
 	  echo "deployer.deploy($$(basename $$f .sol));" >> $@;\
 	done
 	echo "}" >> $@
+endif
 
-veryclean:	clean
-	rm -rf $(BUILD_DIR)
+# truffle test
+truffle-test::	fail-if-ganache-is-not-running
+	rsync $(T_TESTS) $(T_BUILD_DIR)/test
+	(cd $(T_BUILD_DIR); truffle test)

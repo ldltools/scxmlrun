@@ -3,7 +3,7 @@
 const SimpleDAO = artifacts.require("SimpleDAO");
 const SimpleDAO_exploit = artifacts.require("SimpleDAO_exploit");
 
-contract ('SWC107_test', async (accounts) => {
+contract ('SimpleDAO_test', async (accounts) => {
 
   // testcase: DEPLOY
   it ("deploy", async () => {
@@ -57,6 +57,7 @@ contract ('SWC107_test', async (accounts) => {
     attacker_balance = await web3.eth.getBalance (attacker.address);
     //assert.equal (attacker_balance.toNumber (), max + 1);
     console.log ("attacker balance: ", attacker_balance.toNumber ());
+    console.log ("cheated: ", max);
 
   });
 

@@ -11,8 +11,8 @@ If you are not familiar with its concept, be advised to take a look at
 
 A simplified version of _accumulator_ is defined as a statechart as follows.  
 
-- [accumulator in dsl4sc](accumulator.rules)
-- [accumulator in scxml](accumulator.scxml) generated from the above dsl4sc definition
+- [accumulator in dsl4sc](contracts/accumulator.rules)
+- [accumulator in scxml](contracts/accumulator.scxml) generated from the above dsl4sc definition
 
   <details>
     <summary>operation flow</summary>
@@ -33,7 +33,7 @@ A simplified version of _accumulator_ is defined as a statechart as follows.
     </div>
   </details>
 
-![accumulator](accumulator.svg)
+![accumulator](contracts/accumulator.svg)
 
 For the detail of the definition (and its monitors listed below),
 refer to [this material](accumulator.pdf).
@@ -109,7 +109,7 @@ to ensure that the accumulator works exactly as intended.
   [invalid3](scenarios/invalid3.txt),
   [invalid4](scenarios/invalid4.txt)
 
-## running the accumulator statechart and its monitors against valid/invalid scenarios
+## running the accumulator statechart and its monitors
 
 - to run the accumulator against the valid scenarios
 

@@ -57,45 +57,56 @@ we also provide another [DSL4SC version](contracts/Ballot.rules) of the contract
 
   (to be filled in)
 
+## Testing Ballot.scxml
+
+`make test` invokes `shelltest` as follows
+
+```
+shelltest voting.conf
+```
+
 ## Testing Ballot.sol
+
+(This is Solidity-only testing.)
 
 ### Prerequisites
 
 We need `truffle` and `ganache-cli` for testing.
-In addition, for testing _with_ monitors, `mqtt.js` is also required.
 
 Note that if you are not familiar with testing smart contracts on a local Ethereum network,
 please take a look at [this memo](../../docs/ethereum.md).
 
-### Testing Ballot.sol _without_ monitors
-
-(This is pure Solidity contract testing and has nothing to do with `scxmlrun`.)
+### Running scenarios
 
 ```
-$ make launch  
-$ make build  
-$ make test
+$ make ganache-start  
+$ make test-solidity
 ```
 
 <details>
   <summary>Remarks</summary>
   <div>
     <ul>
-      <li>`make launch` launches `ganache`, a local Ethereum network</li>
+      <li>`make ganache-start` launches `ganache`, a local Ethereum network</li>
       <li>`make build` compiles and deploys `Ballot.sol`</li>
-      <li>`make test` run test cases using `web3.js`</li>
+      <li>`make test-solidity` run test cases defined in `scenarios/Ballot_scenario{1,2}.js` using `web3.js`</li>
     </ul?
   </div>
 </details>
 
-### Testing Ballot.sol _with_ monitors in SCXML
+## Testing Ballot.sol _with_ monitors in SCXML
+
+In addition to `truffle` (and `ganache-cli`),
+`mqtt.js` is also required for connecting the contract and the monitros.
+
+
+### Running scenarios
 
 `Ballot.sol` can be _monitored_ in the following manner.
 
 ```
-$ make launch  
-$ make build  
-$ ./runtest.sh monitors/monitor1.scxml scenarios/scenario1.js
+$ make ganache-start  
+$ make test-combined  
 ```
 
 In the above exmple,
@@ -108,7 +119,3 @@ which bridges Ethereum and MQTT.
   <summary>contract and monitor</summary>
   <div><img src="monitors/observer.png"/></div>
 </details>
-
-## Testing Ballot.scxml
-
-(to be filled in)

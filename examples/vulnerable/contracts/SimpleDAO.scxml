@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q2">
+  <datamodel>
+    <data id="credit" expr="[]"/>
+    <data id="payee" expr="0"/>
+  </datamodel>
+  <final id="q4">
+    <formula xmlns="https://github.com/ldltools/dsl4sc">true</formula>
+  </final>
+  <state id="q2">
+    <transition target="q4" event="_accept">
+      <!--tid t5_1-->
+    </transition>
+    <transition target="q5" event="withdraw">
+      <!--tid t6_1-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>   var amount = _event.data;
+   payee = _event.origin;
+   SCXML.raise ({"name" : "fallback", "data" : amount}); ;</script>
+      <!--rule: r3 event: withdraw certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+      <!--rule.raise: fallback-->
+    </transition>
+    <transition target="q2" event="donate">
+      <!--tid t8_1-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>   var account = _event.data.account;
+   var amount = _event.data.amount;
+   if (typeof credit[account] == "undefined")
+     credit[account] = amount;
+   else
+     credit[account] += amount; ;</script>
+      <!--rule: r1 event: donate certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q2" event="queryCredit">
+      <!--tid t8_2-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>   var account = _event.data;
+   console.log (credit[account]); ;</script>
+      <!--rule: r2 event: queryCredit certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+  </state>
+  <state id="q5">
+    <transition target="q2" event="fallback">
+      <!--tid t13_1-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script>   // transfer &lt;amount&gt; to &lt;sender&gt; by calling &lt;sender&gt;'s fallback function
+   // [solidity] require (msg.sender.call.value (amount) ());
+   SCXML.send ({"event" : {"name" : "fallback", "data" : amount},
+		"target" : payee, "topic" : "simpledao_transfer"});
+   credit[account] -= amount; ;</script>
+      <!--rule: r4 event: fallback certainty: 15-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+  </state>
+</scxml>

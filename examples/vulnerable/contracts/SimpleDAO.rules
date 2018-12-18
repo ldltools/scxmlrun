@@ -1,0 +1,56 @@
+//
+
+protocol
+ // repeat: either (1) donate, (2) queryCredit, or (3) withdraw; fallback
+ (donate + queryCredit + withdraw; fallback)*
+;;
+
+rule
+
+// donate (account, amount)
+on donate
+do
+{
+   var account = _event.data.account;
+   var amount = _event.data.amount;
+   if (typeof credit[account] == "undefined")
+     credit[account] = amount;
+   else
+     credit[account] += amount;
+}
+
+// queryCredit (account)
+on queryCredit
+do
+{
+   var account = _event.data;
+   console.log (credit[account]);
+}
+
+// withdraw (amount)
+on withdraw
+raise fallback
+{
+   var amount = _event.data;
+   payee = _event.origin;
+   SCXML.raise ({"name" : "fallback", "data" : amount});
+}
+
+on fallback
+do
+{
+   // transfer <amount> to <sender> by calling <sender>'s fallback function
+   // [solidity] require (msg.sender.call.value (amount) ());
+   SCXML.send ({"event" : {"name" : "fallback", "data" : amount},
+		"target" : payee, "topic" : "simpledao_transfer"});
+
+   credit[account] -= amount;
+}
+
+script
+{
+  <datamodel>
+    <data id="credit" expr="[]"/>
+    <data id="payee" expr="0"/>
+  </datamodel>
+}

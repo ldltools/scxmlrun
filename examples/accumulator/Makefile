@@ -21,12 +21,14 @@ run:	run-accumulator run-monitors
 # accumulator
 run-accumulator:
 	shelltest accumulator.conf
+# (mqtt)
 run-passthru-accumulator:
 	shelltest passthru_accumulator.conf
 
 # monitors
 run-monitors:	check
 	shelltest monitors.conf
+# (mqtt)
 run-passthru-monitors:	check
 	shelltest passthru_monitors.conf
 

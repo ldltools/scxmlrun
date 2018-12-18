@@ -17,7 +17,7 @@ usage ()
     echo "usage: $(basename $0) [--restart] [-f <accumulator>] <monitor> <scenario>"
     echo "description"
     echo "  events defined in <scenario> are first processed by <accumulator>."
-    echo "  <accumulator> emits events via MQTT,"
+    echo "  then, <accumulator> responds by emitting new events via MQTT,"
     echo "  which are received by <monitor>"
     echo "dataflow"
     echo "  <scenario> -(events)-> <accumulator> -(events via MQTT)-> <monitor>"
@@ -65,9 +65,9 @@ do
     shift
 done
 
-test -f "$accumulator" || { echo "accumulator:\"$accumulator\" not fund"; exit 1; }
-test -f "$monitor" || { echo "monitor:\"$monitor\" not fund"; exit 1; }
-test -f "$scenario" || { echo "scenario:\"$scenario\" not fund"; exit 1; }
+test -f "$accumulator" || { echo "accumulator:\"$accumulator\" not found"; exit 1; }
+test -f "$monitor" || { echo "monitor:\"$monitor\" not found"; exit 1; }
+test -e "$scenario" || { echo "scenario:\"$scenario\" not found"; exit 1; }
 test -f "$trace" && rm -f $trace
 
 #

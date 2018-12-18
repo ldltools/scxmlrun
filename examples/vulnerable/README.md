@@ -25,17 +25,15 @@ please take a look at [this memo](../../docs/ethereum.md).
 ### _without_ monitors
 
 ```
-$ make launch  
-$ make build  
-$ make test
+$ make ganache-start  
+$ make test-solidity
 ```
 
 ### _with_ monitors
 
 ```
-$ make launch  
-$ make build  
-$ ./runtest.sh monitors/monitor1.scxml scenarios/scenario1.js
+$ make ganache-start  
+$ make test-combined
 ```
 
 ## References
@@ -46,6 +44,9 @@ $ ./runtest.sh monitors/monitor1.scxml scenarios/scenario1.js
   ([link](https://github.com/ConsenSys/smart-contract-best-practices/blob/master/docs/known_attacks.md))
 - hackingdistributed.com, "Analysis of the DAO exploit", 2016.
   ([link](http://hackingdistributed.com/2016/06/18/analysis-of-the-dao-exploit/))
+- Atzei N., Bartoletti M., Cimoli T.,
+  "A Survey of Attacks on Ethereum Smart Contracts", 2017.
+  ([link](http://blockchain.unica.it/projects/ethereum-survey/index.html))
 - trufflesuite.com, "Tutorial: exploiting the DAO", 2016.
   ([link](https://github.com/trufflesuite/trufflesuite.com/blob/master/src/tutorials/chain-forking-exploiting-the-dao.md))
 - Tim Coulter, "DarkDAO", 2016.
