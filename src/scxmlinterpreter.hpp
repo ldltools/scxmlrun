@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SCXMLPROC_HPP
-#define SCXMLPROC_HPP
+#ifndef SCXMLINTERPRETER_HPP
+#define SCXMLINTERPRETER_HPP
 
 #include "jsonstream.hpp"
 #include <mosquitto.h>

@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "scxmlproc.hpp"
+#include "scxmlinterpreter.hpp"
+#include "mqttrepeater.hpp"
+#include "version.hpp"
 
 #ifdef USE_QTSCXML
 #include "qtscxml/qtscxmlproc.hpp"
@@ -36,42 +38,53 @@
 static void
 synopsis (const char* prog)
 {
-    std::cerr << "usage: " << prog << " <option>* <scxmlfile>? <infile>?\n";
-    std::cerr << "options\n";
-    std::cerr << "  -m <scxmlfile>\t"
+    std::cout << "usage: " << prog << " <option>* <scxmlfile>? <infile>?\n";
+    std::cout << "options\n";
+    std::cout << "  -m <scxmlfile>\t"
               << "read scxml from <scxmlfile>\n";
-    std::cerr << std::endl;
+    std::cout << std::endl;
 
-    std::cerr << "  -i <infile>\t\t"
+    std::cout << "  -i <infile>\t\t"
               << "read input events from <infile>\n";
-    std::cerr << "  -o <outfile>\t\t"
+    std::cout << "  -o <outfile>\t\t"
               << "write output events to <outfile>\n";
-    std::cerr << "  --trace <tracefile>\t"
+    std::cout << "  --trace <tracefile>\t"
               << "write trace to <tracefile>\n";
-    std::cerr << std::endl;
+    std::cout << std::endl;
 
-    std::cerr << "  --mqtt <host>\t\t"
+    std::cout << "  --mqtt\t\t"
+              << "assume MQTT-based I/O by default\n";
+    std::cout << "  --broker <host>\t"
               << "connect to <host> as the MQTT broker\n";
-    std::cerr << "  --sub <topic>\t\t"
+    std::cout << "  --sub <topic>\t\t"
               << "subscribe to <topic> for input events\n";
-    std::cerr << "  --pub <topic>\t\t"
-              << "publish output events to <topic>\n";
-    std::cerr << "  --trace-pub <topic>\t"
+    std::cout << "  --pub <topic>\t\t"
+              << "publish output events to <topic> by default\n";
+    std::cout << "  --trace-pub <topic>\t"
               << "publish trace to <topic>\n";
-    std::cerr << std::endl;
+    std::cout << std::endl;
 
-    std::cerr << "  -h, --help\t\t"
+    std::cout << "  -h, --help\t\t"
               << "display this message\n";
-    std::cerr << "  -v, --verbose\t\t"
+    std::cout << "  -v, --verbose\t\t"
               << "become verbose\n";
-    std::cerr << "  -q, --silent\t\t"
+    std::cout << "  -q, --silent\t\t"
               << "stay quiet\n";
-    std::cerr << "  -V, --version\t\t"
+    std::cout << "  -V, --version\t\t"
               << "show version info\n";
 }
 
 static void
-mosq_connect (mosquitto*& mosq, const char* host, scxml::scxmlproc* proc, bool& connected)
+extra_synopsis (void)
+{
+    std::cout << std::endl;
+    std::cout << "  [advanced/experimental options]" << std::endl;
+    std::cout << "  -r, --relay\t\t"
+              << "run as a MQTT event repeater\n";
+}
+
+static void
+mosq_connect (mosquitto*& mosq, const char* host, int port, scxml::scxmlproc* proc, bool& connected)
 {
     if (mosq && connected) return;
 
@@ -82,7 +95,7 @@ mosq_connect (mosquitto*& mosq, const char* host, scxml::scxmlproc* proc, bool& 
     assert (mosq && !connected);
 
     //int rslt = mosquitto_connect (mosq, host, 1883, 60);
-    int rslt = mosquitto_connect_async (mosq, host, 1883, 60);
+    int rslt = mosquitto_connect_async (mosq, host, port, 60);
     assert (rslt == MOSQ_ERR_SUCCESS);
     connected = true;
 }
@@ -114,6 +127,7 @@ main (int argc, char** argv)
 {
     const char* scxmlfile = NULL;
 
+    enum {_INTERPRETER, _REPEATER} mode = _INTERPRETER;
     enum {_NONE = 0, _FILE, _MQTT} intype = _NONE, outtype = _NONE, tracetype = _NONE;
     const char* infile = NULL;
     const char* outfile = NULL;
@@ -121,6 +135,7 @@ main (int argc, char** argv)
 
     // in/out via MQTT
     const char* mqtt_host = "localhost";  // broker
+    int mqtt_port = 1883;
     std::list<const char*> subs;
     const char* pub = NULL;
     const char* trace_pub = NULL;
@@ -133,7 +148,7 @@ main (int argc, char** argv)
 
     for (int i = 1; i < argc; i++)
     {
-        if (!strcmp (argv[i], "-m"))
+        if (!strcmp (argv[i], "-m") || !strncmp (argv[i], "--model", 3))
             scxmlfile = argv[++i];
 
         else if (!strcmp (argv[i], "-i"))
@@ -144,11 +159,33 @@ main (int argc, char** argv)
             tracefile = argv[++i];
 
         else if (!strncmp (argv[i], "--mqtt", 6))
+            intype = outtype = tracetype = _MQTT; // this may be changed later
+        else if (!strcmp (argv[i], "-b") || !strncmp (argv[i], "--broker", 3))
+        {
             mqtt_host = argv[++i];
-        else if (!strncmp (argv[i], "--sub", 6))
+            const char* found = strchr (mqtt_host, ':');
+            // case: <host>:<port>
+            if (found)
+            {
+                sscanf (found, ":%d", &mqtt_port);
+                assert (1000 < mqtt_port && mqtt_port < 9999);
+                //*found = '\0';
+                char* host = (char*) malloc (found - mqtt_host + 1);
+                strncpy (host, mqtt_host, found - mqtt_host);
+                host[found - mqtt_host] = '\0';
+                mqtt_host = host;
+            }
+        }
+        else if (!strncmp (argv[i], "--sub", 3))
             subs.push_back (argv[++i]);
-        else if (!strncmp (argv[i], "--pub", 6))
+        else if (!strncmp (argv[i], "--pub", 3))
             pub = argv[++i];
+
+        else if (!strcmp (argv[i], "-r") || !strcmp (argv[i], "--relay"))
+        {
+            mode = _REPEATER;
+            scxmlfile = "/dev/null";
+        }
 
         else if (!strcmp (argv[i], "-v") || !strcmp (argv[i], "--verbose"))
             verbosity = 1;
@@ -163,7 +200,15 @@ main (int argc, char** argv)
         }
         else if (!strcmp (argv[i], "-h") || !strcmp (argv[i], "--help"))
         {
-            synopsis (argv[0]); return 0;
+            std::cout << "scxmlrun v" << SCXMLRUN_VERSION << std::endl;
+            synopsis (argv[0]);
+            return 0;
+        }
+        else if (!strcmp (argv[i], "-hh"))
+        {
+            std::cout << "scxmlrun v" << SCXMLRUN_VERSION << std::endl;
+            synopsis (argv[0]); extra_synopsis ();
+            return 0;
         }
 
         else if (*argv[i] == '-')
@@ -189,22 +234,20 @@ main (int argc, char** argv)
     }
     if (!infile && subs.size () == 0)
         // fall-back
-        infile = "/dev/stdin";
+        if (intype != _MQTT)
+            infile = "/dev/stdin";
+        else
+            subs.push_back ("scxmlrun");
     if (infile)
         intype = _FILE;
-
-    if (subs.size () > 0 && intype != _FILE)
+    if (subs.size () > 0)
     {
-        assert (intype == _NONE);
+        assert (intype != _FILE);
         assert (mqtt_host);
         intype = _MQTT;
     }
 
-    if (intype == _NONE)
-    {
-        infile = "/dev/null";
-        intype = _FILE;
-    }
+    assert (intype != _NONE);
 
     // OUTPUT
     if (outfile && pub)
@@ -213,18 +256,18 @@ main (int argc, char** argv)
         std::cerr << "** invalid output specification\n";
         return (-1);
     }
+    if (!outfile && !pub)
+        // fall-back
+        if (outtype != _MQTT)
+            outfile = (verbosity < 0) ? "/dev/null" : "/dev/stdout";
+        else
+            pub = "scxmlrun";
     if (outfile)
         outtype = _FILE;
     if (pub)
-    {
-        assert (outtype == _NONE);
         outtype = _MQTT;
-    }
-    if (outtype == _NONE)
-    {
-        outfile = (verbosity < 0) ? "/dev/null" : "/dev/stdout";
-        outtype = _FILE;
-    }
+
+    assert (outtype != _NONE);
 
     // TRACE
     if (tracefile && trace_pub)
@@ -232,6 +275,12 @@ main (int argc, char** argv)
         std::cerr << "** invalid trace specification\n";
         return (-1);
     }
+    if (!tracefile && !trace_pub)
+        // fall-back
+        if (tracetype != _MQTT)
+            tracefile = (verbosity <= 0) ? "/dev/null" : "/dev/stderr";
+        else
+            trace_pub = "scxmlrun/trace";
     if (tracefile)
         tracetype = _FILE;
     if (trace_pub)
@@ -240,21 +289,30 @@ main (int argc, char** argv)
         assert (mqtt_host);
         tracetype = _MQTT;
     }
-    if (tracetype == _NONE)
-    {
-        tracefile = (verbosity <= 0) ? "/dev/null" : "/dev/stderr";
-        tracetype = _FILE;
-    }
+
+    assert (tracetype != _NONE);
 
     // instantiate proc and load scxml
+    scxml::scxmlproc* proc = nullptr;
+    if (mode == _INTERPRETER)
+    {
 #ifdef USE_QTSCXML
-    QCoreApplication app (argc, argv);	// non-GUI Qt application
-    SCXMLPROC proc (&app);
+        QCoreApplication* app = new QCoreApplication (argc, argv);
+        // non-GUI Qt application
+        proc = new SCXMLPROC (app);
 #elif defined (USE_USCXML)
-    SCXMLPROC proc;
+        proc = new SCXMLPROC ();
 #else
 #error "scxml processor is unknown"
 #endif
+    }
+    else if (mode == _REPEATER)
+    {
+        assert (scxmlfile == "/dev/null");
+        proc = new scxml::mqttrepeater ();
+    }
+    assert (proc);
+
     // MQTT broker
     mosquitto* mosq = nullptr;
     bool mosq_connected = false, mosq_started =false;
@@ -271,50 +329,24 @@ main (int argc, char** argv)
     default:
         {}
     }
-    proc.verbosity_set (verbosity);
+    proc->verbosity_set (verbosity);
 
     // load scxml
     assert (scxmlfile);
-    proc.load (scxmlfile);
+    proc->load (scxmlfile);
 
     // INPUT
     assert (intype != _NONE);
     switch (intype)
     {
     case _FILE:
-        proc.eventin_open (infile);
+        proc->eventin_open (infile);
         break;
     case _MQTT:
         {
-            mosq_connect (mosq, mqtt_host, &proc, mosq_connected);
-            proc.eventin_open (mosq, subs);
+            mosq_connect (mosq, mqtt_host, mqtt_port, proc, mosq_connected);
+            proc->eventin_open (mosq, subs);
             mosq_start (mosq, mosq_started);
-
-            /*
-            if (!mosq)
-            {
-                mosq = mosquitto_new (nullptr, true, nullptr);
-                proc.mosq_set_callbacks (mosq);
-            }
-            assert (mosq);
-
-            if (!mosq_connected)
-            {
-                int rslt = mosquitto_connect (mosq, mqtt_host, 1883, 60);
-                assert (rslt == MOSQ_ERR_SUCCESS);
-                mosq_connected = true;
-            }
-            assert (mosq_connected);
-
-            proc.eventin_open (mosq, subs);
-            if (!mosq_started)
-            {
-                int rslt = mosquitto_loop_start (mosq);  // threaded
-                assert (rslt == MOSQ_ERR_SUCCESS);
-                mosq_started = true;
-            }
-            proc.eventin_open (mosq, subs);
-            */
         }
         break;
     default:
@@ -327,12 +359,12 @@ main (int argc, char** argv)
     switch (outtype)
     {
     case _FILE:
-        proc.eventout_open (outfile);
+        proc->eventout_open (outfile);
         break;
     case _MQTT:
         {
-            mosq_connect (mosq, mqtt_host, &proc, mosq_connected);
-            proc.eventout_open (mosq, pub);
+            mosq_connect (mosq, mqtt_host, mqtt_port, proc, mosq_connected);
+            proc->eventout_open (mosq, pub);
             mosq_start (mosq, mosq_started);
         }
         break;
@@ -345,12 +377,12 @@ main (int argc, char** argv)
     switch (tracetype)
     {
     case _FILE:
-        proc.traceout_open (tracefile);
+        proc->traceout_open (tracefile);
         break;
     case _MQTT:
         {
-            mosq_connect (mosq, mqtt_host, &proc, mosq_connected);
-            proc.traceout_open (mosq, trace_pub);
+            mosq_connect (mosq, mqtt_host, mqtt_port, proc, mosq_connected);
+            proc->traceout_open (mosq, trace_pub);
             mosq_start (mosq, mosq_started);
         }
         break;
@@ -359,17 +391,18 @@ main (int argc, char** argv)
         return (-1);
     }
 
-    proc.setup ();
+    proc->setup ();
     int rslt = 0;
     try
     {
-        rslt = proc.run ();
+        rslt = proc->run ();
     }
     catch (const std::exception& e)
     {
         std::cerr << "** exception: " << e.what () << std::endl;
         rslt = -1;
     }
+    delete proc;
     mosq_terminate (mosq);
 
     return (rslt);

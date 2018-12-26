@@ -14,7 +14,7 @@
 #ifndef USCXMLPROC_HPP
 #define USCXMLPROC_HPP
 
-#include "scxmlproc.hpp"
+#include "scxmlinterpreter.hpp"
 #include "uscxml/config.h"
 #include "uscxml/uscxml.h"
 

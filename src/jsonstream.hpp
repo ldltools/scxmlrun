@@ -55,6 +55,8 @@ private:
     std::ifstream* _in;
 };
 
+// jsonimstream (mqtt)
+
 class jsonimstream : public jsonistream
 {
 public:
@@ -101,11 +103,16 @@ private:
     std::ofstream* _out;
 };
 
+// jsonomstream (mqtt)
+
 class jsonomstream : public jsonostream
 {
 public:
     virtual jsonomstream& write (const std::string&);
     virtual jsonomstream& write (nlohmann::json&);
+
+private:
+    jsonomstream& write (const char* msg, const char* topic, int qos);
 
 public:
     jsonomstream (void);

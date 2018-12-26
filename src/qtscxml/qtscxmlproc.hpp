@@ -14,7 +14,7 @@
 #ifndef QTSCXMLPROC_HPP
 #define QTSCXMLPROC_HPP
 
-#include "scxmlproc.hpp"
+#include "scxmlinterpreter.hpp"
 #include <QtCore/QCoreApplication>
 #include <QtScxml/QScxmlStateMachine>
 

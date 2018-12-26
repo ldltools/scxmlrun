@@ -10,62 +10,125 @@ scxmlrun -- MQTT-enabled SCXML interpreter
 scxmlrun <option>* <scxmlfile>? <infile>?
 
 \section{Description}
-scxmlrun reads a state-chart in SCXML from <scxmlfile> and
-runs it against input events,
-which can be provided from <infile> or via MQTT.
+scxmlrun reads
+a sequence of input events (from a local file <infile> or via MQTT),
+process them as defined in <scxmlfile>,
+and transmits output events when instructed.
 
 \section{Options}
 \begin{description}
 %
 \item[\Opt{--model} <scxmlfile>]
-reads a state-chart in SCXML from <scxmlfile>
+  reads a state-chart in SCXML from <scxmlfile>
 
 % -----
 \item[\Opt{-i} <infile>]
-reads lines of SCXML events (in JSON) from <infile>
+  reads lines of SCXML events (in JSON) from <infile>
 %
 \item[\Opt{-o} <outfile>]
-write output events (in JSON) to <outfile>
+  write output events (in JSON) to <outfile>
 %
 \item[\Opt{--trace} <tracefile>]
-write trace info to <tracefile>
+  write trace info to <tracefile>
 %
 
 % -----
-\item[\Opt{--mqtt} <host>]
-specifiy <host> as the MQTT broker to connect to
+\item[\Opt{--mqtt}]
+  assume MQTT-based I/O by default.
+%
+\item[\Opt{--broker} <host>\Lbr:<port>\Rbr]
+  specifiy <host> (at <port>) as the MQTT broker to connect to.\\
+  (default: localhost:1883)
 %
 \item[\Opt{--sub} <topic>]
-subscribe to <topic> for input events
+  subscribe to <topic> for input events.\\
+  multiple topics can be specified as: --sub t1 --sub t2 ...
 %
 \item[\Opt{--pub} <topic>]
-specify <topic> for output events
+  specify <topic> as the default topic for output events (emitted by SCXML.send).
 %
 \item[\Opt{--trace-pub} <topic>]
-specify <topic> for publishing trace info
+  specify <topic> for publishing trace info
+
+% -----
+\item[\Opt{-r}, \Opt{--relay}]
+  run \textbf{scxmlrun} as a MQTT \emph{repeater}, that is,
+  \textbf{scxmlrun} reads input events and transmits them without any interpretation.
+  No SCXML model should be specified in this mode.
 
 % -----
 \item[\Opt{-v}, \Opt{--verbose}]
-become verbose
+  become verbose.
 %
 \item[\Opt{-q}, \Opt{--silent}]
-stay quiet
+  stay quiet.
 %
 \item[\Opt{-V}, \Opt{--version}]
-show version info
+  show version info.
 %
 \item[\Opt{-h}, \Opt{--help}]
-show usage
+  show usage.
+
 \end{description}
+
+\section{Examples}
+Consider the following simple SCXML model, which we here call "echo.scxml".
+
+\begin{verbatim}
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q1">
+  <state id="q1">
+    <transition target="q2" event="echo">
+      <script>console.log (_event.data)</script>
+    </transition>
+  </state>
+  <final id="q2"/>
+</scxml>
+\end{verbatim}
+
+\begin{enumerate}
+\item file-in/file-out
+
+\texttt{$ echo '\LBr"event":\LBr"name":"echo","data":"hello"\RBr\RBr' | scxmlrun echo.scxml}\\
+\texttt{hello}
+
+\item mqtt-in/file-out
+
+\texttt{$ scxmlrun echo.scxml --sub echo}\\
+\texttt{$ mosquitto\_pub -t echo -m '\LBr"event":\LBr"name":"echo","data":"hello"\RBr\RBr'}\\
+\texttt{hello}
+
+\end{enumerate}
+
+\section{Input/Output Format}
+
+Input and output of \textbf{scxmlrun} are SCXML events in the JSON format.\\
+Each event is a JSON object of the form:
+\begin{center}
+\LBr"event":\LBr"name":..., ...\RBr, "type":"mqtt", "topic":..., ...\RBr
+\end{center}
+
+See \URL{https://www.w3.org/TR/scxml/#send} for the detail.
+
+Note that, as a \textbf{scxmlrun}-specific feature,
+"topic"-key and its value can be included in each input/output event,
+which is referred to when connecting to the MQTT broker.
 
 \section{See Also}
 rules2scxml
 
 \section{Author}
-\URL{https://ldltools.github.io}\\
-\Email{ldltools@outlook.com}
+LDLTools development team at IBM Research.
+
+\begin{itemize}
+\item URL: \URL{https://ldltools.github.io}
+\item Email: \Email{ldltools@outlook.com}
+\end{itemize}
 
 \section{Copyright}
 (C) Copyright IBM Corp. 2018.
+License Apache 2.0.\\
+
+This is free software: you are free to change and redistribute it.
+There is NO  WARRANTY,  to the extent permitted by law.
 
 \end{document}

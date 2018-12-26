@@ -12,6 +12,7 @@
 // limitations under the License.
 
 #include "qtscxmlproc.hpp"
+#include "version.hpp"
 #include "moc_qtscxmlproc.hpp"
 
 #include <QtCore/QCoreApplication>
@@ -464,7 +465,7 @@ qtscxmlproc::js_send (const QJsonObject& params)
 
     assert (send_t == "mqtt");
 
-    // topic (extra parameter for mqtt)
+    // topic (extra parameter for event transmission via mqtt)
     QString topic = "";
     if (params.contains ("topic") && params["topic"].isString ())
         topic = params["topic"].toString ();
@@ -507,10 +508,14 @@ qtscxmlproc::js_send (const QJsonObject& params)
                     {"origintype", origintype},
                     {"sendid", sendid},
                     {"invokeid", invokeid}}},
-         {"type", "mqtt"}};
+         {"type", "mqtt"}
+        };
 
+    // other "send" params (if exist)
+    if (target != "") obj["target"] = target.toStdString ();
     if (id != "") obj["id"] = id.toStdString ();
     if (idlocation != "") obj["idlocation"] = idlocation.toStdString ();
+    if (topic != "") obj["topic"] = topic.toStdString ();
 
     _eventout->write (obj);
 #endif
@@ -964,18 +969,22 @@ qtscxmlproc::setup (void)
 void
 qtscxmlproc::version (void)
 {
-    std::cerr << "QtCore\t\t"
+    std::cerr << "ScxmlRun\t\t"
+              << SCXMLRUN_VERSION
+              << std::endl;
+
+    std::cerr << "QtCore\t\t\t"
               << QT_VERSION_STR
               << std::endl;
 
-    std::cerr << "Mosquitto\t"
+    std::cerr << "Mosquitto\t\t"
               << LIBMOSQUITTO_MAJOR << "."
               << LIBMOSQUITTO_MINOR << "."
               << LIBMOSQUITTO_REVISION
               << std::endl;
 
     auto json_meta = nlohmann::json::meta ();
-    std::cerr << "JSON for C++\t"
+    std::cerr << "JSON for C++\t\t"
               << json_meta["version"]["major"] << "."
               << json_meta["version"]["minor"] << "."
               << json_meta["version"]["patch"]

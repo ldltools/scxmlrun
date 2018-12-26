@@ -97,6 +97,8 @@ endif
 
 -include Makefile.common
 
+OBJS		:= $(filter-out $(BINS:%=%.o),$(OBJS))
+
 all::	$(BINS)
 
 $(BUILD_DIR)/scxmlrun:	$(OBJS) $(BUILD_DIR)/scxmlrun.o
@@ -111,5 +113,7 @@ install::	all
 	done
 
 clean::
+	find . -name '*~' | xargs rm -f
+
 veryclean::	clean
 	rm -f $(BINS)
