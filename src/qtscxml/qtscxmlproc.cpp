@@ -12,6 +12,7 @@
 // limitations under the License.
 
 #include "qtscxmlproc.hpp"
+#include "esprimitives.hpp"
 #include "version.hpp"
 #include "moc_qtscxmlproc.hpp"
 
@@ -991,60 +992,6 @@ qtscxmlproc::version (void)
               << std::endl;
 }
 
-// --------------------------------------------------------------------------------
-// QJSEngine hack
-// --------------------------------------------------------------------------------
-
-void
-_JSScxml::_raise (const QString str)
-{
-    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
-
-    //QJSValue js_val (str);
-    //qInfo () << ";; _JSScxml::raise:" << js_val.toString ();
-    //QVariant v = js_val.toVariant ();
-    // cf. http://doc.qt.io/qt-5/qjsvalue.html#toVariant
-
-    assert (_proc);
-    _proc->js_raise (obj);
-}
-
-void
-_JSScxml::_send (const QString str)
-{
-    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
-
-    //QJSValue js_val (str);
-    //qInfo () << ";; _JSScxml::send:" << js_val.toString ().toStdString ().c_str ();
-    //QVariant v = js_val.toVariant ();
-    // cf. http://doc.qt.io/qt-5/qjsvalue.html#toVariant
-    assert (_proc);
-    _proc->js_send (obj);
-}
-
-void
-_JSScxml::_cancel (const QString str)
-{
-    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
-    assert (_proc);
-    _proc->js_cancel (obj);
-}
-
-void
-_JSScxml::_invoke (const QString str)
-{
-    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
-    assert (_proc);
-    _proc->js_invoke (obj);
-}
-
-void
-_JSConsole::_log (const QString msg)
-{
-    std::string str = msg.toStdString ();
-    qDebug () << "jsConsole: "<< str.c_str () << msg.size ();
-}
-
 void
 qtscxmlproc::_hack (void)
 {
@@ -1088,6 +1035,8 @@ qtscxmlproc::_hack (void)
     QJSValue scxml_val = _engine->newQObject (scxml);
     global.setProperty ("SCXML", scxml_val);
 
+    _JSScxml::intern (_engine, &scxml_val);
+    /*
     // SCXML.raise
     QJSValue raise_fun = _engine->evaluate ("function (obj) { SCXML._raise (JSON.stringify (obj)) }");
     assert (raise_fun.isCallable ());
@@ -1104,6 +1053,7 @@ qtscxmlproc::_hack (void)
     QJSValue invoke_fun = _engine->evaluate ("function (obj) { SCXML._invoke (JSON.stringify (obj)) }");
     assert (invoke_fun.isCallable ());
     scxml_val.setProperty ("invoke", invoke_fun);
+    */
 
     // declare _data as a global variable
     if (!global.hasProperty ("_data"))
@@ -1120,8 +1070,12 @@ qtscxmlproc::_hack (void)
     _JSConsole* console = new _JSConsole ();
     QJSValue console_val = _engine->newQObject (console);
     global.setProperty ("console", console_val);
+
+    _JSConsole::intern (_engine, &console_val);
+    /*
     QJSValue log_fun = _engine->evaluate ("function (obj) { console._log (JSON.stringify (obj)) }");
     console_val.setProperty ("log", log_fun);
+    */
 #endif
 
 }

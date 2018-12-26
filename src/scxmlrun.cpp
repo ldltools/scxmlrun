@@ -331,10 +331,6 @@ main (int argc, char** argv)
     }
     proc->verbosity_set (verbosity);
 
-    // load scxml
-    assert (scxmlfile);
-    proc->load (scxmlfile);
-
     // INPUT
     assert (intype != _NONE);
     switch (intype)
@@ -391,7 +387,14 @@ main (int argc, char** argv)
         return (-1);
     }
 
+    // load scxml
+    assert (scxmlfile);
+    proc->load (scxmlfile);
+
+    // init the engine, etc
     proc->setup ();
+
+    // start processing
     int rslt = 0;
     try
     {

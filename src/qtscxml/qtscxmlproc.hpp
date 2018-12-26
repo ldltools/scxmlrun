@@ -15,6 +15,7 @@
 #define QTSCXMLPROC_HPP
 
 #include "scxmlinterpreter.hpp"
+
 #include <QtCore/QCoreApplication>
 #include <QtScxml/QScxmlStateMachine>
 
@@ -158,38 +159,6 @@ public:
     {
         return (reinterpret_cast<_QScxmlEcmaScriptDataModelPrivate*>(d_ptr.data ()));
     }
-};
-
-//
-class _JSScxml : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit _JSScxml (QObject* parent = nullptr) : QObject (parent) {}
-
-public slots:
-    void _raise (const QString);
-    void _send (const QString);
-    void _cancel (const QString);
-    void _invoke (const QString);
-
-private:
-    scxml::qtscxmlproc* _proc;
-
-    friend class scxml::qtscxmlproc;
-};
-
-//
-class _JSConsole : public QObject
-{
-    Q_OBJECT
-public:
-    explicit _JSConsole (QObject* parent = nullptr) : QObject (parent) {}
-
-signals:
-public slots:
-    void _log (const QString);
 };
 
 #endif

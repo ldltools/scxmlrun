@@ -11,7 +11,7 @@ with the following features:
 
 # Example: [echo](examples/echo/README.md)
 
-The following statechart receives a single _echo_ event, prints out its _\_data_ parameter onto the console, and then terminates.
+The following statechart receives a single _echo_ event, prints out its _data_ parameter onto the console, and then terminates.
 
 ```
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q1">  
@@ -38,7 +38,7 @@ world
 ```
 
 Check out [more examples](examples/README.md) if you are interested.  
-For the usage of _scxmlrun_, see [its man page](docs/man/scxmlrun.man)
+For the usage of _scxmlrun_, see [the man page](docs/man/scxmlrun.man)
 which will be accessible through `man scxmlrun` after installation.
 
 # Installation on Docker
@@ -74,11 +74,19 @@ which will be accessible through `man scxmlrun` after installation.
 ## Build
 - run: `make && make install` in this directory  
 
-## Remark
+## Testing
 
-Instead of [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html),
+- run: `make test` in the `tests` directory.
+
+## Remark on replacing the underlying SCXML engine
+
+Although the default SCXML engine of scxmlrun is
+[QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html),
+it is designed to easily migrate to another one.
+
+For instance,
 [uSCXML](https://github.com/tklab-tud/uscxml) can be used
-as the SCXML engine.  
+instead of QtSCXML.  
 To try this option, see [this note](docs/uScxml.md).
 
 # Installation on macOS/Darwin

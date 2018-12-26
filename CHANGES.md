@@ -1,11 +1,15 @@
 # v0.11.0rc
 
+- [new] "_event repeater_" (invoked with "-r") which transparently transmits input events without any interpretation.
+
 - add/update examples
-- add `test/*.conf` files for testing with [shelltest](https://github.com/simonmichael/shelltestrunner)
+- add `*.conf` files for testing with [shelltest](https://github.com/simonmichael/shelltestrunner)
+- add man page (`man scxmlrun`)
 
 # v0.10.0 (2018-11-08)
 
-- introduce JS functions: `SCXML.raise` and `SCXML.send`
+- [new] introduce JS functions: `SCXML.raise` and `SCXML.send`
+
 - add examples: microwave, calc (with web ui), traffic-control, and blackjack
 - add examples: voting and vulnerable
 
