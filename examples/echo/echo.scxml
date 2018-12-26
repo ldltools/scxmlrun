@@ -3,7 +3,7 @@
     <transition target="q1" event="echo">
       <script>console.log (_event.data)</script>
     </transition>
-    <transition target="q2" event="_accept"/>
+    <transition target="q2" event="quit"/>
   </state>
   <final id="q2"/>
 </scxml>
