@@ -6,43 +6,37 @@ usage:
 	@echo -e "  run\t\t\tperform \"run-accumulator\" and \"run-monitors\""
 	@echo -e "  run-accumulator\trun accumulator against each scenario in the \"scenarios\" directory"
 	@echo -e "  run-monitors\t\trun monitors against the scenarios"
-	@echo -e "  run-mqtt\t\trun accumulator + monitors (via MQTT)"
-	@echo -e "  run-mqtt-passthru\trun passthru + monitors (via MQTT)"
 
 all::
 clean::
 	rm -f *~ .*done
-	make -C monitors $@
-	make -C scenarios $@
+	$(MAKE) -C monitors $@
+	$(MAKE) -C scenarios $@
 
 veryclean::	clean
 	rm -f out/*
 
 run:	run-accumulator run-monitors
 
+# accumulator
 run-accumulator:
-	@echo "** run accumulator.scxml"
-	@for f in scenarios/s*.txt; do\
-	  echo "[$$f]";\
-	  scxmlrun accumulator.scxml $$f -o /dev/null;\
-	  echo;\
-	done
+	shelltest accumulator.conf
+# (mqtt)
+run-passthru-accumulator:
+	shelltest passthru_accumulator.conf
 
+# monitors
 run-monitors:	check
-	@for scxml in monitors/*.scxml; do\
-	  scxml=`readlink -f $$scxml` make -C scenarios run;\
-	done
+	shelltest monitors.conf
+# (mqtt)
+run-passthru-monitors:	check
+	shelltest passthru_monitors.conf
 
-run-mqtt:	check
-	@for scxml in monitors/*.scxml; do\
-	  scxml=`readlink -f $$scxml` make -C scenarios run-mqtt;\
-	done
+# accumulator + monitors
+run-accumulator_monitors:	check
+	shelltest accumulator_monitors.conf
 
-run-mqtt-passthru:	check
-	@for scxml in monitors/*.scxml; do\
-	  scxml=`readlink -f $$scxml` make -C scenarios run-mqtt-passthru;\
-	done
-
+#
 %.scxml:	%.rules
 	rules2scxml $< -o $@
 %.uml:	%.scxml

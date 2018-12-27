@@ -9,39 +9,37 @@ with the following features:
 - input/output events can also be received/transmitted over the network via the [MQTT](https://mqtt.org/) protocol.  
 - several JavaScript functions, including `SCXML.raise` and `SCXML.send` for raising/sending events in the JSON format, are introduced for interfacing with the underlying SCXML engine.
 
-# Example: [ping\_pong](examples/ping_pong/README.md)
+# Example: [echo](examples/echo/README.md)
 
-(1) [_ping.sh_](examples/ping_pong/ping.sh) and [_pong.sh_](examples/ping_pong/pong.sh) interact with each other by emitting _ping_ and _pong_ events via MQTT.  
-They start communication when an initial _ping (0)_ event is received by _ping.sh_,
-upon which _ping.sh_ emits _pong (1)_.  
-Then, it is is delivered to _pong.sh_ and responded with _ping (1)_,
-and interaction goes on that way.
-
-(2) [_ping\_pong.scxml_](examples/ping_pong/ping_pong.scxml) defines
-a state machine that switches states in response to incoming _ping_ and _pong_ events.
-
-![statechart](examples/ping_pong/ping_pong.svg)
-
-(3) When running these together,
-[*ping\_pong.scxml*](examples/ping_pong/ping_pong.scxml) works as a _monitor_
-for _ping.sh_ and _pong.sh_.  
-It monitors all events exchanged between _ping.sh_ and _pong.sh_,
-and reports them onto the console.
+The following statechart, which we here call "echo.scxml", receives a single _echo_ event, prints out its _data_ parameter onto the console, and then terminates.
 
 ```
-$ cd examples/ping_pong; ./runtest.sh
-ping 0  
-pong 1  
-ping 1  
-pong 2  
-ping 2  
-pong 3  
-...
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q1">  
+  <state id="q1">  
+    <transition target="q2" event="echo"><script>console.log (_event.data)</script></transition>  
+  </state>  
+  <final id="q2"/>  
+</scxml>
 ```
 
-![ping\_pong](examples/ping_pong/ping_pong.jpg)
+## Reading event(s) from a local file
 
-Check out [more examples](examples/README.md) if you are interested.
+```
+$ echo '{"event":{"name":"echo","data":"hello"}}' | scxmlrun echo.scxml  
+hello
+```
+
+## Reading event(s) via MQTT
+
+```
+$ scxmlrun echo.scxml --sub echo  
+$ mosquitto_pub -t echo -m '{"event":{"name":"echo","data":"world"}}'  
+world
+```
+
+Check out [more examples](examples/README.md) if you are interested.  
+For the usage of _scxmlrun_, see [the man page](docs/man/scxmlrun.man)
+which will be accessible through `man scxmlrun` after installation.
 
 # Installation on Docker
 
@@ -74,11 +72,29 @@ Check out [more examples](examples/README.md) if you are interested.
   run: `apt-get install nlohmann-json-dev`
 
 ## Build
-- run: `make && make install` in this directory  
+- run: `make && make install` in this directory.
 
-## Remark
+## Testing
 
-Instead of [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html),
+- run: `make -C ./tests test` once installation is done.
+
+  (You may need to install [shelltest](https://github.com/simonmichael/shelltestrunner).)
+
+# Installation on macOS/Darwin
+
+Refer to [this note](docs/macos.md).
+
+# Remarks
+
+## replacing the underlying SCXML engine
+
+Although
+[QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html)
+is assumed as the default SCXML engine of scxmlrun,
+it is not difficult to switch to another one.
+
+For instance,
 [uSCXML](https://github.com/tklab-tud/uscxml) can be used
-as the SCXML engine.  
+instead of QtSCXML.  
 To try this option, see [this note](docs/uScxml.md).
+

@@ -5,22 +5,22 @@ clean::;	rm -f *~
 veryclean::	clean
 	rm -f out/*
 
-RULES = $(shell echo accumulator*.rules)
+RULES = $(shell echo accumulator_mon*.rules)
 
 %.scxml:	%.rules
-	reject_invalid_events=1 rules2scxml $< -o $@
-%.uml:	%.scxml
+	rules2scxml $< -o $@ --monitor
+%.puml:	%.scxml
 	scxml2uml.sh $< -o $@
-%.svg:	%.uml
+%.svg:	%.puml
 	plantuml.sh $< -tsvg
 
 veryclean::
-	rm -f $(RULES:%.rules=%.uml) $(RULES:%.rules=%.svg)
+	rm -f $(RULES:%.rules=%.puml) $(RULES:%.rules=%.svg)
 
 .PRECIOUS:	%.scxml %.uml %.svg
 
 scxml:	$(RULES:%.rules=%.scxml)
-uml:	$(RULES:%.rules=%.uml)
+puml:	$(RULES:%.rules=%.puml)
 svg:	$(RULES:%.rules=%.svg)
 
 check:	$(RULES:%.rules=%.scxml)

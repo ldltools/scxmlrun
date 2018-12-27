@@ -42,12 +42,14 @@ ifeq	($(PROCESSOR), qtscxml)
 CPPFLAGS	+=	-DUSE_QTSCXML
 
 # Qt
-QTVERSION	?=	5.9.5
-CPPFLAGS 	+=	-I/usr/include/x86_64-linux-gnu/qt5
+QTINCDIR	?=	/usr/include/x86_64-linux-gnu/qt5
+#QTVERSION	?=	5.9.5
+QTVERSION	?=	$(shell gawk '/QTCORE_VERSION_STR/{print(gensub(/\"(.*)\"/,"\\1","g",$$3))}' $(QTINCDIR)/QtCore/qtcoreversion.h)
+CPPFLAGS 	+=	-I$(QTINCDIR)
 
-CPPFLAGS	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore
-CPPFLAGS	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/$(QTVERSION)
-CPPFLAGS	+=	-I/usr/include/x86_64-linux-gnu/qt5/QtCore/$(QTVERSION)/QtCore
+CPPFLAGS	+=	-I$(QTINCDIR)/QtCore
+CPPFLAGS	+=	-I$(QTINCDIR)/QtCore/$(QTVERSION)
+CPPFLAGS	+=	-I$(QTINCDIR)/QtCore/$(QTVERSION)/QtCore
 
 CPPFLAGS	+=	-fPIC
 CPPFLAGS	+=	-fdebug-prefix-map=/build/qtbase-opensource-src-oTRRwM/qtbase-opensource-src-$(QTVERSION)+dfsg=.
@@ -97,6 +99,8 @@ endif
 
 -include Makefile.common
 
+OBJS		:= $(filter-out $(BINS:%=%.o),$(OBJS))
+
 all::	$(BINS)
 
 $(BUILD_DIR)/scxmlrun:	$(OBJS) $(BUILD_DIR)/scxmlrun.o
@@ -111,5 +115,7 @@ install::	all
 	done
 
 clean::
+	find . -name '*~' | xargs rm -f
+
 veryclean::	clean
 	rm -f $(BINS)

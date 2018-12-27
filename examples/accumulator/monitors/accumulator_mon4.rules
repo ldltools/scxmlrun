@@ -1,3 +1,5 @@
+// monitor4
+
 protocol
 init; 
 day_close;
@@ -5,35 +7,52 @@ day_close;
 (_knockout; knockout + _not_knockout; (_under_strike + _over_strike); terminate)
 ;;
 
+variable
+is_over_strike : prop;
+  // - initially set to true
+  // - set to true when the latest price is above STRIKE_PRICE (event: _over_strike)
+  //   rule: on _over_strike ensure is_over_strike
+  // - set to false otherwise (event: _under_strike)
+  //   rule: on _under_strike ensure !is_over_strike
+
 property
 is_over_strike;
+
+// extra constraints
 !(<{is_over_strike}*>(last & is_over_strike));
+  // it never occurs that is_over_strike holds continuously through execution
 !(<{!is_over_strike}*>(last & !is_over_strike));
+  // it never occurs that !is_over_strike holds continuously through execution
 
 rule
-on init do {
+on init
+do
+{
     _data.KO_PRICE = _event.data.ko_price || 110;
     _data.STRIKE_PRICE = _event.data.strike_price || 90;
-};
+}
 
-on day_close raise _knockout + _not_knockout
+on day_close
+raise _knockout + _not_knockout
   // raise either "_knockout" or "_not_knockout"
   // in a non-deterministic manner
 {
     _data.price = _event.data.price;
     if (_data.price > _data.KO_PRICE)
-        __raiseEvent ("_knockout");
+        SCXML.raise ({"name":"_knockout"});
     else
-        __raiseEvent ("_not_knockout");
-};
+        SCXML.raise ({"name":"_not_knockout"});
+}
 
-on _not_knockout raise _under_strike + _over_strike
+on _not_knockout
+raise _under_strike + _over_strike
 {
     if (_data.price < _data.STRIKE_PRICE)
-        __raiseEvent ("_under_strike");
+        SCXML.raise ({"name":"_under_strike"});
     else
-        __raiseEvent ("_over_strike");
-};
+        SCXML.raise ({"name":"_over_strike"});
+}
+
 
 on _over_strike ensure is_over_strike;
 on _under_strike ensure !is_over_strike;

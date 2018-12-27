@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Wed Nov 14 15:50:21 JST 2018
+.\" Manual page created with latex2man on Thu Dec 27 12:46:54 2018
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -21,9 +21,10 @@ scxmlrun <option>* <scxmlfile>? <infile>?
 .PP
 .SH DESCRIPTION
 
-scxmlrun reads a state\-chart in SCXML from <scxmlfile> and 
-runs it against input events, 
-which can be provided from <infile> or via MQTT. 
+scxmlrun reads 
+a sequence of input events (from a local file <infile> or via MQTT), 
+processes them as defined in <scxmlfile>, 
+and transmits output events when instructed. 
 .PP
 .SH OPTIONS
 
@@ -33,7 +34,7 @@ which can be provided from <infile> or via MQTT.
 .PP
 .TP
 \fB\-i\fP <infile>
- reads lines of SCXML events (in JSON) from <infile> 
+ read (lines of) SCXML events (in JSON) from <infile> 
 .TP
 \fB\-o\fP <outfile>
  write output events (in JSON) to <outfile> 
@@ -42,30 +43,99 @@ which can be provided from <infile> or via MQTT.
  write trace info to <tracefile> 
 .PP
 .TP
-\fB\-\-mqtt\fP <host>
- specifiy <host> as the MQTT broker to connect to 
+\fB\-\-mqtt\fP
+ assume MQTT\-based I/O by default. 
+.TP
+\fB\-\-broker\fP <host>[:<port>]
+ specifiy <host> (at <port>) as the MQTT broker to connect to.
+.br
+(default: localhost:1883) 
 .TP
 \fB\-\-sub\fP <topic>
- subscribe to <topic> for input events 
+ subscribe to <topic> for input events.
+.br
+multiple topics can be specified as: \-\-sub t1 \-\-sub t2 \&.\&.\&. 
 .TP
 \fB\-\-pub\fP <topic>
- specify <topic> for output events 
+ specify <topic> as the default topic for output events (emitted by SCXML.send). 
 .TP
 \fB\-\-trace\-pub\fP <topic>
  specify <topic> for publishing trace info 
 .PP
 .TP
+\fB\-r\fP, \fB\-\-relay\fP
+ run \fBscxmlrun\fP
+as a MQTT \fIrepeater\fP,
+that is, 
+\fBscxmlrun\fP
+reads input events and transmits them without any interpretation. 
+No SCXML model should be specified in this mode. 
+.PP
+.TP
 \fB\-v\fP, \fB\-\-verbose\fP
- become verbose 
+ become verbose. 
 .TP
 \fB\-q\fP, \fB\-\-silent\fP
- stay quiet 
+ stay quiet. 
 .TP
 \fB\-V\fP, \fB\-\-version\fP
- show version info 
+ show version info. 
 .TP
 \fB\-h\fP, \fB\-\-help\fP
- show usage 
+ show usage. 
+.PP
+.SH EXAMPLES
+
+Consider the following simple SCXML model, which we here call "echo.scxml". 
+.PP
+.Vb
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q1">
+  <state id="q1">
+    <transition target="q2" event="echo">
+      <script>console.log (_event.data)</script>
+    </transition>
+  </state>
+  <final id="q2"/>
+</scxml>
+.Ve
+.PP
+.TP
+1.
+reading event(s) from a local file 
+.PP
+$ echo \&'{"event":{"name":"echo","data":"hello"}}\&' | scxmlrun echo.scxml
+.br
+hello
+.PP
+.TP
+2.
+reading event(s) via MQTT 
+.PP
+$ scxmlrun echo.scxml \-\-sub echo
+.br
+$ mosquitto_pub \-t echo \-m \&'{"event":{"name":"echo","data":"hello"}}\&'
+.br
+hello
+.PP
+.SH INPUT/OUTPUT FORMAT
+
+.PP
+Input and output of \fBscxmlrun\fP
+are SCXML events in the JSON format.
+.br
+Each event is a JSON object of the form: 
+.ce 100
+{"event":{"name":...,\&.\&.\&.},"type":"mqtt", "topic":..., \&.\&.\&.}
+.ce 0
+
+.PP
+See \fBhttps://www.w3.org/TR/scxml/#send\fP
+for the detail. 
+.PP
+Note that, as a \fBscxmlrun\fP\-specific
+feature, 
+"topic"\-key and its value can be included in each input/output event, 
+which is referred to when connecting to the MQTT broker. 
 .PP
 .SH SEE ALSO
 
@@ -73,12 +143,22 @@ rules2scxml
 .PP
 .SH AUTHOR
 
-\fBhttps://ldltools.github.io\fP
-.br
-\fBldltools@outlook.com\fP
+LDLTools development team at IBM Research. 
+.PP
+.TP
+.B *
+URL: \fBhttps://ldltools.github.io\fP
+.TP
+.B *
+Email: \fBldltools@outlook.com\fP
 .PP
 .SH COPYRIGHT
 
 (C) Copyright IBM Corp. 2018. 
+License Apache 2.0.
+.br
+.PP
+This is free software: you are free to change and redistribute it. 
+There is NO WARRANTY, to the extent permitted by law. 
 .PP
 .\" NOTE: This file is generated, DO NOT EDIT.

@@ -5,7 +5,8 @@ clean::
 	rm -f *~
 
 run:
-	scxmlrun echo.scxml echo.in
+#	scxmlrun echo.scxml echo.in
+	shelltest echo.conf
 
 run-mqtt:
-	./runtest.sh
+	shelltest passthru_echo.conf

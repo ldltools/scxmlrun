@@ -200,28 +200,43 @@ jsonomstream::~jsonomstream (void)
 jsonomstream&
 jsonomstream::write (nlohmann::json& obj)
 {
-    std::string str = obj.dump ();
-    return (write (str));
+    assert (obj.is_object ());
+    assert (obj["type"] == "mqtt");
 
-    /*
-    const char* msg = str.c_str ();
-    int len = str.length ();
-    int rslt = mosquitto_publish (_mosq, nullptr, _topic, len, msg, 0, false);
-    assert (rslt == MOSQ_ERR_SUCCESS);
+    std::string msg = obj.dump ();
 
-    return (*this);
-    */
+    const char* topic = nullptr;
+    if (obj.find ("topic") != obj.end ())
+    {
+        nlohmann::json topic_val = obj["topic"];
+        if (topic_val.is_string ())
+        {
+            std::string topic_str = topic_val;
+            topic = topic_str.c_str ();
+        }
+    }
+
+    return (write (msg.c_str (), topic, 1));
 }
 
 jsonomstream&
-jsonomstream::write (const std::string& str)
+jsonomstream::write (const std::string& msg)
 {
-    assert (_mosq && _topic);
-    const char* msg = str.c_str ();
-    int len = str.length ();
-    assert (len == strlen (msg));
-    //std::cerr << ";; jsonomstream::write: " << _topic << " " << msg << std::endl;
-    int qos = 1;
-    int rslt = mosquitto_publish (_mosq, nullptr, _topic, len, msg, qos, false);
+    return (write (msg.c_str (), _topic, 1));
+}
+
+jsonomstream&
+jsonomstream::write (const char* msg, const char* topic, int qos)
+{
+    assert (msg);
+    int len = strlen (msg);
+    const char* topic_ = (topic && strlen (topic) > 0) ? topic : _topic;
+    assert (topic_);
+    assert (0 <= qos && qos <= 2);
+
+    assert (_mosq);
+    int rslt = mosquitto_publish (_mosq, nullptr, topic_, len, msg, qos, false);
     assert (rslt == MOSQ_ERR_SUCCESS);
+
+    return (*this);
 }

@@ -1,13 +1,21 @@
 #
 
 usage:
-	@echo "usage: make launch|build|test"
+	@echo "usage: make [test | test-solidity | test-combined]"
 
-PROJECT_DIR	= .
-#CONTRACTS	= $(shell echo contracts/*.sol)
-CONTRACTS	= contracts/Ballot.sol
-#TESTS		= $(shell echo scenarios/*.js)
-TESTS		= scenarios/ballot_test.js
-GAS_LIMIT	= "8000000"
+# scxml
+test:
+	shelltest voting.conf
 
-include ../Makefile.truffle
+# solidity
+T_CONTRACTS	= contracts/Ballot.sol
+T_TESTS		= $(shell echo scenarios/Ballot_scenario{1,2}.js)
+T_GAS_LIMIT	= "8000000"
+
+-include ../Makefile.truffle
+
+test-solidity:	truffle-deploy truffle-test
+
+# solidity + scxml
+test-combined:	truffle-deploy
+	./runtest.sh monitors/monitor1.scxml scenarios/scenario1.js 

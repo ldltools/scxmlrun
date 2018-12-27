@@ -1,7 +1,7 @@
 #
 
 all::
-	@echo "usage: make run"
+	@echo "usage: make test"
 
 clean::;	rm -f *~
 
@@ -11,7 +11,7 @@ SCENARIOFILES	= $(TESTFILES:%.txml.json=scenarios/%.txt)
 OUTFILES	= $(TESTFILES:%.txml.json=out/%.out)
 TRACEFILES	= $(TESTFILES:%.txml.json=out/%.trace)
 
-RUNTEST		= ../../runtest.sh
+RUNTEST		= ../runtest.sh
 CONVERT		= ./convert.sh
 
 scenarios/%.txt:	%.txml.json
@@ -24,6 +24,7 @@ out/%.trace:	%.txml.scxml scenarios/%.txt
 
 all::	$(SCENARIOFILES)
 
+test:	$(TRACEFILES) check
 run:	$(TRACEFILES)
 check:
 	@n=0; nsucc=0; nfail=0;\

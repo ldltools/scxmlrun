@@ -12,6 +12,8 @@
 // limitations under the License.
 
 #include "qtscxmlproc.hpp"
+#include "esprimitives.hpp"
+#include "version.hpp"
 #include "moc_qtscxmlproc.hpp"
 
 #include <QtCore/QCoreApplication>
@@ -42,7 +44,7 @@ using namespace scxml;
 // --------------------------------------------------------------------------------
 
 qtscxmlproc::qtscxmlproc (void) :
-    scxmlproc (),
+    interpreter (),
     _application (nullptr),
     _machine (nullptr),
     _datamodel_name (nullptr),
@@ -52,7 +54,7 @@ qtscxmlproc::qtscxmlproc (void) :
 }
 
 qtscxmlproc::qtscxmlproc (QCoreApplication* app) :
-    scxmlproc (),
+    interpreter (),
     _application (app),
     _machine (nullptr),
     _datamodel_name (nullptr),
@@ -62,7 +64,7 @@ qtscxmlproc::qtscxmlproc (QCoreApplication* app) :
 }
 
 qtscxmlproc::qtscxmlproc (const qtscxmlproc& p) :
-    scxmlproc ()
+    interpreter ()
 {
     assert (false);
 }
@@ -464,7 +466,7 @@ qtscxmlproc::js_send (const QJsonObject& params)
 
     assert (send_t == "mqtt");
 
-    // topic (extra parameter for mqtt)
+    // topic (extra parameter for event transmission via mqtt)
     QString topic = "";
     if (params.contains ("topic") && params["topic"].isString ())
         topic = params["topic"].toString ();
@@ -507,10 +509,14 @@ qtscxmlproc::js_send (const QJsonObject& params)
                     {"origintype", origintype},
                     {"sendid", sendid},
                     {"invokeid", invokeid}}},
-         {"type", "mqtt"}};
+         {"type", "mqtt"}
+        };
 
+    // other "send" params (if exist)
+    if (target != "") obj["target"] = target.toStdString ();
     if (id != "") obj["id"] = id.toStdString ();
     if (idlocation != "") obj["idlocation"] = idlocation.toStdString ();
+    if (topic != "") obj["topic"] = topic.toStdString ();
 
     _eventout->write (obj);
 #endif
@@ -756,43 +762,6 @@ to_nlohmann (const QJsonObject obj)
 // monitor
 // --------------------------------------------------------------------------------
 
-/*
-class monitor : public QObject
-{
-Q_OBJECT
-
-public:
-    //monitor (void) : QObject () {}
-    //explicit monitor (monitor&) : QObject () {}
-    //explicit monitor (QObject* parent = 0) : QObject (parent) {}
-    //monitor (QObject* parent = 0) : QObject (parent) {}
-    //explicit monitor (QObject* parent = 0);
-    monitor ();
-    virtual ~monitor ();
-
-    void on_entry (bool active)
-    {
-    }
-
-    void on_exit (bool active)
-    {
-    }
-
-signals:
-
-public slots:
-    void log (const QString &label, const QString &msg)
-    //void log ()
-    {
-        std::cerr << "hello";
-    }
-
-};
-*/
-
-//monitor::monitor (void) {}
-//monitor::~monitor () {}
-
 void
 monitor::state_cb (const QString& name, bool active)
 {
@@ -811,14 +780,6 @@ monitor::state_cb (const QString& name, bool active)
     assert (_traceout);
     _traceout->write (obj);
 }
-
-/*
-void
-monitor::log (const QString &label, const QString &msg)
-{
-    qDebug () << "[log]" << label << " : " << msg;
-}
-*/
 
 // --------------------------------------------------------------------------------
 // setup
@@ -964,76 +925,26 @@ qtscxmlproc::setup (void)
 void
 qtscxmlproc::version (void)
 {
-    std::cerr << "QtCore\t\t"
+    std::cerr << "ScxmlRun\t\t"
+              << SCXMLRUN_VERSION
+              << std::endl;
+
+    std::cerr << "QtCore\t\t\t"
               << QT_VERSION_STR
               << std::endl;
 
-    std::cerr << "Mosquitto\t"
+    std::cerr << "Mosquitto\t\t"
               << LIBMOSQUITTO_MAJOR << "."
               << LIBMOSQUITTO_MINOR << "."
               << LIBMOSQUITTO_REVISION
               << std::endl;
 
     auto json_meta = nlohmann::json::meta ();
-    std::cerr << "JSON for C++\t"
+    std::cerr << "JSON for C++\t\t"
               << json_meta["version"]["major"] << "."
               << json_meta["version"]["minor"] << "."
               << json_meta["version"]["patch"]
               << std::endl;
-}
-
-// --------------------------------------------------------------------------------
-// QJSEngine hack
-// --------------------------------------------------------------------------------
-
-void
-_JSScxml::_raise (const QString str)
-{
-    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
-
-    //QJSValue js_val (str);
-    //qInfo () << ";; _JSScxml::raise:" << js_val.toString ();
-    //QVariant v = js_val.toVariant ();
-    // cf. http://doc.qt.io/qt-5/qjsvalue.html#toVariant
-
-    assert (_proc);
-    _proc->js_raise (obj);
-}
-
-void
-_JSScxml::_send (const QString str)
-{
-    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
-
-    //QJSValue js_val (str);
-    //qInfo () << ";; _JSScxml::send:" << js_val.toString ().toStdString ().c_str ();
-    //QVariant v = js_val.toVariant ();
-    // cf. http://doc.qt.io/qt-5/qjsvalue.html#toVariant
-    assert (_proc);
-    _proc->js_send (obj);
-}
-
-void
-_JSScxml::_cancel (const QString str)
-{
-    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
-    assert (_proc);
-    _proc->js_cancel (obj);
-}
-
-void
-_JSScxml::_invoke (const QString str)
-{
-    QJsonObject obj = QJsonDocument::fromJson (str.toUtf8 ()).object ();
-    assert (_proc);
-    _proc->js_invoke (obj);
-}
-
-void
-_JSConsole::_log (const QString msg)
-{
-    std::string str = msg.toStdString ();
-    qDebug () << "jsConsole: "<< str.c_str () << msg.size ();
 }
 
 void
@@ -1074,27 +985,11 @@ qtscxmlproc::_hack (void)
     QJSEngine::Extensions exts = QJSEngine::TranslationExtension | QJSEngine::ConsoleExtension;
     _engine->installExtensions (exts);
 
-    _JSScxml* scxml = new _JSScxml ();
-    scxml->_proc = this;
-    QJSValue scxml_val = _engine->newQObject (scxml);
-    global.setProperty ("SCXML", scxml_val);
-
-    // SCXML.raise
-    QJSValue raise_fun = _engine->evaluate ("function (obj) { SCXML._raise (JSON.stringify (obj)) }");
-    assert (raise_fun.isCallable ());
-    scxml_val.setProperty ("raise", raise_fun);
-    // SCXML.send
-    QJSValue send_fun = _engine->evaluate ("function (obj) { SCXML._send (JSON.stringify (obj)) }");
-    assert (send_fun.isCallable ());
-    scxml_val.setProperty ("send", send_fun);
-    // SCXML.cancel
-    QJSValue cancel_fun = _engine->evaluate ("function (obj) { SCXML._cancel (JSON.stringify (obj)) }");
-    assert (cancel_fun.isCallable ());
-    scxml_val.setProperty ("cancel", cancel_fun);
-    // SCXML.invoke
-    QJSValue invoke_fun = _engine->evaluate ("function (obj) { SCXML._invoke (JSON.stringify (obj)) }");
-    assert (invoke_fun.isCallable ());
-    scxml_val.setProperty ("invoke", invoke_fun);
+    //_JSScxml* scxml = new _JSScxml ();
+    //scxml->_proc = this;
+    //QJSValue scxml_val = _engine->newQObject (scxml);
+    //global.setProperty ("SCXML", scxml_val);
+    _JSScxml::intern (_engine, this);
 
     // declare _data as a global variable
     if (!global.hasProperty ("_data"))
@@ -1108,11 +1003,10 @@ qtscxmlproc::_hack (void)
     //_engine->installExtensions (exts);
 #if 0
     // console.log
-    _JSConsole* console = new _JSConsole ();
-    QJSValue console_val = _engine->newQObject (console);
-    global.setProperty ("console", console_val);
-    QJSValue log_fun = _engine->evaluate ("function (obj) { console._log (JSON.stringify (obj)) }");
-    console_val.setProperty ("log", log_fun);
+    //_JSConsole* console = new _JSConsole ();
+    //QJSValue console_val = _engine->newQObject (console);
+    //global.setProperty ("console", console_val);
+    _JSConsole::intern (_engine);
 #endif
 
 }

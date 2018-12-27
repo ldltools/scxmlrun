@@ -13,6 +13,5 @@
 - [blackjack](blackjack/README.md)
 
 ## Smart contracts and their monitors
-
 - [voting](voting/README.md) (ethereum)
 - [vulnerable](vulnerable/README.md) (ethereum)

@@ -14,7 +14,7 @@
 #ifndef USCXMLPROC_HPP
 #define USCXMLPROC_HPP
 
-#include "scxmlproc.hpp"
+#include "scxmlinterpreter.hpp"
 #include "uscxml/config.h"
 #include "uscxml/uscxml.h"
 
@@ -22,7 +22,7 @@
 
 namespace scxml {
 
-class uscxmlproc : public scxmlproc
+class uscxmlproc : public interpreter
 {
 public:
     virtual void load (const std::string& scxml_url);

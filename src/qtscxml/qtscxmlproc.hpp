@@ -14,7 +14,8 @@
 #ifndef QTSCXMLPROC_HPP
 #define QTSCXMLPROC_HPP
 
-#include "scxmlproc.hpp"
+#include "scxmlinterpreter.hpp"
+
 #include <QtCore/QCoreApplication>
 #include <QtScxml/QScxmlStateMachine>
 
@@ -33,7 +34,7 @@ namespace scxml {
 
 class monitor;
 
-class qtscxmlproc : public scxmlproc
+class qtscxmlproc : public interpreter
 {
 public:
     virtual void load (const std::string& scxml_url);
@@ -84,19 +85,14 @@ class monitor : public QObject
 Q_OBJECT
 
 public:
-    //monitor (void) : QObject () {}
-    //explicit monitor (monitor&) : QObject () {}
-    //explicit monitor (void) : QObject () {}
     monitor (QObject* parent = 0) : QObject (parent) {}
-    //monitor (QObject* parent = 0) : QObject (parent) {}
-    //explicit monitor (QObject* parent = 0);
+    ~monitor () {}
 
 public:
     void state_cb (const QString&, bool active);
 
 signals:
 public slots:
-    //void log (const QString&, const QString&);
 
 private:
     qtscxmlproc* _proc;
@@ -158,38 +154,6 @@ public:
     {
         return (reinterpret_cast<_QScxmlEcmaScriptDataModelPrivate*>(d_ptr.data ()));
     }
-};
-
-//
-class _JSScxml : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit _JSScxml (QObject* parent = nullptr) : QObject (parent) {}
-
-public slots:
-    void _raise (const QString);
-    void _send (const QString);
-    void _cancel (const QString);
-    void _invoke (const QString);
-
-private:
-    scxml::qtscxmlproc* _proc;
-
-    friend class scxml::qtscxmlproc;
-};
-
-//
-class _JSConsole : public QObject
-{
-    Q_OBJECT
-public:
-    explicit _JSConsole (QObject* parent = nullptr) : QObject (parent) {}
-
-signals:
-public slots:
-    void _log (const QString);
 };
 
 #endif

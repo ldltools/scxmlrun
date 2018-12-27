@@ -7,9 +7,9 @@ PREFIX	?= $(TOP_DIR)/_build/install
 SUBDIRS	= man
 
 all::
-	for d in $(SUBDIRS); do make -C $$d $@ || exit 1; done
+	for d in $(SUBDIRS); do $(MAKE) -C $$d $@ || exit 1; done
 install::	all
-	for d in $(SUBDIRS); do make -C $$d PREFIX=$(PREFIX) $@; done
+	for d in $(SUBDIRS); do $(MAKE) -C $$d PREFIX=$(PREFIX) $@; done
 clean::
-	for d in $(SUBDIRS); do make -C $$d $@ || exit 1; done
+	for d in $(SUBDIRS); do $(MAKE) -C $$d $@ || exit 1; done
 veryclean::

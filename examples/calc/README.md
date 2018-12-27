@@ -21,7 +21,7 @@ The following input events are included in [calc.in](calc.in).
 {"event" : {"name" : "terminate"}}
 ```
 
-## testing the statechart against the scenario
+## testing the scenario
 
 ```
 $ scxmlrun calc.scxml calc.in -o /dev/null  
@@ -50,13 +50,24 @@ In addition, you need a local copy of
 in this directory.
 
 Once these are done, invoke the ui along with the state machine by running `runtest.sh`.  
-The fancy calculator shown above should pop up.
 
 ```
 $ ./runtest.sh  
 
 calc.scxml has been invoked successfully  
-OPEN: "file:/.../calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"  
+OPEN: "file:/.../calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"
+```
 
+Now, you're ready to access the statemachine through your browser.
+As instucted above, open `calc_ui.html` with a few parameters.
+
+```
 $ firefox --new-tab "file:/.../calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"
 ```
+
+The fancy calculator shown above should pop up and work as you click its buttons.
+
+<details>
+<summary>calc with web ui</summary>
+<div><img src="calc.jpg" width="480"/></div>
+</details>
