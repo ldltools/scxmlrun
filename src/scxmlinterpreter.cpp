@@ -79,9 +79,6 @@ interpreter::eventin_open (mosquitto* mosq, std::list<const char*>& topics)
         //std::clog << ";; subscribe: " << *it << std::endl;
     }
 
-    //mosq_set_callbacks (mosq);
-    //mosquitto_user_data_set (mosq, this);
-    //mosquitto_message_callback_set (mosq, eventin_message_cb);
 }
 
 // --------------------------------------------------------------------------------
@@ -128,22 +125,6 @@ interpreter::traceout_open (const char* filename)
     //out->open (filename, std::fstream::out | std::fstream::app);
     //assert (fs->is_open () && fs->good ());
 }
-/*
-void
-interpreter::out_open (std::ostream*& out, const char* filename)
-{
-    assert (!out);
-
-    if (!filename) return;
-    //if (_traceout.is_open ()) return;
-
-    std::fstream* fs = new std::fstream (filename, std::fstream::out | std::fstream::app);
-    out = fs;
-    std::clog << ";; trace: " << filename << std::endl;
-    //out->open (filename, std::fstream::out | std::fstream::app);
-    assert (fs->is_open () && fs->good ());
-}
-*/
 
 void
 interpreter::traceout_open (mosquitto* mosq, const char* topic)
@@ -151,24 +132,10 @@ interpreter::traceout_open (mosquitto* mosq, const char* topic)
     assert (mosq);
     if (!topic) return;
 
-    //mosq_set_callbacks (mosq);
-    //mosquitto_user_data_set (mosq, this);
-
     assert (!_traceout);
     jsonomstream* s = new jsonomstream (mosq, topic);
     _traceout = s;
 
-    /*
-    for (auto it = topics.begin (); it != topics.end (); it++)
-    {
-        int rslt = mosquitto_subscribe (mosq, nullptr, *it, 0);
-        assert (rslt == MOSQ_ERR_SUCCESS);
-        std::clog << ";; subscribe: " << *it << std::endl;
-    }
-
-    mosquitto_user_data_set (mosq, _traceoute);
-    mosquitto_message_callback_set (mosq, eventin_message_cb);
-    */
 }
 
 // --------------------------------------------------------------------------------

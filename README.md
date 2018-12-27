@@ -11,7 +11,7 @@ with the following features:
 
 # Example: [echo](examples/echo/README.md)
 
-The following statechart receives a single _echo_ event, prints out its _data_ parameter onto the console, and then terminates.
+The following statechart, which we here call "echo.scxml", receives a single _echo_ event, prints out its _data_ parameter onto the console, and then terminates.
 
 ```
 <scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q1">  
@@ -77,6 +77,8 @@ which will be accessible through `man scxmlrun` after installation.
 ## Testing
 
 - run: `make -C ./tests test` once installation is done.
+
+  (You may need to install [shelltest](https://github.com/simonmichael/shelltestrunner).)
 
 # Installation on macOS/Darwin
 
