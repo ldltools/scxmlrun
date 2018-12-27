@@ -1,4 +1,4 @@
 #ifndef SCXMLRUN_VERSION_HPP
 #define SCXMLRUN_VERSION_HPP
-#define SCXMLRUN_VERSION "0.11.0rc"
+#define SCXMLRUN_VERSION "0.11.0"
 #endif
