@@ -12,7 +12,7 @@ scxmlrun <option>* <scxmlfile>? <infile>?
 \section{Description}
 scxmlrun reads
 a sequence of input events (from a local file <infile> or via MQTT),
-process them as defined in <scxmlfile>,
+processes them as defined in <scxmlfile>,
 and transmits output events when instructed.
 
 \section{Options}
@@ -23,7 +23,7 @@ and transmits output events when instructed.
 
 % -----
 \item[\Opt{-i} <infile>]
-  reads lines of SCXML events (in JSON) from <infile>
+  read (lines of) SCXML events (in JSON) from <infile>
 %
 \item[\Opt{-o} <outfile>]
   write output events (in JSON) to <outfile>
@@ -86,12 +86,12 @@ Consider the following simple SCXML model, which we here call "echo.scxml".
 \end{verbatim}
 
 \begin{enumerate}
-\item file-in/file-out
+\item reading event(s) from a local file
 
 \texttt{$ echo '\LBr"event":\LBr"name":"echo","data":"hello"\RBr\RBr' | scxmlrun echo.scxml}\\
 \texttt{hello}
 
-\item mqtt-in/file-out
+\item reading event(s) via MQTT
 
 \texttt{$ scxmlrun echo.scxml --sub echo}\\
 \texttt{$ mosquitto\_pub -t echo -m '\LBr"event":\LBr"name":"echo","data":"hello"\RBr\RBr'}\\

@@ -85,26 +85,35 @@ _JSScxml::_invoke (const QString str)
 }
 
 void
-_JSScxml::intern (QJSEngine* e, QJSValue* v)
+_JSScxml::intern (QJSEngine* e, scxml::qtscxmlproc* p)
 {
-    assert (e && v);
+    assert (e && p);
+
+    _JSScxml* scxml = new _JSScxml ();
+    scxml->_proc = p;
+    QJSValue scxml_val = e->newQObject (scxml);
+    QJSValue global = e->globalObject ();
+    assert (global.isObject ());
+    assert (!global.hasProperty ("SCXML"));
+    global.setProperty ("SCXML", scxml_val);
+    // scxml_val points to the global "SCXML" object
 
     // SCXML.raise
     QJSValue raise_fun = e->evaluate ("function (obj) { SCXML._raise (JSON.stringify (obj)) }");
     assert (raise_fun.isCallable ());
-    v->setProperty ("raise", raise_fun);
+    scxml_val.setProperty ("raise", raise_fun);
     // SCXML.send
     QJSValue send_fun = e->evaluate ("function (obj) { SCXML._send (JSON.stringify (obj)) }");
     assert (send_fun.isCallable ());
-    v->setProperty ("send", send_fun);
+    scxml_val.setProperty ("send", send_fun);
     // SCXML.cancel
     QJSValue cancel_fun = e->evaluate ("function (obj) { SCXML._cancel (JSON.stringify (obj)) }");
     assert (cancel_fun.isCallable ());
-    v->setProperty ("cancel", cancel_fun);
+    scxml_val.setProperty ("cancel", cancel_fun);
     // SCXML.invoke
     QJSValue invoke_fun = e->evaluate ("function (obj) { SCXML._invoke (JSON.stringify (obj)) }");
     assert (invoke_fun.isCallable ());
-    v->setProperty ("invoke", invoke_fun);
+    scxml_val.setProperty ("invoke", invoke_fun);
 }
 
 // --------------------------------------------------------------------------------
@@ -119,9 +128,18 @@ _JSConsole::_log (const QString msg)
 }
 
 void
-_JSConsole::intern (QJSEngine* e, QJSValue* v)
+_JSConsole::intern (QJSEngine* e)
 {
-    assert (e && v);
+    assert (e);
+    QJSValue global = e->globalObject ();
+    assert (global.isObject ());
+    if (global.hasProperty ("console")) return;
+
+    _JSConsole* console = new _JSConsole ();
+    QJSValue console_val = e->newQObject (console);
+    global.setProperty ("console", console_val);
+    // console_val points to the global "console" object
+
     QJSValue log_fun = e->evaluate ("function (obj) { console._log (JSON.stringify (obj)) }");
-    v->setProperty ("log", log_fun);
+    console_val.setProperty ("log", log_fun);
 }

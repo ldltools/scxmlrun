@@ -1,6 +1,6 @@
 # v0.11.0rc
 
-- [new] "_event repeater_" (invoked with "-r") which transparently transmits input events without any interpretation.
+- [new] introduce _"event repeater"_ (invoked with "-r") which transparently transmits incoming events without any interpretation.
 
 - add/update examples
 - add `*.conf` files for testing with [shelltest](https://github.com/simonmichael/shelltestrunner)

@@ -21,7 +21,7 @@ The following input events are included in [calc.in](calc.in).
 {"event" : {"name" : "terminate"}}
 ```
 
-## testing the statechart against the scenario
+## testing the scenario
 
 ```
 $ scxmlrun calc.scxml calc.in -o /dev/null  
@@ -65,7 +65,7 @@ As instucted above, open `calc_ui.html` with a few parameters.
 $ firefox --new-tab "file:/.../calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"
 ```
 
-The fancy calculator shown above should pop up and work as you click.
+The fancy calculator shown above should pop up and work as you click its buttons.
 
 <details>
 <summary>calc with web ui</summary>

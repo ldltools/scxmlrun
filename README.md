@@ -72,23 +72,27 @@ which will be accessible through `man scxmlrun` after installation.
   run: `apt-get install nlohmann-json-dev`
 
 ## Build
-- run: `make && make install` in this directory  
+- run: `make && make install` in this directory.
 
 ## Testing
 
-- run: `make test` in the `tests` directory.
+- run: `make -C ./tests test` once installation is done.
 
-## Remark on replacing the underlying SCXML engine
+# Installation on macOS/Darwin
 
-Although the default SCXML engine of scxmlrun is
-[QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html),
-it is designed to easily migrate to another one.
+Refer to [this note](docs/macos.md).
+
+# Remarks
+
+## replacing the underlying SCXML engine
+
+Although
+[QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html)
+is assumed as the default SCXML engine of scxmlrun,
+it is not difficult to switch to another one.
 
 For instance,
 [uSCXML](https://github.com/tklab-tud/uscxml) can be used
 instead of QtSCXML.  
 To try this option, see [this note](docs/uScxml.md).
 
-# Installation on macOS/Darwin
-
-Refer to [this note](docs/macos.md).

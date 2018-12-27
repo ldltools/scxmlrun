@@ -45,7 +45,8 @@ public slots:
     void _invoke (const QString);
 
 public:
-    static void intern (QJSEngine*, QJSValue*);
+    static void intern (QJSEngine*, scxml::qtscxmlproc*);
+    // intern: SCXML.raise/send/cancel/invoke
 
 private:
     scxml::qtscxmlproc* _proc;
@@ -61,7 +62,8 @@ public:
     explicit _JSConsole (QObject* parent = nullptr) : QObject (parent) {}
 
 public:
-    static void intern (QJSEngine*, QJSValue*);
+    static void intern (QJSEngine*);
+     // intern: console.log
 
 signals:
 public slots:

@@ -34,7 +34,7 @@ namespace scxml {
 
 class monitor;
 
-class qtscxmlproc : public scxmlproc
+class qtscxmlproc : public interpreter
 {
 public:
     virtual void load (const std::string& scxml_url);
@@ -85,19 +85,14 @@ class monitor : public QObject
 Q_OBJECT
 
 public:
-    //monitor (void) : QObject () {}
-    //explicit monitor (monitor&) : QObject () {}
-    //explicit monitor (void) : QObject () {}
     monitor (QObject* parent = 0) : QObject (parent) {}
-    //monitor (QObject* parent = 0) : QObject (parent) {}
-    //explicit monitor (QObject* parent = 0);
+    ~monitor () {}
 
 public:
     void state_cb (const QString&, bool active);
 
 signals:
 public slots:
-    //void log (const QString&, const QString&);
 
 private:
     qtscxmlproc* _proc;

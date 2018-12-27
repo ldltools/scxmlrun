@@ -22,7 +22,7 @@
 
 namespace scxml {
 
-class scxmlproc
+class interpreter
 {
 public:
     virtual void load (const std::string& scxml_url) = 0;
@@ -56,9 +56,9 @@ protected:
     jsonostream* _traceout;
 
 public:
-    scxmlproc (void);
-    scxmlproc (const scxmlproc&);
-    ~scxmlproc (void);
+    interpreter (void);
+    interpreter (const interpreter&);
+    ~interpreter (void);
 
 public:
     virtual void verbosity_set (int v) = 0;

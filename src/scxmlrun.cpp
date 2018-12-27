@@ -84,7 +84,7 @@ extra_synopsis (void)
 }
 
 static void
-mosq_connect (mosquitto*& mosq, const char* host, int port, scxml::scxmlproc* proc, bool& connected)
+mosq_connect (mosquitto*& mosq, const char* host, int port, scxml::interpreter* proc, bool& connected)
 {
     if (mosq && connected) return;
 
@@ -293,7 +293,7 @@ main (int argc, char** argv)
     assert (tracetype != _NONE);
 
     // instantiate proc and load scxml
-    scxml::scxmlproc* proc = nullptr;
+    scxml::interpreter* proc = nullptr;
     if (mode == _INTERPRETER)
     {
 #ifdef USE_QTSCXML

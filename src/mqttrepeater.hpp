@@ -18,7 +18,7 @@
 
 namespace scxml {
 
-class mqttrepeater : public scxmlproc
+class mqttrepeater : public interpreter
 {
 public:
     virtual void load (const std::string&);

@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Wed Dec 26 15:47:09 2018
+.\" Manual page created with latex2man on Thu Dec 27 12:46:54 2018
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -23,7 +23,7 @@ scxmlrun <option>* <scxmlfile>? <infile>?
 
 scxmlrun reads 
 a sequence of input events (from a local file <infile> or via MQTT), 
-process them as defined in <scxmlfile>, 
+processes them as defined in <scxmlfile>, 
 and transmits output events when instructed. 
 .PP
 .SH OPTIONS
@@ -34,7 +34,7 @@ and transmits output events when instructed.
 .PP
 .TP
 \fB\-i\fP <infile>
- reads lines of SCXML events (in JSON) from <infile> 
+ read (lines of) SCXML events (in JSON) from <infile> 
 .TP
 \fB\-o\fP <outfile>
  write output events (in JSON) to <outfile> 
@@ -101,7 +101,7 @@ Consider the following simple SCXML model, which we here call "echo.scxml".
 .PP
 .TP
 1.
-file\-in/file\-out 
+reading event(s) from a local file 
 .PP
 $ echo \&'{"event":{"name":"echo","data":"hello"}}\&' | scxmlrun echo.scxml
 .br
@@ -109,7 +109,7 @@ hello
 .PP
 .TP
 2.
-mqtt\-in/file\-out 
+reading event(s) via MQTT 
 .PP
 $ scxmlrun echo.scxml \-\-sub echo
 .br

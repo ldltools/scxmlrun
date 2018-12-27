@@ -22,7 +22,7 @@
 
 namespace scxml {
 
-class uscxmlproc : public scxmlproc
+class uscxmlproc : public interpreter
 {
 public:
     virtual void load (const std::string& scxml_url);

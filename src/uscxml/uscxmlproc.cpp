@@ -41,13 +41,13 @@ using namespace XERCESC_NS;
 // --------------------------------------------------------------------------------
 
 uscxmlproc::uscxmlproc (void) :
-    scxmlproc (),
+    scxml::interpreter (),
     _trace_monitor (nullptr)
 {
 }
 
 uscxmlproc::uscxmlproc (const uscxmlproc& p) :
-    scxmlproc ()
+    scxml::interpreter ()
 {
     assert (false);
 }
@@ -319,7 +319,7 @@ public:
     }
 
 private:
-    scxmlproc* _proc;
+    scxml::interpreter* _proc;
     jsonostream* _traceout;
     //_JSCDataModel* _datamodel;
 

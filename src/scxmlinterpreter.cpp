@@ -26,7 +26,7 @@ using namespace scxml;
 // ctor/dtor
 // --------------------------------------------------------------------------------
 
-scxmlproc::scxmlproc (void) :
+interpreter::interpreter (void) :
     _eventin (nullptr),
     _eventout (nullptr),
     _traceout (nullptr),
@@ -35,13 +35,13 @@ scxmlproc::scxmlproc (void) :
 {
 }
 
-scxmlproc::scxmlproc (const scxmlproc& p) :
-    scxmlproc ()
+interpreter::interpreter (const interpreter& p) :
+    interpreter ()
 {
     assert (false);
 }
 
-scxmlproc::~scxmlproc (void)
+interpreter::~interpreter (void)
 {
     if (_eventin) delete _eventin;
     if (_traceout) delete _traceout;
@@ -52,7 +52,7 @@ scxmlproc::~scxmlproc (void)
 // --------------------------------------------------------------------------------
 
 void
-scxmlproc::eventin_open (const char* filename)
+interpreter::eventin_open (const char* filename)
 {
     assert (!_eventin);
 
@@ -62,7 +62,7 @@ scxmlproc::eventin_open (const char* filename)
 }
 
 void
-scxmlproc::eventin_open (mosquitto* mosq, std::list<const char*>& topics)
+interpreter::eventin_open (mosquitto* mosq, std::list<const char*>& topics)
 {
     assert (mosq);
     if (topics.size () == 0) return;
@@ -89,7 +89,7 @@ scxmlproc::eventin_open (mosquitto* mosq, std::list<const char*>& topics)
 // --------------------------------------------------------------------------------
 
 void
-scxmlproc::eventout_open (const char* filename)
+interpreter::eventout_open (const char* filename)
 {
     assert (!_eventout);
 
@@ -99,7 +99,7 @@ scxmlproc::eventout_open (const char* filename)
 }
 
 void
-scxmlproc::eventout_open (mosquitto* mosq, const char* topic)
+interpreter::eventout_open (mosquitto* mosq, const char* topic)
 {
     assert (mosq);
     if (!topic) return;
@@ -115,7 +115,7 @@ scxmlproc::eventout_open (mosquitto* mosq, const char* topic)
 // --------------------------------------------------------------------------------
 
 void
-scxmlproc::traceout_open (const char* filename)
+interpreter::traceout_open (const char* filename)
 {
     assert (!_traceout);
 
@@ -130,7 +130,7 @@ scxmlproc::traceout_open (const char* filename)
 }
 /*
 void
-scxmlproc::out_open (std::ostream*& out, const char* filename)
+interpreter::out_open (std::ostream*& out, const char* filename)
 {
     assert (!out);
 
@@ -146,7 +146,7 @@ scxmlproc::out_open (std::ostream*& out, const char* filename)
 */
 
 void
-scxmlproc::traceout_open (mosquitto* mosq, const char* topic)
+interpreter::traceout_open (mosquitto* mosq, const char* topic)
 {
     assert (mosq);
     if (!topic) return;
@@ -176,7 +176,7 @@ scxmlproc::traceout_open (mosquitto* mosq, const char* topic)
 // --------------------------------------------------------------------------------
 
 void
-scxmlproc::mosq_set_callbacks (mosquitto* mosq)
+interpreter::mosq_set_callbacks (mosquitto* mosq)
 {
     mosquitto_user_data_set (mosq, this);
     mosquitto_disconnect_callback_set (mosq, mosq_disconnect_cb);
@@ -185,7 +185,7 @@ scxmlproc::mosq_set_callbacks (mosquitto* mosq)
 }
 
 void
-scxmlproc::eventin_message_cb (mosquitto* mosq, void* obj, const mosquitto_message* msg)
+interpreter::eventin_message_cb (mosquitto* mosq, void* obj, const mosquitto_message* msg)
 {
     //std::clog << ";; message[" << msg->topic << "]: ";
     const int len = msg->payloadlen;
@@ -195,7 +195,7 @@ scxmlproc::eventin_message_cb (mosquitto* mosq, void* obj, const mosquitto_messa
     //std::clog << *str << std::endl;
 
     assert (obj);
-    scxmlproc* proc = (scxmlproc*) obj;	// ** insecure
+    interpreter* proc = (interpreter*) obj;	// ** insecure
     assert (proc);
     jsonimstream* s = (jsonimstream*) proc->_eventin;
     assert (s && &s->broker () == mosq);
@@ -204,13 +204,13 @@ scxmlproc::eventin_message_cb (mosquitto* mosq, void* obj, const mosquitto_messa
 }
 
 void
-scxmlproc::mosq_disconnect_cb (mosquitto* mosq, void* obj, int rc)
+interpreter::mosq_disconnect_cb (mosquitto* mosq, void* obj, int rc)
 {
     //std::cerr << ";; mosquitto on_disconnect " << rc << std::endl;
 }
 
 void
-scxmlproc::mosq_publish_cb (mosquitto* mosq, void* obj, int mid)
+interpreter::mosq_publish_cb (mosquitto* mosq, void* obj, int mid)
 {
     //std::cerr << ";; mosquitto on_publish " << mid << std::endl;
 }
