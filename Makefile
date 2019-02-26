@@ -30,11 +30,9 @@ tar:	veryclean
 DOCKER_IMAGE	= ldltools/scxmlrun
 .PHONY:	$(DOCKER_IMAGE)-dev $(DOCKER_IMAGE)
 $(DOCKER_IMAGE)-dev:
-	docker images | grep -q '^ldltools/ldlsat-dev' || exit 1
 	docker images | grep -q "^$@ " && { echo "** $@ exists"; exit 0; } ||\
 	docker build --target builder -t $@ .
 $(DOCKER_IMAGE):
-	docker images | grep -q '^ldltools/ldlsat-dev' || exit 1
 	docker images | grep -q "^$@ " && { echo "** $@ exists"; exit 0; } ||\
 	docker build -t $@ .
 
