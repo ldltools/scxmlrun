@@ -72,13 +72,13 @@ which will be accessible through `man scxmlrun` after installation.
   run: `apt-get install nlohmann-json-dev`
 
 ## Build
-- run: `make && make install` in this directory.
+- run: `make && make install` in the top directory.
 
 ## Testing
 
 - run: `make -C ./tests test` once installation is done.
 
-  (You may need to install [shelltest](https://github.com/simonmichael/shelltestrunner).)
+  Note: you may need to install [shelltest](https://github.com/simonmichael/shelltestrunner) (by running `apt-get install shelltestrunner`).
 
 # Installation on macOS/Darwin
 

@@ -201,7 +201,7 @@ jsonomstream&
 jsonomstream::write (nlohmann::json& obj)
 {
     assert (obj.is_object ());
-    assert (obj["type"] == "mqtt");
+    //assert (obj["type"] == "mqtt");
 
     std::string msg = obj.dump ();
 

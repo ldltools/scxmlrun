@@ -148,7 +148,7 @@ main (int argc, char** argv)
 
     for (int i = 1; i < argc; i++)
     {
-        if (!strcmp (argv[i], "-m") || !strncmp (argv[i], "--model", 3))
+        if (!strcmp (argv[i], "-m") || !strncmp (argv[i], "--model", 5))
             scxmlfile = argv[++i];
 
         else if (!strcmp (argv[i], "-i"))
@@ -160,7 +160,7 @@ main (int argc, char** argv)
 
         else if (!strncmp (argv[i], "--mqtt", 6))
             intype = outtype = tracetype = _MQTT; // this may be changed later
-        else if (!strcmp (argv[i], "-b") || !strncmp (argv[i], "--broker", 3))
+        else if (!strcmp (argv[i], "-b") || !strncmp (argv[i], "--broker", 5))
         {
             mqtt_host = argv[++i];
             const char* found = strchr (mqtt_host, ':');
@@ -176,12 +176,12 @@ main (int argc, char** argv)
                 mqtt_host = host;
             }
         }
-        else if (!strncmp (argv[i], "--sub", 3))
+        else if (!strncmp (argv[i], "--sub", 5))
             subs.push_back (argv[++i]);
-        else if (!strncmp (argv[i], "--pub", 3))
+        else if (!strncmp (argv[i], "--pub", 5))
             pub = argv[++i];
 
-        else if (!strcmp (argv[i], "-r") || !strcmp (argv[i], "--relay"))
+        else if (!strcmp (argv[i], "-r") || !strncmp (argv[i], "--relay", 5))
         {
             mode = _REPEATER;
             scxmlfile = "/dev/null";
@@ -240,7 +240,7 @@ main (int argc, char** argv)
             subs.push_back ("scxmlrun");
     if (infile)
         intype = _FILE;
-    if (subs.size () > 0)
+    else if (subs.size () > 0)
     {
         assert (intype != _FILE);
         assert (mqtt_host);
@@ -285,7 +285,6 @@ main (int argc, char** argv)
         tracetype = _FILE;
     if (trace_pub)
     {
-        assert (tracetype == _NONE);
         assert (mqtt_host);
         tracetype = _MQTT;
     }
@@ -347,6 +346,7 @@ main (int argc, char** argv)
         break;
     default:
         assert (false);
+        std::cerr << "** input type unspecified\n";
         return (-1);
     }
 
@@ -366,6 +366,7 @@ main (int argc, char** argv)
         break;
     default:
         assert (false);
+        std::cerr << "** output type unspecified\n";
         return (-1);
     }
 
@@ -384,6 +385,7 @@ main (int argc, char** argv)
         break;
     default:
         assert (false);
+        std::cerr << "** trace type unspecified\n";
         return (-1);
     }
 

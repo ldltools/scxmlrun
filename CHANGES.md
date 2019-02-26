@@ -1,3 +1,5 @@
+# v0.12.0rc
+
 # v0.11.0 (2018-12-27)
 
 - [new] introduce _"event repeater"_ (invoked with "-r") which transparently transmits incoming events without any interpretation.

@@ -3,6 +3,7 @@ _build/
 tmp/
 trash/
 obsolete/
+CHANGES.html
 README.html
 .DS_Store
 *~
