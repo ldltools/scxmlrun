@@ -32,7 +32,7 @@ hello
 ## Reading event(s) via MQTT
 
 ```
-$ scxmlrun echo.scxml --sub echo  
+$ scxmlrun echo.scxml --sub echo &  
 $ mosquitto_pub -t echo -m '{"event":{"name":"echo","data":"world"}}'  
 world
 ```

@@ -177,7 +177,11 @@ qtscxmlproc::step (void)
 {
     qDebug () << ";; step";
 
-    assert (_eventin);
+    if (!_machine->isRunning ())
+    {
+        _application->quit ();
+        return;
+    }
     //assert (_machine->isRunning ());
 
     QScxmlStateMachinePrivate* smp = ((_QScxmlStateMachine*) _machine)->d ();
@@ -187,6 +191,7 @@ qtscxmlproc::step (void)
     //    queueProcessEvents, called from submitEvent(e), returns without invoking doProcessEvents.
     //    then the event, e, could remain in the queue without being processed.
 
+    assert (_eventin);
     QScxmlEvent* e = new QScxmlEvent ();
     try { event_read (*e); }
     catch (std::runtime_error ex)
