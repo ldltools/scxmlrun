@@ -705,7 +705,7 @@ to_nlohmann (const QVariant v)
         //return to_nlohmann (v.toJsonObject ());
         return to_nlohmann (v.toMap ());
     default:
-        {}
+        qDebug () << ";; unknown QVariant type";
     }
 
     return (to_nlohmann (v.toJsonValue ()));
@@ -973,17 +973,22 @@ qtscxmlproc::_hack (void)
     QJSValue global = _engine->globalObject ();
     assert (global.isObject ());
 
-    // system variables
-    QJSValue _name = global.property ("_name");
-    qInfo () << ";; _name:" << _name.toString ();
+    // system variables: _event, _sessionid, _name, _ioprocessors, _x
+    // https://www.w3.org/TR/scxml/#SystemVariables
     QJSValue _sessionid = global.property ("_sessionid");
     qInfo () << ";; _sessionid:" << _sessionid.toString ();
 
+    QJSValue _name = global.property ("_name");
+    qInfo () << ";; _name:" << _name.toString ();
+
+    // _ioprocessors:
+    // - http://www.w3.org/TR/scxml/#SCXMLEventProcessor (default)
+    // - http://www.w3.org/TR/scxml/#BasicHTTPEventProcessor (optional) -- not supported by QtSCXML
     QJSValue _ioprocessors = global.property ("_ioprocessors");
-    assert (_ioprocessors.isObject ());
-    qInfo () << ";; _ioprocessors:" << _ioprocessors.toString ();
-    QJSValue loc = _engine->evaluate ("_ioprocessors.scxml.location");
-    qInfo () << ";; _ioprocessors.scxml.location:" << loc.toString ();
+    assert (_ioprocessors.isObject () && _ioprocessors.hasProperty ("scxml"));
+    qInfo () << ";; _ioprocessors.scxml:" << _ioprocessors.property ("scxml").toString ();
+    QJSValue scxml_loc = _engine->evaluate ("_ioprocessors.scxml.location");
+    qInfo () << ";; _ioprocessors.scxml.location:" << scxml_loc.toString ();
     // QtSCXML only supports: <send type="http://www.w3.org/TR/scxml/#SCXMLEventProcessor"...>
 
     // JSEngine extension

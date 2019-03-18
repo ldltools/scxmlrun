@@ -38,6 +38,7 @@
 static void
 synopsis (const char* prog)
 {
+    std::cout << prog << " v" << SCXMLRUN_VERSION << "\n";
     std::cout << "usage: " << prog << " <option>* <scxmlfile>? <infile>?\n";
     std::cout << "options\n";
     std::cout << "  -m <scxmlfile>\t"
@@ -200,13 +201,11 @@ main (int argc, char** argv)
         }
         else if (!strcmp (argv[i], "-h") || !strcmp (argv[i], "--help"))
         {
-            std::cout << "scxmlrun v" << SCXMLRUN_VERSION << std::endl;
             synopsis (argv[0]);
             return 0;
         }
         else if (!strcmp (argv[i], "-hh"))
         {
-            std::cout << "scxmlrun v" << SCXMLRUN_VERSION << std::endl;
             synopsis (argv[0]); extra_synopsis ();
             return 0;
         }

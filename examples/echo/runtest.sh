@@ -71,4 +71,5 @@ done
 
 # clean up
 rm -f .echo_done
+USER=${USER:-$(id -u -n)}
 test $(pgrep -u $USER scxmlrun | wc -l) -eq 0 || { echo "** scxmlrun is running" > /dev/stderr; pkill -u $USER scxmlrun; exit 1; }

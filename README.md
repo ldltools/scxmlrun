@@ -38,7 +38,7 @@ world
 ```
 
 Check out [more examples](examples/README.md) if you are interested.  
-For the usage of _scxmlrun_, see [the man page](docs/man/scxmlrun.man)
+For the usage of _scxmlrun_, see [the man page](docs/man/scxmlrun.html)
 which will be accessible through `man scxmlrun` after installation.
 
 # Installation on Docker
