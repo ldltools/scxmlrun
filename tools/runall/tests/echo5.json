@@ -1,0 +1,7 @@
+// let-binding
+{"process": {"variable": {"name": "echo",
+			  "process": {"path": "../../../examples/echo/echo.scxml"}},
+	     "process": {"name": "echo"}},
+ "input": {"events": [{"event": {"name": "echo", "data": "hello"}}, {"event": {"name": "quit"}}]},
+ "output": {"path": "/dev/stdout"}
+}

@@ -32,6 +32,7 @@
 #include <list>
 #include <sstream>
 #include <string>
+#include <cstdlib>
 #include <cassert>
 //#include <thread>
 
@@ -135,8 +136,11 @@ main (int argc, char** argv)
     const char* tracefile = NULL;
 
     // in/out via MQTT
-    const char* mqtt_host = "localhost";  // broker
+    const char* mqtt_host = secure_getenv ("MQTT_HOST");  // broker
+    if (!mqtt_host) mqtt_host = "localhost";
     int mqtt_port = 1883;
+    const char* mqtt_port_str = secure_getenv ("MQTT_PORT");
+    if (mqtt_port_str) sscanf (mqtt_port_str, "%d", &mqtt_port);
     std::list<const char*> subs;
     const char* pub = NULL;
     const char* trace_pub = NULL;

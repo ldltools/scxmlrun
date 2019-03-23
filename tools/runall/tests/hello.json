@@ -1,0 +1,4 @@
+{"process": {"path": "../../../examples/hello/hello.scxml"},
+ "input": {"path": "/dev/null"},
+ "output": {"path": "/dev/null"}
+}
