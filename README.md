@@ -41,7 +41,7 @@ To see how SCXML processes interact with each other via MQTT,
 take a look at the [ping\_pong](examples/ping_pong/README.md) example.  
 
 To browse examples,
-check out [more examples](examples/README.md).  
+check out [this list](examples/README.md).  
 For the usage of _scxmlrun_, see [the man page](docs/man/scxmlrun.html)
 which will be accessible through `man scxmlrun` after installation.
 

@@ -70,7 +70,7 @@ to run this script, try:
 $ echo '{"event": {"name": "ping", "data": {"count": 2}}}' | bash ping_pong_mqtt.sh  
 [ping] 2  
 [pong] 1  
-[ping] 0
+[ping] 0  
 ```
 
 or more simply, 
@@ -89,7 +89,9 @@ $ mosquitto_sub -t ping -t pong | jq -c '.event.name, .event.data?'
 "pong"  
 {"count":1}  
 "ping"  
-{"count":0}
+{"count":0}  
+"quit"  
+{"die_alone":1}
 ```
 
 
