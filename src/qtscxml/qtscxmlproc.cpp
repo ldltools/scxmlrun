@@ -425,14 +425,37 @@ qtscxmlproc::js_send (const QJsonObject& params)
     qInfo () << "scxmlrun: event_send:" << params;
     assert (_eventout);
 
-    assert (params.contains ("event") || params.contains ("eventexpr"));
+    assert (!params.contains ("event") || !params.contains ("eventexpr"));
     // event
-    QJsonObject e = params["event"].toObject ();
+    QJsonObject e;
+    if (params.contains ("event"))
+        e = params["event"].toObject ();
+    // eventexpr
+    if (params.contains ("eventexpr"))
+    {
+        if (params.contains ("event"))
+        {
+            // ** should raise an error??
+        }
+        // e = ... (not implemented)
+    }
+    assert (!e.empty ());
 
+    assert (!params.contains ("target") || !params.contains ("targetexpr"));
     // target (uri)
     QString target = "";
     if (params.contains ("target") && params["target"].isString ())
         target = params["target"].toString ();
+    // targetexpr
+    QString targetexpr = "";
+    if (params.contains ("targetexpr") && params["targetexpr"].isString ())
+    {
+        if (params.contains ("target"))
+        {
+            // ** should raise an error??
+        }
+        targetexpr = params["targetexpr"].toString ();
+    }
 
     // id (xml:id)
     QString id = "";
@@ -447,14 +470,32 @@ qtscxmlproc::js_send (const QJsonObject& params)
     // delay (duration)
     // namelist (list of locations)
 
+    assert (!params.contains ("type") || !params.contains ("typeexpr"));
     // type (uri)
-    QString send_t = "mqtt";
-      // short form
-      // Processors MAY define short form notations as an authoring convenience (e.g., "scxml" as equivalent to http://www.w3.org/TR/scxml/#SCXMLEventProcessor).
+    QString send_t = "";
     if (params.contains ("type") && params["type"].isString ())
         send_t = params["type"].toString ();
+    // typeexpr
+    if (params.contains ("typeexpr"))
+    {
+        if (params.contains ("type"))
+        {
+            // ** should raise an error??
+        }
+        // sent_t = ... (not implemented)
+    }
+    // fallback
+    if (send_t == "")
+        if (params.contains ("topic") && params["topic"].isString ())
+            send_t = "mqtt";
+        else
+            send_t = "unspecified";
+      // short form
+      // Processors MAY define short form notations as an authoring convenience (e.g., "scxml" as equivalent to http://www.w3.org/TR/scxml/#SCXMLEventProcessor).
+    assert (send_t != "");
 
-    if (send_t != "mqtt")
+    // non-mqtt case
+    if (send_t != "mqtt" && send_t != "unspecified")
     {
         if (send_t == "scxml" || send_t == "http://www.w3.org/TR/scxml/#SCXMLEventProcessor")
         {
@@ -471,7 +512,7 @@ qtscxmlproc::js_send (const QJsonObject& params)
         return;
     }
 
-    assert (send_t == "mqtt");
+    assert (send_t == "mqtt" || send_t == "unspecified");
 
     // topic (extra parameter for event transmission via mqtt)
     QString topic = "";
@@ -501,6 +542,7 @@ qtscxmlproc::js_send (const QJsonObject& params)
     // origintype
     nlohmann::json origintype = nullptr;
     if (e.contains ("origintype")) origin = e["origintype"].toString ().toStdString ();
+
     // sendid
     nlohmann::json sendid = nullptr;
     if (e.contains ("sendid")) origin = e["sendid"].toString ().toStdString ();
@@ -515,9 +557,10 @@ qtscxmlproc::js_send (const QJsonObject& params)
                     {"origin", origin},
                     {"origintype", origintype},
                     {"sendid", sendid},
-                    {"invokeid", invokeid}}},
-         {"type", "mqtt"}
+                    {"invokeid", invokeid}}}
         };
+
+    obj["type"] = send_t.toStdString ();
 
     // other "send" params (if exist)
     if (target != "") obj["target"] = target.toStdString ();

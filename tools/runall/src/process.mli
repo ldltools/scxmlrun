@@ -28,6 +28,7 @@ and process_exp =
 	(** parallel composition *)
 
 and process_attr =
+  | Att_null
   | Att_int of int
   | Att_bool of bool
   | Att_string of string

@@ -130,6 +130,9 @@ main (int argc, char** argv)
     const char* scxmlfile = NULL;
 
     enum {_INTERPRETER, _REPEATER} mode = _INTERPRETER;
+      // [remark]
+      // in the "repeater" mode, no scxml file is needed/interpreted,
+      // but just incoming events are forwarded to elsewhere
     enum {_NONE = 0, _FILE, _MQTT} intype = _NONE, outtype = _NONE, tracetype = _NONE;
     const char* infile = NULL;
     const char* outfile = NULL;
@@ -163,7 +166,11 @@ main (int argc, char** argv)
         else if (!strcmp (argv[i], "--trace"))
             tracefile = argv[++i];
 
-        else if (!strncmp (argv[i], "--mqtt", 6))
+        else if (!strcmp (argv[i], "--mqtt:in"))
+            intype = _MQTT; // this may be changed later
+        else if (!strcmp (argv[i], "--mqtt:out"))
+            outtype = _MQTT; // this may be changed later
+        else if (!strcmp (argv[i], "--mqtt"))
             intype = outtype = tracetype = _MQTT; // this may be changed later
         else if (!strcmp (argv[i], "-b") || !strncmp (argv[i], "--broker", 5))
         {
@@ -240,11 +247,17 @@ main (int argc, char** argv)
         if (intype != _MQTT)
             infile = "/dev/stdin";
         else
-            subs.push_back ("scxmlrun");
+        {
+            //subs.push_back ("scxmlrun");
+            std::cerr << "** no topic specified\n";
+            return (-1);
+        }
+    assert (infile || subs.size () > 0);
     if (infile)
         intype = _FILE;
-    else if (subs.size () > 0)
+    else
     {
+        assert (subs.size () > 0);
         assert (intype != _FILE);
         assert (mqtt_host);
         intype = _MQTT;
@@ -305,7 +318,7 @@ main (int argc, char** argv)
 #elif defined (USE_USCXML)
         proc = new SCXMLPROC ();
 #else
-#error "scxml processor is unknown"
+#error "scxml processor is not specified"
 #endif
     }
     else if (mode == _REPEATER)

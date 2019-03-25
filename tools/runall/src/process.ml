@@ -48,6 +48,7 @@ and process_exp =
 	(** parallel composition *)
 
 and process_attr =
+  | Att_null
   | Att_int of int
   | Att_bool of bool
   | Att_string of string
@@ -183,7 +184,9 @@ and parse_attr (k, v) =
 	  | "http" -> Att_protocol TP_http
 	  | _ -> Att_protocol (TP_unknown proto)
 	in attr
+    | "path", `Null -> Att_string "/dev/null"
     | "path", `String path -> Att_string path
+    | "events", `Null -> Att_events []
     | "events", `List events -> Att_events events
 
     | "mqtt_host", `String host -> Att_string host

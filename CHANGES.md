@@ -1,6 +1,6 @@
 # v0.12.0rc
 
-- **new** [scxmlrun-all](tools/scxmlrun-all):
+- **new** [scxmlrun-all](tools/runall):
   run several SCXML processes (along with generic MQTT processes) in parallel.
 
 # v0.11.0 (2018-12-27)

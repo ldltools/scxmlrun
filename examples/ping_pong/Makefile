@@ -5,7 +5,10 @@ clean::
 	rm -f *~
 
 run:
-	scxmlrun ping_pong.scxml ping_pong.in
+	shelltest ping_pong.conf
 
 run-mqtt:
-	./runtest.sh
+	shelltest ping_pong_mqtt.conf
+
+ping_pong_mqtt.sh:	ping_pong_mqtt.json
+	scxmlrun-all --no-exec $< -o $@

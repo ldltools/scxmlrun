@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript" initial="q2">
+  <datamodel/>
+  <final id="q6">
+    <formula xmlns="https://github.com/ldltools/dsl4sc">true</formula>
+  </final>
+  <state id="q4">
+    <transition target="q2" event="pong">
+      <!--tid t9_1-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script> console.log ("[monitor] pong", _event.data.count);  ;</script>
+      <!--rule: r2 event: pong certainty: 1-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
+  </state>
+  <state id="q2">
+    <transition target="q4" event="ping">
+      <!--tid t5_1-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script> console.log ("[monitor] ping", _event.data.count);  ;</script>
+      <!--rule: r1 event: ping certainty: 1-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="q5" event="quit">
+      <!--tid t6_1-->
+      <!--transition: curr_world: true label: true next_world: true-->
+      <script> console.log ("[monitor] quit");  ;</script>
+      <!--rule: r3 event: quit certainty: 1-->
+      <!--rule.when: true-->
+      <!--rule.ensure: true-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
+  </state>
+  <state id="q5">
+    <transition target="q6" event=" ">
+      <!--tid t11_1-->
+    </transition>
+    <transition target="_rejected" event="*">
+      <!--tid-->
+    </transition>
+  </state>
+  <final id="_rejected">
+    <onentry>
+      <!--raise event="error.execution"/-->
+      <script>
+              SCXML.send ({"event" : {"name" : "error.execution"}});
+              console.log ("_rejected");
+            </script>
+    </onentry>
+  </final>
+</scxml>

@@ -282,6 +282,7 @@ and scriptize_scxml oc bg_job (e, attrs) =
 	let events : Yojson.Safe.json list =
 	  match List.assoc "events" attrs_in with Att_events events -> events | _ -> assert false
 	in
+	if events = [] then "" else
 	let events : string =
 	  List.fold_left (fun rslt ev -> rslt ^ Yojson.Safe.to_string ev ^ "\\n") "" events
 	in
@@ -334,17 +335,21 @@ and scriptize_script oc bg_job (e, attrs) =
   and attrs_out =
     match List.assoc "output" attrs with Att_attributes attrs -> attrs | _ -> assert false
   in
-  let source =
+  let source : string option =
     match List.assoc "protocol" attrs_in with
     | Att_protocol TP_none when List.mem_assoc "path" attrs_in ->
-	let path =
-	  match List.assoc "path" attrs_in with Att_string path -> path | _ -> assert false
+	let path : string option =
+	  match List.assoc "path" attrs_in with
+	  | Att_null -> None
+	  | Att_string path -> Some ("cat " ^ path)
+	  | _ -> assert false
 	in
-	Some ("cat " ^ path)
+	path
     | Att_protocol TP_none when List.mem_assoc "events" attrs_in ->
 	let events : Yojson.Safe.json list =
 	  match List.assoc "events" attrs_in with Att_events events -> events | _ -> assert false
 	in
+	if events = [] then None else
 	let events : string =
 	  List.fold_left (fun rslt ev -> rslt ^ Yojson.Safe.to_string ev ^ "\\n") "" events
 	in
