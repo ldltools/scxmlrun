@@ -1,4 +1,4 @@
-# generated from "ping_pong_mqtt.json" by scxmlrun-all at 2019-03-25T08:32:36
+# generated from "ping_pong_mqtt.json" by scxmlrun-all at 2019-03-25T09:16:48
 # (https://github.com/ldltools/scxmlrun/tree/master/tools/)
 # preamble
 set -eu -o pipefail
@@ -9,6 +9,5 @@ test $(pgrep -c -u $USER scxmlrun) -eq 0 || { echo "scxml running"; exit 1; }
 { scxmlrun ./pong.scxml --sub pong --mqtt; } &
 { cat /dev/stdin | { sleep 1s; mosquitto_pub -t ping -s; }; }
 # postamble
-sleep 3s
-sleep 1s; test $(pgrep -c -u $USER scxmlrun) -eq 0 || { pkill -u $USER scxmlrun; exit 1; }
+while test $(pgrep -c -u $USER scxmlrun) -gt 0; do sleep 1s; done
 exit 0

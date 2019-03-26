@@ -9,7 +9,7 @@ RUN echo "dash dash/sh boolean false" | debconf-set-selections;\
     dpkg-reconfigure -f noninteractive dash;\
     echo "/usr/local/lib" > /etc/ld.so.conf.d/usr-local-lib.conf
 RUN apt-get update;\
-    apt-get install -y build-essential g++ flex bison gawk;\
+    apt-get install -y build-essential g++ flex bison gawk jq;\
     apt-get install -y file rsync wget net-tools nmap
 
 # Qt5
@@ -33,9 +33,9 @@ RUN version=5.9.5;\
 # JSON
 RUN apt-get install -y nlohmann-json-dev
 
-# MQTT
-RUN apt-get install -y mosquitto mosquitto-clients libmosquitto-dev
-RUN dir=/etc/mosquitto/conf.d; conf=${dir}/websockets.conf;\
+# MQTT w. the WebSocket-bridge functionality activated
+RUN apt-get install -y mosquitto mosquitto-clients libmosquitto-dev;\
+    dir=/etc/mosquitto/conf.d; conf=${dir}/websockets.conf;\
     test -d $dir -a ! -f $conf &&\
     echo -e "listener 1883\nlistener 9001\nprotocol websockets" > $conf &&\
     service mosquitto restart
@@ -43,9 +43,48 @@ RUN dir=/etc/mosquitto/conf.d; conf=${dir}/websockets.conf;\
 # SCXMLRUN
 ADD . /root/scxmlrun
 WORKDIR /root/scxmlrun
-RUN make && make install
+RUN make && PREFIX=/usr/local make install
 
 #
+WORKDIR /root
+CMD ["/bin/bash"]
+
+# MQTT/Websocket ports
+EXPOSE 1883
+EXPOSE 9001
+
+# ====================
+# final image
+# ====================
+FROM ubuntu:18.04
+
+RUN echo "dash dash/sh boolean false" | debconf-set-selections;\
+    dpkg-reconfigure -f noninteractive dash;\
+    echo "/usr/local/lib" > /etc/ld.so.conf.d/usr-local-lib.conf;\
+    apt-get update
+
+# Qt5
+RUN apt-get install -y libqt5core5a libqt5network5 libqt5qml5
+
+# QtSCXML
+WORKDIR /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libQt5Scxml.so.5.9.5 .
+RUN ln -s libQt5Scxml.so.5.9.5 libQt5Scxml.so.5.9;\
+    ln -s libQt5Scxml.so.5.9.5 libQt5Scxml.so.5;\
+    ln -s libQt5Scxml.so.5.9.5 libQt5Scxml.so
+
+# MQTT
+RUN apt-get install -y mosquitto mosquitto-clients;\
+    dir=/etc/mosquitto/conf.d; conf=${dir}/websockets.conf;\
+    test -d $dir -a ! -f $conf &&\
+    echo -e "listener 1883\nlistener 9001\nprotocol websockets" > $conf &&\
+    service mosquitto start
+
+# SCXMLRUN
+WORKDIR /usr/local
+COPY --from=builder /usr/local .
+RUN ldconfig
+
 WORKDIR /root
 CMD ["/bin/bash"]
 

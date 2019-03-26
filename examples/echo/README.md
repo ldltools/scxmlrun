@@ -1,6 +1,6 @@
 # echo
 
-## statechart: `echo.scxml`
+## statechart: [echo.scxml](echo.scxml)
 
 The [statechart](echo.scxml) receives one or more _echo_ events and prints out the event parameter onto the console.
 It terminates upon a _quit_ event.

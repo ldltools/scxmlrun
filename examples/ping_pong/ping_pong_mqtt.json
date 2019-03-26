@@ -11,7 +11,5 @@
 	      "input": {"path": "/dev/stdin"}}
 	       // ** "sleep 1s" is included, since it takes time before the 2 scxml processes start
 	    ],
- "protocol": "mqtt",
- "postamble": "sleep 3s"
-   // ** make an extra sure that the 2 scxml processes finish their operations.
+ "protocol": "mqtt"
 }

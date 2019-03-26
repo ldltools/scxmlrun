@@ -218,7 +218,7 @@ let preamble =
    "test $(pgrep -c -u $USER scxmlrun) -eq 0 || { echo \"scxml running\"; exit 1; }"]
 
 let postamble =
-  ["sleep 1s; test $(pgrep -c -u $USER scxmlrun) -eq 0 || { pkill -u $USER scxmlrun; exit 1; }";
+  ["while test $(pgrep -c -u $USER scxmlrun) -gt 0; do sleep 1s; done";
    "exit 0"]
 
 let rec scriptize ?(verbose = false) oc (p : t) =

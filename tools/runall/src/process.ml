@@ -184,16 +184,21 @@ and parse_attr (k, v) =
 	  | "http" -> Att_protocol TP_http
 	  | _ -> Att_protocol (TP_unknown proto)
 	in attr
-    | "path", `Null -> Att_string "/dev/null"
-    | "path", `String path -> Att_string path
+
     | "events", `Null -> Att_events []
     | "events", `List events -> Att_events events
+
+    | "path", `Null -> Att_string "/dev/null"
+    | "path", `String path -> Att_string path
 
     | "mqtt_host", `String host -> Att_string host
     | "mqtt_topic", `String topic
     | "topic", `String topic ->
 	let topics = List.filter (fun str -> str <> "") (String.split_on_char ' ' topic)
 	in Att_strings topics
+    | "topic", `List topics
+    | "topics", `List topics ->
+	Att_strings (List.map (function `String topic -> topic | _ -> assert false) topics)
 
     | "preamble", `String line | "postamble", `String line ->
 	Att_strings [line]
@@ -210,7 +215,7 @@ and parse_attr (k, v) =
 	Att_unknown v
   and k' =
     match k with
-    | "topic" -> "mqtt_topic"
+    | "topic" | "topics" -> "mqtt_topic"
     | _ -> k
   in k', attr
 

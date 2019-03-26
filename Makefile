@@ -2,7 +2,8 @@
 
 PREFIX		?= /usr/local
 
-SUBDIRS	= src examples tests docs
+SUBDIRS		= src examples tests docs
+#SUBDIRS	+= tools
 
 all::
 	for d in $(SUBDIRS); do $(MAKE) -C $$d $@; done
@@ -36,7 +37,7 @@ $(DOCKER_IMAGE):
 	docker images | grep -q "^$@ " && { echo "** $@ exists"; exit 0; } ||\
 	docker build -t $@ .
 
-docker-build-all:	$(DOCKER_IMAGE)-dev
-docker-build:	$(DOCKER_IMAGE)-dev
-docker-run:	$(DOCKER_IMAGE)-dev
+docker-build-all:	$(DOCKER_IMAGE)-dev $(DOCKER_IMAGE)
+docker-build:	$(DOCKER_IMAGE)
+docker-run:	$(DOCKER_IMAGE)
 	docker run -it --rm $<
