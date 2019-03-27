@@ -48,7 +48,7 @@ veryclean::
 
 clean::
 #	find . -name '*~' -or -name '*.o' | xargs rm -f
-	rm -f $(OBJS)
+#	rm -f $(OBJS)
 
 veryclean::
 	rm -rf $(BUILD_DIR)

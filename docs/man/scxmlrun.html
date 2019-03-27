@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<!-- Manual page created with latex2man on Mon Mar 18 10:35:09 2019
+<!-- Manual page created with latex2man on Wed Mar 27 11:39:54 2019
 ** Author of latex2man: Juergen.Vollmer@informatik-vollmer.de
 ** NOTE: This file is generated, DO NOT EDIT. -->
 <html>
@@ -18,10 +18,11 @@ scxmlrun -- MQTT-enabled SCXML interpreter
 <li><a href="#section_2">Description </a></li>
 <li><a href="#section_3">Options </a></li>
 <li><a href="#section_4">Examples </a></li>
-<li><a href="#section_5">Input/Output Format </a></li>
-<li><a href="#section_6">See Also </a></li>
-<li><a href="#section_7">Author </a></li>
-<li><a href="#section_8">Copyright </a></li>
+<li><a href="#section_5">Input/Output Event Format </a></li>
+<li><a href="#section_6">Environment Variables </a></li>
+<li><a href="#section_7">See Also </a></li>
+<li><a href="#section_8">Author </a></li>
+<li><a href="#section_9">Copyright </a></li>
 </ul>
 <p>
 <h2><a name="section_1">Synopsis</a></h2>
@@ -30,10 +31,16 @@ scxmlrun <option>* <scxmlfile>? <infile>?
 <p>
 <h2><a name="section_2">Description</a></h2>
 
-scxmlrun reads 
-a sequence of input events (from a local file <infile> or via MQTT), 
-processes them as defined in <scxmlfile>, 
-and transmits output events when instructed. 
+scxmlrun reads <em><scxmlfile></em>,
+and then processes 
+a sequence of input events listed in <em><infile></em>
+as instructed in <em><scxmlfile></em>.
+Instead of reading from <em><infile></em>,
+input events can be received over the network via MQTT. 
+Output events emitted using <em>SCXML.send</em>
+in <em><scxmlfile></em>
+can be 
+either written to a local file or transmitted via MQTT. 
 <p>
 <h2><a name="section_3">Options</a></h2>
 
@@ -41,53 +48,68 @@ and transmits output events when instructed.
 <dt><b>--model</b> <scxmlfile>
 </dt>
 <dd> 
-reads a state-chart in SCXML from <scxmlfile> 
+reads a state-chart in SCXML from <em><scxmlfile></em>
 <p>
 </dd>
 <dt><b>-i</b> <infile>
 </dt>
 <dd> 
-read (lines of) SCXML events (in JSON) from <infile> 
+read (lines of) SCXML events (in JSON) from <em><infile></em>
 </dd>
 <dt><b>-o</b> <outfile>
 </dt>
 <dd> 
-write output events (in JSON) to <outfile> 
+write output events (in JSON) to <em><outfile></em>
 </dd>
 <dt><b>--trace</b> <tracefile>
 </dt>
 <dd> 
-write trace info to <tracefile> 
+write trace info to <em><tracefile></em>.
+Trace reports which states execution visits through. 
 <p>
 </dd>
-<dt><b>--mqtt</b>
+<dt><b>--mqtt[:in|:out]</b>
 </dt>
 <dd> 
-assume MQTT-based I/O by default. 
+assume MQTT-based I/O by default.<br>
+
+<b>--mqtt:in</b>,
+<b>--mqtt:out</b>,
+or <b>--mqtt</b>
+assumes MQTT for input, output, or both, respectively. 
+<p>
 </dd>
 <dt><b>--broker</b> <host>[:<port>]
 </dt>
 <dd> 
-specifiy <host> (at <port>) as the MQTT broker to connect to.<br>
+specifiy <em><host></em>
+(at <em><port></em>)
+as the MQTT broker to connect to.<br>
 
 (default: localhost:1883) 
 </dd>
 <dt><b>--sub</b> <topic>
 </dt>
 <dd> 
-subscribe to <topic> for input events.<br>
+subscribe to <em><topic></em>
+for input events.<br>
 
 multiple topics can be specified as: --sub t1 --sub t2 ... 
 </dd>
 <dt><b>--pub</b> <topic>
 </dt>
 <dd> 
-specify <topic> as the default topic for output events (emitted by SCXML.send). 
+specify <em><topic></em>
+as the default topic for output events. 
+This is used by <em>SCXML.send</em>
+in <em><scxmlfile></em>
+when no topic is passed as a parameter. 
 </dd>
 <dt><b>--trace-pub</b> <topic>
 </dt>
 <dd> 
-specify <topic> for publishing trace info 
+specify <em><topic></em>
+for publishing trace info 
 <p>
 </dd>
 <dt><b>-r</b>, <b>--relay</b>
@@ -158,7 +180,7 @@ Consider the following simple SCXML model, which we here call "echo.scxml".
 </li>
 </ol>
 <p>
-<h2><a name="section_5">Input/Output Format</a></h2>
+<h2><a name="section_5">Input/Output Event Format</a></h2>
 
 <p>
 Input and output of <strong>scxmlrun</strong>
@@ -177,11 +199,17 @@ feature,
 "topic"-key and its value can be included in each input/output event, 
 which is referred to when connecting to the MQTT broker. 
 <p>
-<h2><a name="section_6">See Also</a></h2>
+<h2><a name="section_6">Environment Variables</a></h2>
+
+<p>
+<em>MQTT_HOST</em>
+is looked up, when no broker is explicitly specified. 
+<p>
+<h2><a name="section_7">See Also</a></h2>
 
 rules2scxml 
 <p>
-<h2><a name="section_7">Author</a></h2>
+<h2><a name="section_8">Author</a></h2>
 
 LDLTools development team at IBM Research. 
 <p>
@@ -192,7 +220,7 @@ LDLTools development team at IBM Research.
 </li>
 </ul>
 <p>
-<h2><a name="section_8">Copyright</a></h2>
+<h2><a name="section_9">Copyright</a></h2>
 
 (C) Copyright IBM Corp. 2018. 
 License Apache 2.0.<br>

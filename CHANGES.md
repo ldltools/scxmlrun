@@ -3,13 +3,15 @@
 - **new** [scxmlrun-all](tools/runall):
   run several SCXML processes (along with generic MQTT processes) in parallel.
 
+- add `*_mqtt.conf` for testing composite SCXML processes connected via MQTT.
+
 # v0.11.0 (2018-12-27)
 
 - **new** introduce _"event repeater"_ (activated by: `scxmlrun -r`) which relays incoming events to elsewhere.
 
 - add/update examples
-- add `*.conf` files for testing with [shelltest](https://github.com/simonmichael/shelltestrunner)
-- add man page (`man scxmlrun`)
+- add `*.conf` files for unit-testing using [shelltest](https://github.com/simonmichael/shelltestrunner)
+- add man page (for `man scxmlrun`)
 
 # v0.10.0 (2018-11-08)
 

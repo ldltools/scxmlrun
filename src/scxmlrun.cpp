@@ -139,11 +139,8 @@ main (int argc, char** argv)
     const char* tracefile = NULL;
 
     // in/out via MQTT
-    const char* mqtt_host = secure_getenv ("MQTT_HOST");  // broker
-    if (!mqtt_host) mqtt_host = "localhost";
-    int mqtt_port = 1883;
-    const char* mqtt_port_str = secure_getenv ("MQTT_PORT");
-    if (mqtt_port_str) sscanf (mqtt_port_str, "%d", &mqtt_port);
+    const char* mqtt_host = nullptr;
+    int mqtt_port = 0;
     std::list<const char*> subs;
     const char* pub = NULL;
     const char* trace_pub = NULL;
@@ -173,21 +170,7 @@ main (int argc, char** argv)
         else if (!strcmp (argv[i], "--mqtt"))
             intype = outtype = tracetype = _MQTT; // this may be changed later
         else if (!strcmp (argv[i], "-b") || !strncmp (argv[i], "--broker", 5))
-        {
             mqtt_host = argv[++i];
-            const char* found = strchr (mqtt_host, ':');
-            // case: <host>:<port>
-            if (found)
-            {
-                sscanf (found, ":%d", &mqtt_port);
-                assert (1000 < mqtt_port && mqtt_port < 9999);
-                //*found = '\0';
-                char* host = (char*) malloc (found - mqtt_host + 1);
-                strncpy (host, mqtt_host, found - mqtt_host);
-                host[found - mqtt_host] = '\0';
-                mqtt_host = host;
-            }
-        }
         else if (!strncmp (argv[i], "--sub", 5))
             subs.push_back (argv[++i]);
         else if (!strncmp (argv[i], "--pub", 5))
@@ -249,7 +232,7 @@ main (int argc, char** argv)
         else
         {
             //subs.push_back ("scxmlrun");
-            std::cerr << "** no topic specified\n";
+            std::cerr << "** no topic is subscribed to. use \"--sub <topic>\"\n";
             return (-1);
         }
     assert (infile || subs.size () > 0);
@@ -259,7 +242,6 @@ main (int argc, char** argv)
     {
         assert (subs.size () > 0);
         assert (intype != _FILE);
-        assert (mqtt_host);
         intype = _MQTT;
     }
 
@@ -301,7 +283,6 @@ main (int argc, char** argv)
         tracetype = _FILE;
     if (trace_pub)
     {
-        assert (mqtt_host);
         tracetype = _MQTT;
     }
 
@@ -331,6 +312,38 @@ main (int argc, char** argv)
     // MQTT broker
     mosquitto* mosq = nullptr;
     bool mosq_connected = false, mosq_started =false;
+
+    if (intype == _MQTT || outtype == _MQTT || tracetype == _MQTT)
+    {
+        if (!mqtt_host)
+        {
+            mqtt_host = secure_getenv ("MQTT_HOST");  // broker
+            if (!mqtt_host) mqtt_host = "localhost";
+        }
+        assert (mqtt_host);
+
+        const char* found = strchr (mqtt_host, ':');
+        // case: <host>:<port>
+        if (found)
+        {
+            sscanf (found, ":%d", &mqtt_port);
+            //*found = '\0';
+            char* host = (char*) malloc (found - mqtt_host + 1);
+            strncpy (host, mqtt_host, found - mqtt_host);
+            host[found - mqtt_host] = '\0';
+            mqtt_host = host;
+        }
+
+        if (mqtt_port == 0)
+        {
+            const char* mqtt_port_str = secure_getenv ("MQTT_PORT");
+            if (mqtt_port_str)
+                sscanf (mqtt_port_str, "%d", &mqtt_port);
+            else
+                mqtt_port = 1883;
+        }
+        assert (1000 < mqtt_port && mqtt_port < 9999);
+    }
 
     // verbosity
     switch (verbosity)

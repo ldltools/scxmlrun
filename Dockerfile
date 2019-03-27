@@ -77,8 +77,10 @@ RUN ln -s libQt5Scxml.so.5.9.5 libQt5Scxml.so.5.9;\
 RUN apt-get install -y mosquitto mosquitto-clients;\
     dir=/etc/mosquitto/conf.d; conf=${dir}/websockets.conf;\
     test -d $dir -a ! -f $conf &&\
-    echo -e "listener 1883\nlistener 9001\nprotocol websockets" > $conf &&\
-    service mosquitto start
+    echo -e "listener 1883\nlistener 9001\nprotocol websockets" > $conf;\
+    echo -e "#! /bin/bash\n/usr/sbin/mosquitto -c /etc/mosquitto/mosquitto.conf" > /root/runmosq.sh;\
+    echo -e "#! /bin/bash\npkill mosquitto" > /root/killmosq.sh;\
+    chmod +x /root/runmosq.sh /root/killmosq.sh
 
 # SCXMLRUN
 WORKDIR /usr/local
@@ -89,5 +91,4 @@ WORKDIR /root
 CMD ["/bin/bash"]
 
 # MQTT/Websocket ports
-EXPOSE 1883
-EXPOSE 9001
+EXPOSE 1883 9001

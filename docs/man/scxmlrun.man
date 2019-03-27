@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Thu Dec 27 12:46:54 2018
+.\" Manual page created with latex2man on Wed Mar 27 11:39:54 2019
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -21,46 +21,67 @@ scxmlrun <option>* <scxmlfile>? <infile>?
 .PP
 .SH DESCRIPTION
 
-scxmlrun reads 
-a sequence of input events (from a local file <infile> or via MQTT), 
-processes them as defined in <scxmlfile>, 
-and transmits output events when instructed. 
+scxmlrun reads \fI<scxmlfile>\fP,
+and then processes 
+a sequence of input events listed in \fI<infile>\fP
+as instructed in \fI<scxmlfile>\fP\&.
+Instead of reading from \fI<infile>\fP,
+input events can be received over the network via MQTT. 
+Output events emitted using \fISCXML.send\fP
+in \fI<scxmlfile>\fP
+can be 
+either written to a local file or transmitted via MQTT. 
 .PP
 .SH OPTIONS
 
 .TP
 \fB\-\-model\fP <scxmlfile>
- reads a state\-chart in SCXML from <scxmlfile> 
+ reads a state\-chart in SCXML from \fI<scxmlfile>\fP
 .PP
 .TP
 \fB\-i\fP <infile>
- read (lines of) SCXML events (in JSON) from <infile> 
+ read (lines of) SCXML events (in JSON) from \fI<infile>\fP
 .TP
 \fB\-o\fP <outfile>
- write output events (in JSON) to <outfile> 
+ write output events (in JSON) to \fI<outfile>\fP
 .TP
 \fB\-\-trace\fP <tracefile>
- write trace info to <tracefile> 
+ write trace info to \fI<tracefile>\fP\&.
+Trace reports which states execution visits through. 
 .PP
 .TP
-\fB\-\-mqtt\fP
- assume MQTT\-based I/O by default. 
+\fB\-\-mqtt[:in|:out]\fP
+ assume MQTT\-based I/O by default.
+.br
+\fB\-\-mqtt:in\fP,
+\fB\-\-mqtt:out\fP,
+or \fB\-\-mqtt\fP
+assumes MQTT for input, output, or both, respectively. 
+.PP
 .TP
 \fB\-\-broker\fP <host>[:<port>]
- specifiy <host> (at <port>) as the MQTT broker to connect to.
+ specifiy \fI<host>\fP
+(at \fI<port>\fP)
+as the MQTT broker to connect to.
 .br
 (default: localhost:1883) 
 .TP
 \fB\-\-sub\fP <topic>
- subscribe to <topic> for input events.
+ subscribe to \fI<topic>\fP
+for input events.
 .br
 multiple topics can be specified as: \-\-sub t1 \-\-sub t2 \&.\&.\&. 
 .TP
 \fB\-\-pub\fP <topic>
- specify <topic> as the default topic for output events (emitted by SCXML.send). 
+ specify \fI<topic>\fP
+as the default topic for output events. 
+This is used by \fISCXML.send\fP
+in \fI<scxmlfile>\fP
+when no topic is passed as a parameter. 
 .TP
 \fB\-\-trace\-pub\fP <topic>
- specify <topic> for publishing trace info 
+ specify \fI<topic>\fP
+for publishing trace info 
 .PP
 .TP
 \fB\-r\fP, \fB\-\-relay\fP
@@ -117,7 +138,7 @@ $ mosquitto_pub \-t echo \-m \&'{"event":{"name":"echo","data":"hello"}}\&'
 .br
 hello
 .PP
-.SH INPUT/OUTPUT FORMAT
+.SH INPUT/OUTPUT EVENT FORMAT
 
 .PP
 Input and output of \fBscxmlrun\fP
@@ -136,6 +157,12 @@ Note that, as a \fBscxmlrun\fP\-specific
 feature, 
 "topic"\-key and its value can be included in each input/output event, 
 which is referred to when connecting to the MQTT broker. 
+.PP
+.SH ENVIRONMENT VARIABLES
+
+.PP
+\fIMQTT_HOST\fP
+is looked up, when no broker is explicitly specified. 
 .PP
 .SH SEE ALSO
 
