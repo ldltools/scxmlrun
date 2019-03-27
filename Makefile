@@ -34,10 +34,10 @@ docker-build-all:	$(DOCKER_REPO)-dev $(DOCKER_REPO)
 docker-build:	$(DOCKER_REPO)
 docker-run:
 #	docker run -it --rm $(DOCKER_REPO)
-	docker run -d --rm $(DOCKER_REPO) "/root/runmosq.sh"
+	docker run -d --rm $(DOCKER_REPO) /usr/sbin/mosquitto -c /etc/mosquitto/mosquitto.conf
 	container=$$(docker ps -l --format '{{.ID}}');\
 	docker exec -it $$container /bin/bash;\
-	docker exec $$container /root/killmosq.sh
+	docker exec $$container pkill mosquitto
 
 # :latest and :$(VERSION)
 define TAGRULES
