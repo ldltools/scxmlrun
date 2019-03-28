@@ -1,24 +1,42 @@
 This memo explains how to compile, deploy, and run smart contracts on a local ethereum network.  
-It also discusses event transmission from Ethereum to SCXML statecharts running with `scxmlrun`.
+It also discusses event transmission from Ethereum to SCXML processes (run by `scxmlrun`).
 
-## [Ganache](https://truffleframework.com/ganache): local ethereum network for testing
+## Prerequisites
+
+### [Truffle](https://truffleframework.com/) (Framework for Solidity)
+
+```
+$ npm install -g truffle
+```
+
+### [Ganache](https://truffleframework.com/ganache): local ethereum network for testing
 
 ```
 $ npm install -g ganache-cli  
-$ ganache-cli &
 ```
 
-This launches a new local ethereum network (at port 7545 by default).
+## Compilation & Deployment
 
-## Contract compilation and deployment
-
-### [Truffle](https://truffleframework.com/) (Solidity)
+Compose a contract in Solidity, and compile & deploy it in the following manner.
 
 ```
 $ truffle compile && truffle deploy
 ```
 
-### [web3](https://github.com/ethereum/web3.js/)
+## Testing
+
+Compose test scripts using [web3](https://github.com/ethereum/web3.js/).  
+Then, launch a new local ethereum network (at port 7545 by default).  
+
+```
+$ ganache-cli &
+```
+
+Then, run the test scripts.
+
+```
+$ truffle test
+```
 
 ## Connection between Ethereum and MQTT
 

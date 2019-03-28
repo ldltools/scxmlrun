@@ -4,6 +4,7 @@
   run several SCXML processes (along with generic MQTT processes) in parallel.
 
 - add `*_mqtt.conf` for testing composite SCXML processes connected via MQTT.
+- update/adjust examples
 
 # v0.11.0 (2018-12-27)
 

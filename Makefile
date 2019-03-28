@@ -30,26 +30,32 @@ $(DOCKER_REPO)-dev:
 $(DOCKER_REPO):
 	docker build -t $(DOCKER_REPO) .
 
-docker-build-all:	$(DOCKER_REPO)-dev $(DOCKER_REPO)
-docker-build:	$(DOCKER_REPO)
-docker-run:
+docker-build:	docker-build-$(DOCKER_REPO)
+docker-run:	check-latest-$(DOCKER_REPO)
 #	docker run -it --rm $(DOCKER_REPO)
 	docker run -d --rm $(DOCKER_REPO) /usr/sbin/mosquitto -c /etc/mosquitto/mosquitto.conf
 	container=$$(docker ps -l --format '{{.ID}}');\
 	docker exec -it $$container /bin/bash;\
 	docker exec $$container pkill mosquitto
 
-# :latest and :$(VERSION)
-define TAGRULES
+#
+define GENRULES
+docker-build-all::	docker-build-$(1)
+docker-build-$(1):	$(1)
+
 docker-tag::	docker-tag-$(1)
-docker-tag-$(1):
-	@docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "$(1):latest" || { echo "** image \"$(1):latest\" not found"; exit 1; }
+docker-tag-$(1):	check-latest-$(1) docker-untag-$(1)
 	docker tag $(1):latest $(1):$$(VERSION)
+	docker rmi $(1):latest
+
 docker-untag::	docker-untag-$(1)
-docker-untag-$(1):
+docker-untag-$(1):	check-latest-$(1)
 	@docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "$(1):$$(VERSION)" && docker rmi $(1):$$(VERSION) || true
+
+check-latest-$(1):
+	@docker images --format "{{.Repository}}:{{.Tag}}" | grep -q "$(1):latest" || { echo "** image \"$(1):latest\" not found"; exit 1; }
 endef
-$(foreach repo,$(DOCKER_REPO)-dev $(DOCKER_REPO),$(eval $(call TAGRULES,$(repo))))
+$(foreach repo,$(DOCKER_REPO)-dev $(DOCKER_REPO),$(eval $(call GENRULES,$(repo))))
 
 #
 tar:	veryclean

@@ -47,6 +47,5 @@ contract ('Ballot_scenario1', async (accounts) => {
 	console.log ("Winning proposal: ", p.toString (10));
     });
 
-
 });
 

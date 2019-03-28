@@ -57,7 +57,7 @@ we also provide another [DSL4SC version](contracts/Ballot.rules) of the contract
 
   (to be filled in)
 
-## Testing Ballot.scxml
+## Testing Ballot.scxml using scxmlrun
 
 `make test` invokes `shelltest` as follows
 
@@ -65,57 +65,85 @@ we also provide another [DSL4SC version](contracts/Ballot.rules) of the contract
 shelltest voting.conf
 ```
 
-## Testing Ballot.sol
+## Testing Ballot.sol using [truffle](https://truffleframework.com/) and [ganache](https://truffleframework.com/ganache)
 
 (This is Solidity-only testing.)
 
 ### Prerequisites
 
-We need `truffle` and `ganache-cli` for testing.
+We need `truffle` and `ganache-cli` for testing.  
+`Ballot.sol` in this directory has been tested using the following versions.
+
+```
+$ truffle version  
+Truffle v5.0.9 (core: 5.0.9)  
+Solidity v0.5.0 (solc-js)  
+Node v10.15.1  
+Web3.js v1.0.0-beta.37  
+$ ganache-cli --version  
+Ganache CLI v6.4.1 (ganache-core: 2.5.3)
+```
 
 Note that if you are not familiar with testing smart contracts on a local Ethereum network,
-please take a look at [this memo](../../docs/ethereum.md).
+please take a look at [this brief memo](../../docs/ethereum.md).
 
-### Running scenarios
+### Comppiling Ballot.sol
+
+```
+$ make truffle-compile  
+```
+
+### Deploying and testing Ballot.sol
+
+Several test cases for Ballot.sol are defined,
+using the [mocha](https://mochajs.org/) test framework that is integrated into truffle,
+and stored in the scenarios directory.  
+To run these, you just need to take the following steps.
 
 ```
 $ make ganache-start  
-$ make test-solidity
+$ make test-solidity  
 ```
 
 <details>
-  <summary>Remarks</summary>
+  <summary>Caveat</summary>
   <div>
+    When something goes wrong, it is often the case that ganache needs to be *fully* restarted.
+    To do so for sure, try the following.
     <ul>
-      <li>`make ganache-start` launches `ganache`, a local Ethereum network</li>
-      <li>`make build` compiles and deploys `Ballot.sol`</li>
-      <li>`make test-solidity` run test cases defined in `scenarios/Ballot_scenario{1,2}.js` using `web3.js`</li>
-    </ul?
+      <li>`make ganache-stop`</li>
+      <li>`make clean`</li>
+      <li>`make ganache-start`</li>
+    </ul>
   </div>
 </details>
 
-## Testing Ballot.sol _with_ monitors in SCXML
 
-In addition to `truffle` (and `ganache-cli`),
-`mqtt.js` is also required for connecting the contract and the monitros.
+### Testing Ballot.sol connected _with_ a monitor in SCXML
 
-
-### Running scenarios
-
-`Ballot.sol` can be _monitored_ in the following manner.
-
-```
-$ make ganache-start  
-$ make test-combined  
-```
-
-In the above exmple,
-events emitted by `Ballot.sol` are
-sent to `monitor1.scxml` through
-an [_observer_ script](monitors/observer.js)
-which bridges Ethereum and MQTT.
+We can _monitor_ events that Ballot.sol raises by attaching a monitor in SCXML.  
+More specifically,
+we inject an [_observer script_](monitors/observer.js),
+which listens to events emitted by `Ballot.sol` and
+forwards them to the monitor through a MQTT broker.
 
 <details>
   <summary>contract and monitor</summary>
   <div><img src="monitors/observer.png"/></div>
 </details>
+
+To connect Ethereum and MQTT in this way,
+we need `mqtt.js` in addition to `web3.js`
+for connecting the contract and the monitros.
+
+```
+$ npm install web3@0.20  
+$ npm install mqtt  
+```
+
+To test `Ballot.sol` with our monitor, type in the following commands.
+
+```
+$ make ganache-restart  
+$ make test-combined  
+```

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.22;
+pragma solidity >=0.4.22 <0.7.0;
 
 /// @title Voting with delegation.
 contract Ballot {
@@ -51,8 +51,8 @@ contract Ballot {
             }));
         }
     }
-
-    function _init(bytes32[] proposalNames) public {
+    /*
+    function _init(bytes32[] memory proposalNames) public {
         chairperson = msg.sender;
         voters[chairperson].weight = 1;
 
@@ -69,7 +69,7 @@ contract Ballot {
             }));
         }
     }
-
+    */
     event GiveRightToVote (address indexed _voter);
     event Delegate (address indexed _from, address indexed _to, uint _weight);
     event Vote (address indexed _sender, uint _proposal, uint _weight);
@@ -157,6 +157,7 @@ contract Ballot {
     /// to proposal `proposals[proposal].name`.
     function vote(uint proposal) public {
         Voter storage sender = voters[msg.sender];
+        require(sender.weight != 0, "Has no right to vote");
         require(!sender.voted, "Already voted.");
         sender.voted = true;
         sender.vote = proposal;

@@ -48,7 +48,8 @@ which will be accessible through `man scxmlrun` after installation.
 # Installation on Docker
 
 - run `make docker-build` to build a new docker image for scxmlrun
-- run `make docker-run` to enter into the image
+- run `make docker-run` to spawn a container and enter into it
+- (in the container, try `make -C /root/tests test`)
 
 # Installation on Debian/Ubuntu
 
@@ -80,7 +81,11 @@ which will be accessible through `man scxmlrun` after installation.
 
 ## Testing
 
-- run: `make -C ./tests test` once installation is done.
+Once installation is done, try the following.
+
+- run: `make -C ./tests test`
+
+- run: `make -C ./tests test-mqtt`
 
   Note: you may need to install [shelltest](https://github.com/simonmichael/shelltestrunner) (by running `apt-get install shelltestrunner`).
 

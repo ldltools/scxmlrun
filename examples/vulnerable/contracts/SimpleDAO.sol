@@ -3,7 +3,7 @@
  * @author: Atzei N., Bartoletti M., Cimoli T
  * Modified by Josselin Feist
  */
-pragma solidity 0.4.24;
+pragma solidity >=0.4.24;
 
 contract SimpleDAO {
   mapping (address => uint) public credit;
@@ -20,10 +20,16 @@ contract SimpleDAO {
   function withdraw(uint amount) public{
     if (credit[msg.sender]>= amount) {
       emit Withdraw (msg.sender, amount);
-      require (msg.sender.call.value (amount) ());
-        // ** transfer <amount> from SimpleDAO to msg.sender
-        //    the caller's code can call withdraw recursively
-	//    this should come after the following state change
+
+      //require (msg.sender.call.value (amount) ());
+      // ** transfer <amount> from SimpleDAO to msg.sender
+      //    the caller's code can call withdraw recursively
+      //    this should come after the following state change
+      // ** as of Solidity 0.5, this is not allowed
+
+      msg.sender.call.value (amount) ("");
+      // ** this does not work either
+
       credit[msg.sender]-=amount;
     }
   }  

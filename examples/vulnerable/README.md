@@ -9,18 +9,21 @@ their monitors to detect their exploitation.
 - [exploit](contracts/SimpleDAO_exploit.sol)
 - [monitor]()
 
+**Remark**
+As of Solidity 0.5
+
 ## Transaction Order Dependence ([SWC-114](https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-114))
 
 (to be filled in)
 
-## Running scenarios
+## Testing the contracts using [truffle](https://truffleframework.com/) and [ganache](https://truffleframework.com/ganache)
 
 ### Prerequisites
 
 We need `truffle` and `ganache-cli` for testing.
 
 Note that if you have never tested smart contracts on a local Ethereum network,
-please take a look at [this memo](../../docs/ethereum.md).
+please take a look at [this brief memo](../../docs/ethereum.md).
 
 ### _without_ monitors
 
@@ -28,6 +31,20 @@ please take a look at [this memo](../../docs/ethereum.md).
 $ make ganache-start  
 $ make test-solidity
 ```
+
+<details>
+  <summary>Caveat</summary>
+  <div>
+    When something goes wrong, it is often the case that ganache needs to be *fully* restarted.
+    To do so for sure, try the following.
+    <ul>
+      <li>`make ganache-stop`</li>
+      <li>`make clean`</li>
+      <li>`make ganache-start`</li>
+    </ul>
+  </div>
+</details>
+
 
 ### _with_ monitors
 

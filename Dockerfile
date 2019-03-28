@@ -80,9 +80,13 @@ RUN apt-get install -y mosquitto mosquitto-clients;\
     echo -e "listener 1883\nlistener 9001\nprotocol websockets" > $conf
 
 # SCXMLRUN
-WORKDIR /usr/local
-COPY --from=builder /usr/local .
+COPY --from=builder /usr/local /usr/local
 RUN ldconfig
+
+# examples & tests
+ADD examples /root/examples
+ADD tests /root/tests
+RUN apt-get install -y make gawk jq shelltestrunner
 
 WORKDIR /root
 CMD ["/bin/bash"]

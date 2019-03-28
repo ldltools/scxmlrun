@@ -7,6 +7,7 @@ topic=voting
 
 export ROOT=$(readlink -f $(dirname $0))/_build
 ## monitors/observer.js (and scenarios) refers to this variable
+export GANACHE_PORT="8545"
 
 usage ()
 {
@@ -34,12 +35,12 @@ test -f "$monitor" || exit 1
 test -f "$observer" || exit 1
 
 pgrep -a node | grep -q ganache-cli || { echo "ganache not running" > /dev/stderr; exit 1; }
+test $(pgrep -c scxmlrun) -gt 0 && { echo "scxmlrun is already running" > /dev/stderr; exit 1; }
 
 # observer: ganache -> mqtt
 echo
 echo "* starting $observer"
-#rsync $observer _build/test
-(cd $(dirname $observer); node $(basename $observer)) &
+{ node $observer; } &
 sleep 1
 
 # monitor

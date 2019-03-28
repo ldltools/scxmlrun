@@ -1,6 +1,6 @@
 #
 
-usage:
+usage::
 	@echo "usage: make [test | test-solidity | test-combined]"
 
 # scxml
@@ -17,5 +17,6 @@ T_GAS_LIMIT	= "8000000"
 test-solidity:	truffle-deploy truffle-test
 
 # solidity + scxml
-test-combined:	truffle-deploy
+test-combined:	truffle-deploy run-combined
+run-combined:
 	./runtest.sh monitors/monitor1.scxml scenarios/scenario1.js 
