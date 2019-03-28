@@ -1,0 +1,12 @@
+// parallel composition
+{"process": [{"process": {"path": "./calc.scxml"},
+	      "input": {"topic": "calc"},
+	      "output": {"topic": "calc_resp"}},
+	     {"process": {"script": "mosquitto_sub -t calc_resp | jq -c '.event.name, .event.data?'"},
+	      "output": {"path": "/dev/stdout"}},
+
+	     {"process": {"script": "sleep 1s; mosquitto_pub -t calc -l; sleep 1s; pkill -n mosquitto_sub"},
+	      "input": {"path": "/dev/stdin"}}
+	    ],
+ "protocol": "mqtt"
+}

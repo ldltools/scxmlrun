@@ -32,12 +32,14 @@
 #include <list>
 #include <sstream>
 #include <string>
+#include <cstdlib>
 #include <cassert>
 //#include <thread>
 
 static void
 synopsis (const char* prog)
 {
+    std::cout << prog << " v" << SCXMLRUN_VERSION << "\n";
     std::cout << "usage: " << prog << " <option>* <scxmlfile>? <infile>?\n";
     std::cout << "options\n";
     std::cout << "  -m <scxmlfile>\t"
@@ -128,14 +130,17 @@ main (int argc, char** argv)
     const char* scxmlfile = NULL;
 
     enum {_INTERPRETER, _REPEATER} mode = _INTERPRETER;
+      // [remark]
+      // in the "repeater" mode, no scxml file is needed/interpreted,
+      // but just incoming events are forwarded to elsewhere
     enum {_NONE = 0, _FILE, _MQTT} intype = _NONE, outtype = _NONE, tracetype = _NONE;
     const char* infile = NULL;
     const char* outfile = NULL;
     const char* tracefile = NULL;
 
     // in/out via MQTT
-    const char* mqtt_host = "localhost";  // broker
-    int mqtt_port = 1883;
+    const char* mqtt_host = nullptr;
+    int mqtt_port = 0;
     std::list<const char*> subs;
     const char* pub = NULL;
     const char* trace_pub = NULL;
@@ -148,7 +153,7 @@ main (int argc, char** argv)
 
     for (int i = 1; i < argc; i++)
     {
-        if (!strcmp (argv[i], "-m") || !strncmp (argv[i], "--model", 3))
+        if (!strcmp (argv[i], "-m") || !strncmp (argv[i], "--model", 5))
             scxmlfile = argv[++i];
 
         else if (!strcmp (argv[i], "-i"))
@@ -158,30 +163,20 @@ main (int argc, char** argv)
         else if (!strcmp (argv[i], "--trace"))
             tracefile = argv[++i];
 
-        else if (!strncmp (argv[i], "--mqtt", 6))
+        else if (!strcmp (argv[i], "--mqtt:in"))
+            intype = _MQTT; // this may be changed later
+        else if (!strcmp (argv[i], "--mqtt:out"))
+            outtype = _MQTT; // this may be changed later
+        else if (!strcmp (argv[i], "--mqtt"))
             intype = outtype = tracetype = _MQTT; // this may be changed later
-        else if (!strcmp (argv[i], "-b") || !strncmp (argv[i], "--broker", 3))
-        {
+        else if (!strcmp (argv[i], "-b") || !strncmp (argv[i], "--broker", 5))
             mqtt_host = argv[++i];
-            const char* found = strchr (mqtt_host, ':');
-            // case: <host>:<port>
-            if (found)
-            {
-                sscanf (found, ":%d", &mqtt_port);
-                assert (1000 < mqtt_port && mqtt_port < 9999);
-                //*found = '\0';
-                char* host = (char*) malloc (found - mqtt_host + 1);
-                strncpy (host, mqtt_host, found - mqtt_host);
-                host[found - mqtt_host] = '\0';
-                mqtt_host = host;
-            }
-        }
-        else if (!strncmp (argv[i], "--sub", 3))
+        else if (!strncmp (argv[i], "--sub", 5))
             subs.push_back (argv[++i]);
-        else if (!strncmp (argv[i], "--pub", 3))
+        else if (!strncmp (argv[i], "--pub", 5))
             pub = argv[++i];
 
-        else if (!strcmp (argv[i], "-r") || !strcmp (argv[i], "--relay"))
+        else if (!strcmp (argv[i], "-r") || !strncmp (argv[i], "--relay", 5))
         {
             mode = _REPEATER;
             scxmlfile = "/dev/null";
@@ -200,13 +195,11 @@ main (int argc, char** argv)
         }
         else if (!strcmp (argv[i], "-h") || !strcmp (argv[i], "--help"))
         {
-            std::cout << "scxmlrun v" << SCXMLRUN_VERSION << std::endl;
             synopsis (argv[0]);
             return 0;
         }
         else if (!strcmp (argv[i], "-hh"))
         {
-            std::cout << "scxmlrun v" << SCXMLRUN_VERSION << std::endl;
             synopsis (argv[0]); extra_synopsis ();
             return 0;
         }
@@ -237,13 +230,18 @@ main (int argc, char** argv)
         if (intype != _MQTT)
             infile = "/dev/stdin";
         else
-            subs.push_back ("scxmlrun");
+        {
+            //subs.push_back ("scxmlrun");
+            std::cerr << "** no topic is subscribed to. use \"--sub <topic>\"\n";
+            return (-1);
+        }
+    assert (infile || subs.size () > 0);
     if (infile)
         intype = _FILE;
-    if (subs.size () > 0)
+    else
     {
+        assert (subs.size () > 0);
         assert (intype != _FILE);
-        assert (mqtt_host);
         intype = _MQTT;
     }
 
@@ -285,8 +283,6 @@ main (int argc, char** argv)
         tracetype = _FILE;
     if (trace_pub)
     {
-        assert (tracetype == _NONE);
-        assert (mqtt_host);
         tracetype = _MQTT;
     }
 
@@ -303,7 +299,7 @@ main (int argc, char** argv)
 #elif defined (USE_USCXML)
         proc = new SCXMLPROC ();
 #else
-#error "scxml processor is unknown"
+#error "scxml processor is not specified"
 #endif
     }
     else if (mode == _REPEATER)
@@ -316,6 +312,38 @@ main (int argc, char** argv)
     // MQTT broker
     mosquitto* mosq = nullptr;
     bool mosq_connected = false, mosq_started =false;
+
+    if (intype == _MQTT || outtype == _MQTT || tracetype == _MQTT)
+    {
+        if (!mqtt_host)
+        {
+            mqtt_host = secure_getenv ("MQTT_HOST");  // broker
+            if (!mqtt_host) mqtt_host = "localhost";
+        }
+        assert (mqtt_host);
+
+        const char* found = strchr (mqtt_host, ':');
+        // case: <host>:<port>
+        if (found)
+        {
+            sscanf (found, ":%d", &mqtt_port);
+            //*found = '\0';
+            char* host = (char*) malloc (found - mqtt_host + 1);
+            strncpy (host, mqtt_host, found - mqtt_host);
+            host[found - mqtt_host] = '\0';
+            mqtt_host = host;
+        }
+
+        if (mqtt_port == 0)
+        {
+            const char* mqtt_port_str = secure_getenv ("MQTT_PORT");
+            if (mqtt_port_str)
+                sscanf (mqtt_port_str, "%d", &mqtt_port);
+            else
+                mqtt_port = 1883;
+        }
+        assert (1000 < mqtt_port && mqtt_port < 9999);
+    }
 
     // verbosity
     switch (verbosity)
@@ -347,6 +375,7 @@ main (int argc, char** argv)
         break;
     default:
         assert (false);
+        std::cerr << "** input type unspecified\n";
         return (-1);
     }
 
@@ -366,6 +395,7 @@ main (int argc, char** argv)
         break;
     default:
         assert (false);
+        std::cerr << "** output type unspecified\n";
         return (-1);
     }
 
@@ -384,6 +414,7 @@ main (int argc, char** argv)
         break;
     default:
         assert (false);
+        std::cerr << "** trace type unspecified\n";
         return (-1);
     }
 

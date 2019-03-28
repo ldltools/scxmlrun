@@ -1,0 +1,15 @@
+// composed of 3 processes
+// - ping: receives ping, emits pong
+// - pong: receives pong, emits ping
+// - admin: emits the first one event
+
+{"process": [{"process": {"path": "./ping.scxml"},
+	      "input": {"topic": "ping"}},
+	     {"process": {"path": "./pong.scxml"},
+	      "input": {"topic": "pong"}},
+	     {"process": {"script": "sleep 1s; mosquitto_pub -t ping -s"},
+	      "input": {"path": "/dev/stdin"}}
+	       // ** "sleep 1s" is included, since it takes time before the 2 scxml processes start
+	    ],
+ "protocol": "mqtt"
+}

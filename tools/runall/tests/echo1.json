@@ -1,0 +1,4 @@
+{"process": {"path": "../../../examples/echo/echo.scxml"},
+ "input": {"events": [{"event": {"name": "echo", "data": "hello"}}, {"event" : {"name": "quit"}}]},
+ "output": {"path": "/dev/stdout"}
+}

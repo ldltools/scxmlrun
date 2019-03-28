@@ -1,0 +1,4 @@
+{"process": {"path": "../../../examples/echo/echo.scxml"},
+ "input": {"path": "/dev/stdin"},
+ "output": {"path": "/dev/null"}
+}

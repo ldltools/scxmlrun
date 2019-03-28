@@ -1,4 +1,4 @@
-// accumulator
+// accumulator; -*-javascript-*-
 // cf. https://en.wikipedia.org/wiki/Accumulator_(structured_product)
 //
 // events (incoming)
@@ -42,7 +42,7 @@ do
 
     _data.expiry_date = _event.data.expiry_date;
     _data.date = 1;
-};
+}
 
 // [event] day_open
 on day_open
@@ -53,7 +53,7 @@ do
     _data.date = _data.date + 1;
 
     console.log ("open: ", _data.date);
-};
+}
 
 // [event] day_close (price)
 on day_close
@@ -69,7 +69,7 @@ raise (_knockout + _not_knockout)
         SCXML.raise ({"event" : {"name" : "_knockout"}});
     else
         SCXML.raise ({"event" : {"name" : "_not_knockout"}});
-};
+}
 
 // case: _knockout
 on _knockout
@@ -79,7 +79,7 @@ do
 
     console.log ("knockout: ", _data.price);
     console.log ("purchased: ", _data.purchased);
-};
+}
 
 // case: _not_knockout
 on _not_knockout
@@ -89,7 +89,7 @@ raise (_over_strike + _under_strike)
         SCXML.raise ({"event" : {"name" : "_over_strike"}});
     else
         SCXML.raise ({"event" : {"name" : "_under_strike"}});
-};
+}
 
 on _over_strike
 raise (_terminate + _not_terminate)
@@ -102,7 +102,7 @@ raise (_terminate + _not_terminate)
         SCXML.raise ({"event" : {"name" : "_terminate"}});
     else
         SCXML.raise ({"event" : {"name" : "_not_terminate"}});
-};
+}
 
 on _under_strike
 raise (_terminate + _not_terminate)
@@ -115,7 +115,7 @@ raise (_terminate + _not_terminate)
         SCXML.raise ({"event" : {"name" : "_terminate"}});
     else
         SCXML.raise ({"event" : {"name" : "_not_terminate"}});
-};
+}
 
 on _terminate
 do
@@ -124,4 +124,4 @@ do
 
     console.log ("terminate: ", _data.date);
     console.log ("purchased: ", _data.purchased);
-};
+}

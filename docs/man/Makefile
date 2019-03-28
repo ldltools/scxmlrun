@@ -8,9 +8,15 @@ SUBDIRS		=
 
 %.man:	%.tex
 	latex2man $< $@
+%.html:	%.tex
+	latex2man -H: $< $@
 
-MANPAGES	= scxmlrun.man
+COMMANDS	= scxmlrun
+MANPAGES	= $(COMMANDS:%=%.man)
+HTMLPAGES	= $(COMMANDS:%=%.html)
+
 man:	$(MANPAGES)
+html:	$(HTMLPAGES)
 
 install::	all
 	@dir=$(PREFIX)/share/man/man1; mkdir -p $$dir && test -w $$dir || exit 1

@@ -1,0 +1,8 @@
+// parallel composition
+{"process": [{"process": {"path": "../../../examples/echo/echo.scxml"},
+	      "input": {"topic": "echo"}},
+	     {"process": {"script": "sleep 1s; mosquitto_pub -t echo -l"},
+	      "input": {"events": [{"event": {"name": "echo", "data": "hello"}}, {"event": {"name": "quit"}}]}}
+	    ],
+ "protocol": "mqtt"
+}

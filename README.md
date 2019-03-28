@@ -32,19 +32,24 @@ hello
 ## Reading event(s) via MQTT
 
 ```
-$ scxmlrun echo.scxml --sub echo  
+$ scxmlrun echo.scxml --sub echo &  
 $ mosquitto_pub -t echo -m '{"event":{"name":"echo","data":"world"}}'  
 world
 ```
 
-Check out [more examples](examples/README.md) if you are interested.  
-For the usage of _scxmlrun_, see [the man page](docs/man/scxmlrun.man)
+To see how SCXML processes interact with each other via MQTT,
+take a look at the [ping\_pong](examples/ping_pong/README.md) example.  
+
+To browse examples,
+check out [this list](examples/README.md).  
+For the usage of _scxmlrun_, see [the man page](docs/man/scxmlrun.html)
 which will be accessible through `man scxmlrun` after installation.
 
 # Installation on Docker
 
 - run `make docker-build` to build a new docker image for scxmlrun
-- run `make docker-run` to enter into the image
+- run `make docker-run` to spawn a container and enter into it
+- (in the container, try `make -C /root/tests test`)
 
 # Installation on Debian/Ubuntu
 
@@ -72,13 +77,17 @@ which will be accessible through `man scxmlrun` after installation.
   run: `apt-get install nlohmann-json-dev`
 
 ## Build
-- run: `make && make install` in this directory.
+- run: `make && make install` in the top directory.
 
 ## Testing
 
-- run: `make -C ./tests test` once installation is done.
+Once installation is done, try the following.
 
-  (You may need to install [shelltest](https://github.com/simonmichael/shelltestrunner).)
+- run: `make -C ./tests test`
+
+- run: `make -C ./tests test-mqtt`
+
+  Note: you may need to install [shelltest](https://github.com/simonmichael/shelltestrunner) (by running `apt-get install shelltestrunner`).
 
 # Installation on macOS/Darwin
 

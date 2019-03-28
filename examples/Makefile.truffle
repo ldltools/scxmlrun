@@ -16,7 +16,7 @@ G_NETWORK	?= 5777
 G_GAS_LIMIT	?= 8000000
 G_PID_FILE	?= $(T_BUILD_DIR)/.ganache_pid
 
-build::	truffle_compile truffle_deploy
+build::	truffle-compile truffle-deploy
 
 veryclean::	clean
 	rm -rf $(T_BUILD_DIR)
@@ -28,6 +28,9 @@ version::
 
 # --------------------------------------------------------------------------------
 # ganache
+
+usage::
+	@echo "usage: make ganache-[start | stop | restart]"
 
 # start a new ganache process
 ganache-start:	fail-if-ganache-is-running
@@ -56,10 +59,12 @@ clean::
 # --------------------------------------------------------------------------------
 # truffle
 
-truffle-usage:
-	@echo "make truffle-[init | compile | deploy | test]"
+usage::
+	@echo "usage: make truffle-[init | compile | deploy | test]"
 
+# --------------------
 # truffle init
+# --------------------
 truffle-init::
 	test -d $(T_BUILD_DIR)/contracts ||\
 	{ mkdir -p $(T_BUILD_DIR); cd $(T_BUILD_DIR);\
@@ -67,7 +72,9 @@ truffle-init::
 	  rm -f ./truffle.js; }
 	test -f $(T_BUILD_DIR)/package.json || echo '{}' > $(T_BUILD_DIR)/package.json
 
+# --------------------
 # truffle compile
+# --------------------
 truffle-compile::	truffle-init $(T_CONTRACTS_js)
 
 $(T_CONTRACTS_js):	$(T_BUILD_DIR)/.compiled
@@ -83,10 +90,13 @@ clean::
 	rm -f $(T_BUILD_DIR)/.compiled
 	rm -f $(T_BUILD_DIR)/build/contracts/*.json
 
+# --------------------
 # truffle deploy
+# --------------------
 truffle-deploy::	truffle-compile $(T_BUILD_DIR)/migrations/2_deploy_contracts.js $(T_BUILD_DIR)/truffle.js fail-if-ganache-is-not-running
 	(cd $(T_BUILD_DIR); truffle deploy)
 
+# setup: "_build/truffle.js"
 $(T_BUILD_DIR)/truffle.js:
 	rm -f $@; touch $@
 	echo "module.exports = {"	>> $@
@@ -95,6 +105,7 @@ $(T_BUILD_DIR)/truffle.js:
 	echo "   host: \"$(G_HOST)\", port: $(G_PORT), network_id: \"*\"" >> $@
 	echo "}}};"			>> $@
 
+# set up: "_build/migrations/2_deploy_contracts.js"
 ifeq ($(shell test -f migrations/2_deploy_contracts.js && echo 1 || echo 0), 1)
 $(T_BUILD_DIR)/migrations/2_deploy_contracts.js:	migrations/2_deploy_contracts.js
 	mkdir -p $(T_BUILD_DIR)/migrations
@@ -113,7 +124,9 @@ $(T_BUILD_DIR)/migrations/2_deploy_contracts.js:
 	echo "}" >> $@
 endif
 
+# --------------------
 # truffle test
+# --------------------
 truffle-test::	fail-if-ganache-is-not-running
 	rsync $(T_TESTS) $(T_BUILD_DIR)/test
 	(cd $(T_BUILD_DIR); truffle test)

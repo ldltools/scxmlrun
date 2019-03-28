@@ -1,0 +1,4 @@
+{"process": {"script": "echo -ne '{\"event\": {\"name\": \"echo\", \"data\": \"hello\"}}\\n{\"event\": {\"name\": \"quit\"}}\\n' | scxmlrun ../../../examples/echo/echo.scxml"},
+ "input": {"protocol": "none"},
+ "output": {"path": "/dev/null"}
+}

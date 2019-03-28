@@ -201,7 +201,7 @@ jsonomstream&
 jsonomstream::write (nlohmann::json& obj)
 {
     assert (obj.is_object ());
-    assert (obj["type"] == "mqtt");
+    //assert (obj["type"] == "mqtt");
 
     std::string msg = obj.dump ();
 
@@ -235,8 +235,10 @@ jsonomstream::write (const char* msg, const char* topic, int qos)
     assert (0 <= qos && qos <= 2);
 
     assert (_mosq);
-    int rslt = mosquitto_publish (_mosq, nullptr, topic_, len, msg, qos, false);
+    bool retain = false;
+    int rslt = mosquitto_publish (_mosq, nullptr, topic_, len, msg, qos, retain);
     assert (rslt == MOSQ_ERR_SUCCESS);
+    //std::cerr << "[jsonomstream::write] " << msg << "\n";
 
     return (*this);
 }

@@ -37,35 +37,54 @@ result: 46
 
 ## web ui for calc
 
-You can also try a [web ui](calc_ui.html) for the calc statemachine
-that runs on your browser.
+If you have `firefox` installed on your machine,
+just try:
+
+```
+$ ./runcalc.sh --with-ui  
+```
+
+You will see the following fancy calculator to play with.  
+Have fun.
 
 <div><img src="calc_ui.jpg" width="320"/></div>
 
-First, you need to configure mosquitto to work as a bridge between MQTT and Websocket.  
+
+## web ui for calc (in detail)
+
+In case your browser is not firefox or the above one-step option did not work for you,
+take the following step-by-step approach to success.
+
+First, you need to make sure that mosquitto is properly configured to work as a bridge between MQTT and Websocket.  
 Follow [this instruction](../../docs/websocket.md).
 
-In addition, you need a local copy of
-[mqttws31](https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js)
+In addition, you also need a local copy of
+[mqttws31](https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js),
 in this directory.
+Download the file if necessary.
 
-Once these are done, invoke the ui along with the state machine by running `runtest.sh`.  
+Once these are done, run `runcalc.sh` without invoking a browser:
 
 ```
-$ ./runtest.sh  
-
-calc.scxml has been invoked successfully  
-OPEN: "file:/.../calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"
+$ ./runcalc.sh --no-ui  
+...  
+URL: "file:/.../calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"  
+...
 ```
 
-Now, you're ready to access the statemachine through your browser.
-As instucted above, open `calc_ui.html` with a few parameters.
+In this case, `runcalc.sh` just starts a process for `calc.scxml` and
+generates a URL for connecting to the process via WebSocket (at port 9001 of localhost).
+
+As the final step, open the above url on your browser.  
+From a termiinal window, you can do this as follows.
 
 ```
 $ firefox --new-tab "file:/.../calc_ui.html?host=127.0.0.1&port=9001&sub=calc477855293&pub=calcui477855293"
 ```
 
-The fancy calculator shown above should pop up and work as you click its buttons.
+The calculator shown above should pop up and work as you click its buttons.
+
+As a remark, if you are interested in how events are exchanged between `scxmlrun` and your browser, refer to the following diagram.
 
 <details>
 <summary>calc with web ui</summary>
