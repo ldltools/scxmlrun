@@ -215,10 +215,10 @@ let canonicalize (p : t) =
 let preamble =
   ["set -eu -o pipefail";
    "USER=${USER:-$(id -u -n)}";
-   "test $(pgrep -c -u $USER scxmlrun) -eq 0 || { echo \"scxml running\"; exit 1; }"]
+   "test $(pgrep -cx -u $USER scxmlrun) -eq 0 || { echo \"scxml running\"; exit 1; }"]
 
 let postamble =
-  ["while test $(pgrep -c -u $USER scxmlrun) -gt 0; do sleep 1s; done";
+  ["while test $(pgrep -cx -u $USER scxmlrun) -gt 0; do sleep 1s; done";
    "exit 0"]
 
 let rec scriptize ?(verbose = false) oc (p : t) =

@@ -9,9 +9,6 @@ their monitors to detect their exploitation.
 - [exploit](contracts/SimpleDAO_exploit.sol)
 - [monitor]()
 
-**Remark**
-As of Solidity 0.5
-
 ## Transaction Order Dependence ([SWC-114](https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-114))
 
 (to be filled in)

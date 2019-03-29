@@ -109,7 +109,7 @@ let main argc argv =
     end;
 
   (* exec script -- potentially dangerous *)
-  failwith "\"--exec\" is currently not supported";
+  (*failwith "\"--exec\" is currently not supported";*)
   let temp_name, temp_ch = Filename.open_temp_file "runall" ".sh"
   in
   at_exit (fun _ -> Sys.remove temp_name);

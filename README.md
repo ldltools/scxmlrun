@@ -42,13 +42,14 @@ take a look at the [ping\_pong](examples/ping_pong/README.md) example.
 
 To browse examples,
 check out [this list](examples/README.md).  
-For the usage of _scxmlrun_, see [the man page](docs/man/scxmlrun.html)
+For the usage of _scxmlrun_,
+see [the man page](https://ldltools.github.io/docs/man/scxmlrun.html)
 which will be accessible through `man scxmlrun` after installation.
 
 # Installation on Docker
 
 - run `make docker-build` to build a new docker image for scxmlrun
-- run `make docker-run` to spawn a container and enter into it
+- run `make docker-run` to spawn a container process and enter into it
 - (in the container, try `make -C /root/tests test`)
 
 # Installation on Debian/Ubuntu
