@@ -6,9 +6,13 @@ TOP_DIR		=	$(shell readlink -f ..)
 BUILD_DIR	=	$(TOP_DIR)/_build/scxmlrun
 PREFIX		?=	$(TOP_DIR)/_build/install
 SRC_DIRS	=	.
+VERSION		= $(shell echo -e '\#include "version.hpp"\nSCXMLRUN_VERSION' | cpp -P | sed 's/\"//g')
 
 BINS		=	scxmlrun
 BINS		:=	$(BINS:%=$(BUILD_DIR)/%)
+
+LIBS		=	libscxmlrun.so.$(VERSION)
+LIBS		:=	$(LIBS:%=$(BUILD_DIR)/%)
 
 CPP		=	g++
 #CPPFLAGS	=	-std=c++11
@@ -18,6 +22,7 @@ CPPFLAGS	+=	-g
 #CPPFLAGS	+=	-Wall -W
 CPPFLAGS	+=	-I.
 CPPFLAGS	+=	-fstack-protector-strong
+CPPFLAGS	+=	-fPIC
 
 LDFLAGS		=
 LDFLAGS		+=	-lmosquitto
@@ -28,6 +33,7 @@ LDFLAGS		+=	-lmosquitto
 
 # ================================================================================
 # use QtSCXML (default)
+# ref: https://doc.qt.io/qt-5/qtscxml-overview.html
 # ================================================================================
 
 ifndef	PROCESSOR
@@ -69,6 +75,7 @@ endif
 
 # ================================================================================
 # use uScxml (experimental)
+# ref: https://github.com/tklab-tud/uscxml
 # ================================================================================
 
 ifeq	($(PROCESSOR), uscxml)
@@ -80,6 +87,7 @@ CPP		:=	g++-6
 CPPFLAGS	+=	-DUSE_USCXML
 CPPFLAGS	+=	-I/usr/local/include
 LDFLAGS		+=	-luscxml
+LDFLAGS		+=	-Wl,-soname,libscxmlrun.so.$(VERSION)
 
 # WebKit JavaScriptCore
 CPPFLAGS	+=	-I/usr/include/webkitgtk-4.0
@@ -101,17 +109,29 @@ endif
 
 OBJS		:= $(filter-out $(BINS:%=%.o),$(OBJS))
 
-all::	$(BINS)
+all::	$(LIBS) $(BINS)
 
-$(BUILD_DIR)/scxmlrun:	$(OBJS) $(BUILD_DIR)/scxmlrun.o
-	$(CPP) $^ -o $@ $(LDFLAGS)
+$(BUILD_DIR)/libscxmlrun.so.$(VERSION):	$(OBJS)
+	$(CPP) $^ -o $@ -shared $(LDFLAGS)
 
-install::	all
+$(BUILD_DIR)/scxmlrun:	$(BUILD_DIR)/scxmlrun.o $(LIBS)
+	$(CPP) -o $@ -Wl,-rpath=$(PREFIX)/lib/scxmlrun $< $(LDFLAGS) libscxmlrun.so.$(VERSION)
+
+install::	install_bins
+install_bins::	$(BINS)
 	@test -d $(PREFIX)/bin -a \( ! -w $(PREFIX)/bin \) && exit 1 || true
 	@mkdir -p $(PREFIX)/bin
 	for f in $(BINS); do \
 	  cmp -s $$f $(PREFIX)/bin/$$f && continue;\
-	  cp -fp $(BINS) $(PREFIX)/bin;\
+	  cp -fp $$f $(PREFIX)/bin;\
+	done
+install::	install_libs
+install_libs::	$(LIBS)
+	@test -d $(PREFIX)/lib -a \( ! -w $(PREFIX)/lib \) && exit 1 || true
+	@mkdir -p $(PREFIX)/lib/scxmlrun
+	for f in $(LIBS); do \
+	  cmp -s $$f $(PREFIX)/lib/scxmlrun/$$f && continue;\
+	  cp -fp $$f $(PREFIX)/lib/scxmlrun;\
 	done
 
 clean::

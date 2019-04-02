@@ -36,17 +36,50 @@ jsonifstream::~jsonifstream (void)
 {
 }
 
+static void
+read_lines (std::ifstream* in, char str[], int maxlen, int& nread)
+{
+    nread = 0;
+    int parity = 0;
+    while (1)
+    {
+        in->getline (str + nread, maxlen - nread);
+        if (in->eof ())
+            throw std::runtime_error ("End_of_file");
+        if (in->fail ())
+            throw std::runtime_error ("Failure: jsonifstream::read");
+        for (int i = nread; i < maxlen && str[i] != 0; i++)
+        {
+            switch (str[i])
+            {
+            case '{': parity++; break;
+            case '}': assert (parity > 0); parity--; break;
+            case '[': parity++; break;
+            case ']': assert (parity > 0); parity--; break;
+            default:
+                {}
+            }
+            nread++;
+        }
+        if (parity == 0 || nread == maxlen) break;
+    }
+}
+
 jsonifstream&
 jsonifstream::read (std::string& obj)
 {
     assert (_in);
 
     char str[0x4000];	// 4KB
+    /*
     _in->getline (str, 0x4000);
     if (_in->eof ())
         throw std::runtime_error ("End_of_file");
     if (_in->fail ())
         throw std::runtime_error ("Failure: jsonifstream::read");
+    */
+    int nread;
+    read_lines (_in, str, 0x4000, nread);
 
     assert (obj.empty ());
     obj += str;
@@ -62,11 +95,15 @@ jsonifstream::read (nlohmann::json& obj)
     obj = nullptr;
 
     char str[0x4000];	// 4KB
+    /*
     _in->getline (str, 0x4000);
     if (_in->eof ())
         throw std::runtime_error ("End_of_file");
     if (_in->fail ())
         throw std::runtime_error ("Failure: jsonifstream::read");
+    */
+    int nread;
+    read_lines (_in, str, 0x4000, nread);
 
     //std::clog << ";; read: '" << str << "'" << std::endl;
     obj = nlohmann::json::parse (str);
@@ -75,7 +112,51 @@ jsonifstream::read (nlohmann::json& obj)
 }
 
 // ================================================================================
-// jsonimstream
+// jsonofstream
+// ================================================================================
+
+jsonofstream::jsonofstream (void) :
+    _out (nullptr)
+{
+}
+
+jsonofstream::jsonofstream (const char* filename)
+{
+    _out = new std::ofstream (filename, std::ofstream::out | std::ofstream::app);
+}
+
+jsonofstream::~jsonofstream (void)
+{
+    if (_out) delete _out;
+}
+
+jsonofstream&
+jsonofstream::write (nlohmann::json& obj)
+{
+    assert (_out);
+    std::string str = obj.dump ();
+
+    return (write (str));
+
+    /*
+    //std::clog << ";; write: '" << str << "'" << std::endl;
+    *_out << str << std::endl;
+    return (*this);
+    */
+}
+
+jsonofstream&
+jsonofstream::write (const std::string& str)
+{
+    assert (_out);
+    //std::cerr << ";; write: '" << str << "'" << std::endl;
+    *_out << str << std::endl;
+
+    return (*this);
+}
+
+// ================================================================================
+// jsonimstream (mqtt)
 // ================================================================================
 
 jsonimstream::jsonimstream (void) :
@@ -135,51 +216,7 @@ jsonimstream::read (nlohmann::json& obj)
 }
 
 // ================================================================================
-// jsonofstream
-// ================================================================================
-
-jsonofstream::jsonofstream (void) :
-    _out (nullptr)
-{
-}
-
-jsonofstream::jsonofstream (const char* filename)
-{
-    _out = new std::ofstream (filename, std::ofstream::out | std::ofstream::app);
-}
-
-jsonofstream::~jsonofstream (void)
-{
-    if (_out) delete _out;
-}
-
-jsonofstream&
-jsonofstream::write (nlohmann::json& obj)
-{
-    assert (_out);
-    std::string str = obj.dump ();
-
-    return (write (str));
-
-    /*
-    //std::clog << ";; write: '" << str << "'" << std::endl;
-    *_out << str << std::endl;
-    return (*this);
-    */
-}
-
-jsonofstream&
-jsonofstream::write (const std::string& str)
-{
-    assert (_out);
-    //std::cerr << ";; write: '" << str << "'" << std::endl;
-    *_out << str << std::endl;
-
-    return (*this);
-}
-
-// ================================================================================
-// jsonomstream
+// jsonomstream (mqtt)
 // ================================================================================
 
 jsonomstream::jsonomstream (void) :
