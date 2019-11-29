@@ -29,6 +29,8 @@
 #include <QtQml/QJSEngine>
 #include <QtScxml/QScxmlEcmaScriptDataModel>
 #include <QtScxml/private/qscxmlstatemachine_p.h>
+#include <QtScxml/qscxmlinvokableservice.h>
+#include <QtScxml/qscxmlexecutablecontent.h>
 
 #include <cassert>
 #include <codecvt>
@@ -251,6 +253,14 @@ qtscxmlproc::step (void)
 void
 qtscxmlproc::event_read (QScxmlEvent& e)
 {
+    // jsonstream -> nlohmann::json -> QScxmlEvent
+    //nlohmann::json obj;
+    //_eventin->read (obj);
+    //if (obj.is_null ()) throw std::runtime_error ("Not_found");
+    //if (obj.find ("event") != obj.end ()) obj = obj["event"];
+    //std::string name = obj["name"];
+    //nlohmann::json data = obj["data"];
+
     std::string str;
     _eventin->read (str);
 
@@ -324,52 +334,6 @@ qtscxmlproc::event_read (QScxmlEvent& e)
     }
 }
 
-// jsonstream -> nlohmann::json -> QScxmlEvent
-/*
-void
-qtscxmlproc::event_read (QScxmlEvent& e)
-{
-    nlohmann::json obj;
-    _eventin->read (obj);
-
-    if (obj.is_null ()) throw std::runtime_error ("Not_found");
-    if (obj.find ("event") != obj.end ()) obj = obj["event"];
-
-    qDebug () << "scxmlrun: event_read:" << obj.dump ().c_str ();
-
-    // name
-    assert (obj.count ("name") == 1);
-    if (!obj["name"].is_string ()) throw std::runtime_error ("Invalid_argument");
-    assert (obj["name"].is_string ());
-    std::string name = obj["name"];
-    e.setName (QString (name.c_str ()));
-    e.setEventType (QScxmlEvent::InternalEvent);	// raise
-    //e.setEventType (QScxmlEvent::ExternalEvent);	// send
-
-    // data
-    nlohmann::json data = obj["data"];
-    QVariant data_var = QVariant ();
-    if (obj.count ("data") == 0 || data.is_null ())
-    {
-        //QJsonValue data_val = QJsonValue ();
-        //assert (data_val.isNull ());
-        data_var = QVariant ();
-        assert (data_var.isNull ());
-    }
-    else
-    {
-        data_var = to_qvariant (data);
-    }
-    //fflush (nullptr);
-    assert (data_var.isNull () || data_var.isValid ());
-    e.setData (data_var);
-
-    qDebug () << "scxmlrun: event_read:"
-              << "name:" << name.c_str ()
-              << "data:" << data_var;
-}
-*/
-
 // QScxmlEvent -> nlohmann::json -> jsonstream
 void
 qtscxmlproc::event_write (jsonostream& s, const QScxmlEvent& e)
@@ -382,10 +346,72 @@ qtscxmlproc::event_write (jsonostream& s, const QScxmlEvent& e)
     s.write (obj);
 }
 
-static QScxmlEvent* event_make (const QJsonObject&);
+// {"name" : name, "data" : data, ... } -> QScxmlEvent
+// cf. https://www.w3.org/TR/scxml/#InternalStructureofEvents
+static QScxmlEvent*
+event_make (const QJsonObject& obj)
+{
+    QScxmlEvent* e = new QScxmlEvent ();
+    // event keys: name, data, type, origin, origintype, sendid, invokeid
 
-// RAISE
-// cf. https://www.w3.org/TR/scxml/#raise
+    // name. This is a character string giving  the name of the event. The SCXML
+    // Processor MUST set the  name field to the name of this  event. It is what
+    // is matched against the 'event' attribute of <transition>.
+    // Note that transitions can do additional  tests by using the value of this
+    // field inside boolean expressions in the 'cond' attribute.
+    assert (obj.contains ("name") && obj["name"].isString ());
+    e->setName (obj["name"].toString ());
+
+    // type. This field describes the event type. The SCXML Processor MUST set it to: 
+    // "platform" (for events raised by the platform itself, such as error events)
+    // "internal" (for events raised by <raise> and <send> with target '_internal')
+    // "external" (for all other events).
+    if (obj.contains ("type"))
+    {
+        int n = obj["type"].toInt ();
+        assert (0 <= n && n <= 2); // Platform = 0, Internal, External
+        e->setEventType (QScxmlEvent::EventType (n));
+    }
+
+    if (obj.contains ("data"))
+        e->setData (obj["data"]);
+
+    // origin. This is a URI, equivalent to the 'target' attribute on the <send>
+    // element.
+    // For external events, the SCXML Processor SHOULD set this field to a value
+    // which, when used as the value of 'target', will allow the receiver of the
+    // event to <send>  a response back to the originating  entity via the Event
+    // I/O Processor specified in 'origintype'.
+    // For internal and platform events, the Processor MUST leave this field blank.
+    if (obj.contains ("origin") && obj["origin"].isString ())
+        e->setOrigin (obj["origin"].toString ());
+    if (obj.contains ("origintype") && obj["origintype"].isString ())
+        e->setOriginType (obj["origintype"].toString ());
+
+    // sendid.  If the  sending  entity  has specified  a  value  for this,  the
+    // Processor MUST set  this field to that value (see  C Event I/O Processors
+    // for  details). Otherwise,  in the  case of  error events  triggered by  a
+    // failed attempt to send an event, the Processor MUST set this field to the
+    // send id  of the  triggering <send>  element.
+    // Otherwise  it MUST  leave it blank.
+    if (obj.contains ("sendid") && obj["sendid"].isString ())
+        e->setSendId (obj["sendid"].toString ());
+
+    // invokeid. If this  event is generated from an invoked  child process, the
+    // SCXML Processor  MUST set this field  to the invoke id  of the invocation
+    // that triggered the child process.
+    // Otherwise it MUST leave it blank.
+    if (obj.contains ("invokeid") && obj["invokeid"].isString ())
+        e->setSendId (obj["invokeid"].toString ());
+
+    return (e);
+}
+
+// --------------------------------------------------------------------------------
+// JS primitives
+// --------------------------------------------------------------------------------
+
+// RAISE (https://www.w3.org/TR/scxml/#raise)
 void
 qtscxmlproc::js_raise (const QJsonObject& params)
 {
@@ -401,7 +427,7 @@ qtscxmlproc::js_raise (const QJsonObject& params)
     _machine->submitEvent (e);
 }
 
-// SEND
+// SEND (https://www.w3.org/TR/scxml/#send)
 //
 // keys
 // - event/eventexpr
@@ -416,10 +442,11 @@ qtscxmlproc::js_raise (const QJsonObject& params)
 // - param
 // - content
 //
-// cf. https://www.w3.org/TR/scxml/#send
 void
 qtscxmlproc::js_send (const QJsonObject& params)
 {
+    // params = {event: e, target: .., ..}
+
     // QJsonObject -> std::string (or nlohmann::json) -> jsonstream
 
     qInfo () << "scxmlrun: [js_send]" << params;
@@ -576,25 +603,27 @@ qtscxmlproc::js_send (const QJsonObject& params)
 
 }
 
-// CANCEL
+// CANCEL (https://www.w3.org/TR/scxml/#cancel)
+// The <cancel> element is used to cancel a delayed <send> event. 
 //
 // keys
 // - sendid/sendidexpr
 //
-// cf. https://www.w3.org/TR/scxml/#invoke
 void
 qtscxmlproc::js_cancel (const QJsonObject& params)
 {
+    qInfo () << "scxmlrun: [js_cancel]" << params;
+
     assert (!"not yet implemented");
 }
 
-// INVOKE
+// INVOKE (https://www.w3.org/TR/scxml/#invoke)
 //
 // keys
-// - src/srcexpr
 // - type/typeexpr
-// - id
-// - idlocation
+// - src/srcexpr
+//   src can point to a file
+// - id/idlocation
 // - delay/delayexpr
 // - namelist
 // - autoforward
@@ -604,74 +633,83 @@ qtscxmlproc::js_cancel (const QJsonObject& params)
 // - finalize
 // - content
 //
-// cf. https://www.w3.org/TR/scxml/#invoke
 void
 qtscxmlproc::js_invoke (const QJsonObject& params)
 {
-    assert (params.contains ("src") || params.contains ("srcexpr"));
+    qInfo () << "scxmlrun: [js_invoke]" << params;
+
+    if (_machine->activeStateNames ().length () != 1)
+    {
+        throw std::runtime_error ("Failure: js_invoke in a unknown state");
+    }
+    QString& state_id = _machine->activeStateNames ().first ();
+
+    QScxmlStateMachinePrivate* smp = ((_QScxmlStateMachine*) _machine)->d ();
+    assert (smp);
+
+    // state_idx = index of the current state
+    const QScxmlExecutableContent::StateTable* tbl = smp->m_stateTable;
+    int state_idx = -1;
+    for (int i = 0; i < tbl->stateCount; i++)
+    {
+        QString name = smp->m_tableData->string (tbl->state (i).name);
+        if (name == state_id) { state_idx = i; break; }
+    }
+    assert (state_idx >= 0);
+    qDebug () << "scxmlrun: [js_invoke] state =" << state_id << "index =" << state_idx;
+
+    //const int array_id = smp->m_stateTable->state (state_idx).serviceFactoryIds;
+    //assert (array_id != QScxmlExecutableContent::StateTable::InvalidIndex);
+
+    // src
+    QJsonObject src;
+    if (params.contains ("src"))
+        src = params["src"].toObject ();
+    assert (!src.empty ());
+
+    // id
+    QString id = "";
+    if (params.contains ("id") && params["id"].isString ())
+        id = params["id"].toString ();
+    assert (id != "");
+
+    assert (!params.contains ("type") || !params.contains ("typeexpr"));
+    // type (uri)
+    QString invoke_t = "";
+    if (params.contains ("type") && params["type"].isString ())
+        invoke_t = params["type"].toString ();
+    assert (invoke_t != "");
+
+    //smp->addService (state_idx);
+
+    QScxmlExecutableContent::InvokeInfo invoke_info;
+    invoke_info.autoforward = false;
+    invoke_info.context = 0;
+    invoke_info.expr = 0; // evaluatorid
+    invoke_info.finalize = 0; // containerid
+    invoke_info.id = 0;
+    invoke_info.location = 0;
+    invoke_info.prefix = 0;
+
+    QVector<QScxmlExecutableContent::StringId> invoke_names;
+    QVector<QScxmlExecutableContent::ParameterInfo> invoke_params;
+    QScxmlDynamicScxmlServiceFactory* factory =
+        new QScxmlDynamicScxmlServiceFactory (invoke_info, invoke_names, invoke_params);
+    auto service = factory->invoke (_machine);
+    service->start ();
 
     assert (!"not yet implemented");
 }
 
-// {"name" : name, "data" : data, ... } -> QScxmlEvent
-// cf. https://www.w3.org/TR/scxml/#InternalStructureofEvents
-static QScxmlEvent*
-event_make (const QJsonObject& obj)
+// FINALIZE (https://www.w3.org/TR/scxml/#finalize)
+// The <finalize> element enables an invoking session to update its data model with data contained in events returned by the invoked session. 
+//
+void
+qtscxmlproc::js_finalize (const QJsonObject& params)
 {
-    QScxmlEvent* e = new QScxmlEvent ();
-    // event keys: name, data, type, origin, origintype, sendid, invokeid
+    qInfo () << "scxmlrun: [js_finalize]" << params;
 
-    // name. This is a character string giving  the name of the event. The SCXML
-    // Processor MUST set the  name field to the name of this  event. It is what
-    // is matched against the 'event' attribute of <transition>.
-    // Note that transitions can do additional  tests by using the value of this
-    // field inside boolean expressions in the 'cond' attribute.
-    assert (obj.contains ("name") && obj["name"].isString ());
-    e->setName (obj["name"].toString ());
-
-    // type. This field describes the event type. The SCXML Processor MUST set it to: 
-    // "platform" (for events raised by the platform itself, such as error events)
-    // "internal" (for events raised by <raise> and <send> with target '_internal')
-    // "external" (for all other events).
-    if (obj.contains ("type"))
-    {
-        int n = obj["type"].toInt ();
-        assert (0 <= n && n <= 2); // Platform = 0, Internal, External
-        e->setEventType (QScxmlEvent::EventType (n));
-    }
-
-    if (obj.contains ("data"))
-        e->setData (obj["data"]);
-
-    // origin. This is a URI, equivalent to the 'target' attribute on the <send>
-    // element.
-    // For external events, the SCXML Processor SHOULD set this field to a value
-    // which, when used as the value of 'target', will allow the receiver of the
-    // event to <send>  a response back to the originating  entity via the Event
-    // I/O Processor specified in 'origintype'.
-    // For internal and platform events, the Processor MUST leave this field blank.
-    if (obj.contains ("origin") && obj["origin"].isString ())
-        e->setOrigin (obj["origin"].toString ());
-    if (obj.contains ("origintype") && obj["origintype"].isString ())
-        e->setOriginType (obj["origintype"].toString ());
-
-    // sendid.  If the  sending  entity  has specified  a  value  for this,  the
-    // Processor MUST set  this field to that value (see  C Event I/O Processors
-    // for  details). Otherwise,  in the  case of  error events  triggered by  a
-    // failed attempt to send an event, the Processor MUST set this field to the
-    // send id  of the  triggering <send>  element.
-    // Otherwise  it MUST  leave it blank.
-    if (obj.contains ("sendid") && obj["sendid"].isString ())
-        e->setSendId (obj["sendid"].toString ());
-
-    // invokeid. If this  event is generated from an invoked  child process, the
-    // SCXML Processor  MUST set this field  to the invoke id  of the invocation
-    // that triggered the child process.
-    // Otherwise it MUST leave it blank.
-    if (obj.contains ("invokeid") && obj["invokeid"].isString ())
-        e->setSendId (obj["invokeid"].toString ());
-
-    return (e);
+    assert (!"not yet implemented");
 }
 
 // --------------------------------------------------------------------------------
@@ -818,7 +856,7 @@ to_nlohmann (const QJsonObject obj)
 void
 monitor::state_cb (const QString& name, bool active)
 {
-    qDebug () << "scxmlrun: [state_cb]" << name
+    qDebug () << "scxmlrun.monitor: [state_cb]" << name
               << (active ? "(on entry)" : "(on exit)");
 
     if (!active) return;
@@ -898,6 +936,7 @@ qtscxmlproc::setup (void)
         QString state = states.at (i);
         _machine->connectToState (state, _monitor,
                                   [this, state](bool active) {
+                                      //if (active) _state = state;
                                       _monitor->state_cb (state, active);
                                   });
     }

@@ -11,7 +11,7 @@ VERSION		= $(shell echo -e '\#include "version.hpp"\nSCXMLRUN_VERSION' | cpp -P 
 BINS		=	scxmlrun
 BINS		:=	$(BINS:%=$(BUILD_DIR)/%)
 
-LIBS		=	libscxmlrun.so.$(VERSION)
+LIBS		=	libscxmlrun.so
 LIBS		:=	$(LIBS:%=$(BUILD_DIR)/%)
 
 CPP		=	g++
@@ -111,11 +111,11 @@ OBJS		:= $(filter-out $(BINS:%=%.o),$(OBJS))
 
 all::	$(LIBS) $(BINS)
 
-$(BUILD_DIR)/libscxmlrun.so.$(VERSION):	$(OBJS)
+$(BUILD_DIR)/libscxmlrun.so:	$(OBJS)
 	$(CPP) $^ -o $@ -shared $(LDFLAGS)
 
 $(BUILD_DIR)/scxmlrun:	$(BUILD_DIR)/scxmlrun.o $(LIBS)
-	$(CPP) -o $@ -Wl,-rpath=$(PREFIX)/lib/scxmlrun $< $(LDFLAGS) libscxmlrun.so.$(VERSION)
+	$(CPP) -o $@ $< $(LDFLAGS) -Wl,-rpath=$(PREFIX)/lib/scxmlrun -L$(BUILD_DIR) -lscxmlrun
 
 install::	install_bins
 install_bins::	$(BINS)

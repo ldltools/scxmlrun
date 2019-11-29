@@ -57,6 +57,7 @@ public:
       // params = {event: <event>, ..send_opts..}
     void js_cancel (const QJsonObject& params);
     void js_invoke (const QJsonObject& params);
+    void js_finalize (const QJsonObject& params);
 
 public:
     qtscxmlproc (void);

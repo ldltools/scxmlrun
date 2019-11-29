@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" datamodel="ecmascript">
+  <state id="q1">
+    <invoke src="invoke2_ext.scxml" id="hello" type="http://www.w3.org/TR/scxml/"/>
+    <transition event="done.invoke.hello" target="q2"/>
+  </state>
+  <final id="q2">
+    <onentry><script>console.log ("done")</script></onentry>
+  </final>
+</scxml>
