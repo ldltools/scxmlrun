@@ -26,6 +26,7 @@
 #include <QtCore/QtGlobal>
 #include <QtQml/QJSEngine>
 #include <QtScxml/QScxmlEcmaScriptDataModel>
+// extras
 #include <QtScxml/private/qscxmlstatemachine_p.h>
 
 #include <cassert>
@@ -89,31 +90,32 @@ _JSScxml::intern (QJSEngine* e, scxml::qtscxmlproc* p)
 {
     assert (e && p);
 
-    _JSScxml* scxml = new _JSScxml ();
-    scxml->_proc = p;
-    QJSValue scxml_val = e->newQObject (scxml);
+    _JSScxml* scxml_obj = new _JSScxml ();
+    scxml_obj->_proc = p;
+    QJSValue scxml = e->newQObject (scxml_obj);
     QJSValue global = e->globalObject ();
     assert (global.isObject ());
     assert (!global.hasProperty ("SCXML"));
-    global.setProperty ("SCXML", scxml_val);
-    // scxml_val points to the global "SCXML" object
+    global.setProperty ("SCXML", scxml);
+    assert (global.hasProperty ("SCXML"));
+    // the global "SCXML" property points to the "scxml" object (of _JSScxml)
 
     // SCXML.raise
-    QJSValue raise_fun = e->evaluate ("function (obj) { SCXML._raise (JSON.stringify (obj)) }");
+    QJSValue raise_fun = e->evaluate ("obj => { SCXML._raise (JSON.stringify (obj)) }");
     assert (raise_fun.isCallable ());
-    scxml_val.setProperty ("raise", raise_fun);
+    scxml.setProperty ("raise", raise_fun);
     // SCXML.send
-    QJSValue send_fun = e->evaluate ("function (obj) { SCXML._send (JSON.stringify (obj)) }");
+    QJSValue send_fun = e->evaluate ("obj => { SCXML._send (JSON.stringify (obj)) }");
     assert (send_fun.isCallable ());
-    scxml_val.setProperty ("send", send_fun);
+    scxml.setProperty ("send", send_fun);
     // SCXML.cancel
-    QJSValue cancel_fun = e->evaluate ("function (obj) { SCXML._cancel (JSON.stringify (obj)) }");
+    QJSValue cancel_fun = e->evaluate ("obj => { SCXML._cancel (JSON.stringify (obj)) }");
     assert (cancel_fun.isCallable ());
-    scxml_val.setProperty ("cancel", cancel_fun);
+    scxml.setProperty ("cancel", cancel_fun);
     // SCXML.invoke
-    QJSValue invoke_fun = e->evaluate ("function (obj) { SCXML._invoke (JSON.stringify (obj)) }");
+    QJSValue invoke_fun = e->evaluate ("obj => { SCXML._invoke (JSON.stringify (obj)) }");
     assert (invoke_fun.isCallable ());
-    scxml_val.setProperty ("invoke", invoke_fun);
+    scxml.setProperty ("invoke", invoke_fun);
 }
 
 // --------------------------------------------------------------------------------
@@ -135,6 +137,8 @@ _JSConsole::intern (QJSEngine* e)
     assert (global.isObject ());
     if (global.hasProperty ("console")) return;
 
+    // console on our own
+    qInfo () << "scxmlrun: [intern] global console object (of _JSConsole)";
     _JSConsole* console = new _JSConsole ();
     QJSValue console_val = e->newQObject (console);
     global.setProperty ("console", console_val);

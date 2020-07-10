@@ -28,9 +28,11 @@
 #include <QtCore/QtGlobal>
 #include <QtQml/QJSEngine>
 #include <QtScxml/QScxmlEcmaScriptDataModel>
-#include <QtScxml/private/qscxmlstatemachine_p.h>
-#include <QtScxml/qscxmlinvokableservice.h>
+#include <QtScxml/QScxmlInvokableService>
+//#include <QtScxml/qscxmlinvokableservice.h>
 #include <QtScxml/qscxmlexecutablecontent.h>
+// extras
+#include <QtScxml/private/qscxmlstatemachine_p.h>
 
 #include <cassert>
 #include <codecvt>
@@ -1087,12 +1089,14 @@ qtscxmlproc::_hack (void)
     QJSEngine::Extensions exts = QJSEngine::TranslationExtension | QJSEngine::ConsoleExtension;
     _engine->installExtensions (exts);
 
-    //_JSScxml* scxml = new _JSScxml ();
-    //scxml->_proc = this;
-    //QJSValue scxml_val = _engine->newQObject (scxml);
-    //global.setProperty ("SCXML", scxml_val);
+    // -----
+    // SCXML
+    // -----
     _JSScxml::intern (_engine, this);
 
+    // -----
+    // _data
+    // -----
     // declare _data as a global variable
     if (!global.hasProperty ("_data"))
     {
@@ -1100,7 +1104,9 @@ qtscxmlproc::_hack (void)
     }
     assert (global.hasProperty ("_data"));
 
+    // -------
     // console
+    // -------
     //QJSEngine::Extensions exts = QJSEngine::TranslationExtension | QJSEngine::ConsoleExtension;
     //_engine->installExtensions (exts);
 #if 0

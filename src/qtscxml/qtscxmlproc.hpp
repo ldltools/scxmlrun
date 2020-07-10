@@ -26,9 +26,9 @@
 #include <QtQml/QJSEngine>
 #include <QtQml/QJSValue>
 #include <QtScxml/QScxmlEcmaScriptDataModel>
-#include <QtScxml/qscxmldatamodel.h>
+#include <QtScxml/QScxmlDataModel>
+// extra header file
 #include <QtScxml/private/qscxmldatamodel_p.h>
-#include <QtScxml/qscxmlecmascriptdatamodel.h>
 
 namespace scxml {
 

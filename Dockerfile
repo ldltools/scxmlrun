@@ -12,23 +12,17 @@ RUN apt-get update;\
     apt-get install -y build-essential g++ flex bison gawk jq;\
     apt-get install -y file rsync wget net-tools nmap
 
-# Qt5
+# Qt5/QtScxml
 RUN apt-get install -y qt5-default qtbase5-dev qtbase5-private-dev;\
-    apt-get install -y qtdeclarative5-dev qtdeclarative5-private-dev
+    apt-get install -y qtdeclarative5-dev qtdeclarative5-private-dev;\
+    apt-get install -y libqt5scxml5-dev
 
-# QtSCXML
+# QtSCXML -- add extra header files
 WORKDIR /root
-RUN version=5.9.5;\
-    wget https://github.com/qt/qtscxml/archive/v${version}.tar.gz;\
-    tar xzf v${version}.tar.gz;\
-    cd qtscxml-${version}/src/scxml; qmake;\
-    incdir=/usr/include/x86_64-linux-gnu/qt5/QtScxml;\
-    mkdir -p ${incdir}/private; cp -p *.h $incdir; cp ${incdir}/*.h ${incdir}/private;\
-    ln -s . private;\
-    make && make install;\
-    echo "#include \"qscxmlstatemachine.h\"" > ${incdir}/QScxmlStateMachine;\
-    echo "#include \"qscxmlevent.h\"" > ${incdir}/QScxmlEvent;\
-    echo "#include \"qscxmlecmascriptdatamodel.h\"" > ${incdir}/QScxmlEcmaScriptDataModel
+RUN QTVERSION=$(gawk '/QTCORE_VERSION_STR/{print($$3)}' /usr/include/x86_64-linux-gnu/qt5/QtCore/qtcoreversion.h | sed 's/"//g');\
+    wget https://github.com/qt/qtscxml/archive/v${QTVERSION}.tar.gz;\
+    tar xzf v${QTVERSION}.tar.gz;\
+    dir=/usr/include/x86_64-linux-gnu/qt5/QtScxml/private; mkdir -p $dir; cp -p qtscxml-${QTVERSION}/src/scxml/*_p.h $dir
 
 # JSON
 RUN apt-get install -y nlohmann-json-dev

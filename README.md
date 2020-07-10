@@ -62,20 +62,26 @@ which will be accessible through `man scxmlrun` after installation.
   run: `apt-get install qt5-default qtbase5-dev qtbase5-private-dev`  
   run: `apt-get install qtdeclarative5-dev qtdeclarative5-private-dev`  
 
-  Note: as of Sep 2018, the packages for Ubuntu are based on Qt v5.9.5.
+  Note: as of Jul 2020, the packages for Ubuntu 20.04 are based on Qt v5.12.8.
 
-- [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html)  
-  download the corresponding version of the QtSCXML source package  
-  run: `wget https://github.com/qt/qtscxml/archive/v5.9.5.tar.gz`
+- [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html): SCXML processor  
+  run: `apt-get install libqt5scxml5-dev`
 
-  expand the archive, then build and install QtSCXML  
-  run: `cd qtscxml-5.9.5/src/scxml; qmake && make && make install`
+- Extra header files for hacking the QtSCXML engine
+
+  download/expand the corresponding version of the QtSCXML source package  
+  run: `wget https://github.com/qt/qtscxml/archive/v5.12.8.tar.gz; tar xzf v5.12.8.tar.gz`
+
+  copy those header files into the system QtSCXML direcotry  
+  run: `mkdir -p ${QTDIR}/QtScxml/private; cp qtscxml-5.12.8/src/scxml/*.h ${QTDIR}/QtScxml/private`  
+  where `QTDIR` refers to the system-wide directory for the Qt5 header files
+  (`/usr/include/x86_64-linux-gnu/qt5` on ubuntu 20.04)
 
 - [Mosquitto](https://mosquitto.org): MQTT broker and development library  
   run: `apt-get install mosquitto mosquitto-clients libmosquitto-dev`  
 
 - [JSON for C++](https://github.com/nlohmann/json): JSON parser/serializer  
-  run: `apt-get install nlohmann-json-dev`
+  run: `apt-get install nlohmann-json3-dev`
 
 ## Build
 - run: `make && make install` in the top directory.

@@ -6,7 +6,7 @@ TOP_DIR		=	$(shell readlink -f ..)
 BUILD_DIR	=	$(TOP_DIR)/_build/scxmlrun
 PREFIX		?=	$(TOP_DIR)/_build/install
 SRC_DIRS	=	.
-VERSION		= $(shell echo -e '\#include "version.hpp"\nSCXMLRUN_VERSION' | cpp -P | sed 's/\"//g')
+VERSION		=	$(shell echo -e '\#include "version.hpp"\nSCXMLRUN_VERSION' | cpp -P | sed 's/\"//g')
 
 BINS		=	scxmlrun
 BINS		:=	$(BINS:%=$(BUILD_DIR)/%)
@@ -23,6 +23,11 @@ CPPFLAGS	+=	-g
 CPPFLAGS	+=	-I.
 CPPFLAGS	+=	-fstack-protector-strong
 CPPFLAGS	+=	-fPIC
+
+DEBUG		?=	0
+ifeq ($(DEBUG), 1)
+CPPFLAGS	+=	-g
+endif
 
 LDFLAGS		=
 LDFLAGS		+=	-lmosquitto
@@ -47,15 +52,17 @@ ifeq	($(PROCESSOR), qtscxml)
 
 CPPFLAGS	+=	-DUSE_QTSCXML
 
-# Qt
+# Qt/QtScxml
 QTINCDIR	?=	/usr/include/x86_64-linux-gnu/qt5
-#QTVERSION	?=	5.9.5
-QTVERSION	?=	$(shell gawk '/QTCORE_VERSION_STR/{print(gensub(/\"(.*)\"/,"\\1","g",$$3))}' $(QTINCDIR)/QtCore/qtcoreversion.h)
+#QTVERSION	?=	5.12.8
+QTVERSION	?=	$(shell gawk '/QTCORE_VERSION_STR/{print($$3)}' $(QTINCDIR)/QtCore/qtcoreversion.h | sed 's/"//g')
 CPPFLAGS 	+=	-I$(QTINCDIR)
-
 CPPFLAGS	+=	-I$(QTINCDIR)/QtCore
 CPPFLAGS	+=	-I$(QTINCDIR)/QtCore/$(QTVERSION)
 CPPFLAGS	+=	-I$(QTINCDIR)/QtCore/$(QTVERSION)/QtCore
+# for those "*_p.h" header files
+QTSCXMLINCDIR	?=	$(QTINCDIR)
+CPPFLAGS	+=	-I$(QTSCXMLINCDIR)
 
 CPPFLAGS	+=	-fPIC
 CPPFLAGS	+=	-fdebug-prefix-map=/build/qtbase-opensource-src-oTRRwM/qtbase-opensource-src-$(QTVERSION)+dfsg=.

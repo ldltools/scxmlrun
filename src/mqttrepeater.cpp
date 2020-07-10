@@ -12,6 +12,7 @@
 // limitations under the License.
 
 #include "mqttrepeater.hpp"
+#include <iostream>
 
 using namespace scxml;
 

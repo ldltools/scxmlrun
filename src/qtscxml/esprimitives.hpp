@@ -26,9 +26,7 @@
 #include <QtQml/QJSEngine>
 #include <QtQml/QJSValue>
 #include <QtScxml/QScxmlEcmaScriptDataModel>
-#include <QtScxml/qscxmldatamodel.h>
-#include <QtScxml/private/qscxmldatamodel_p.h>
-#include <QtScxml/qscxmlecmascriptdatamodel.h>
+#include <QtScxml/QScxmlDataModel>
 
 // global "SCXML" object
 class _JSScxml : public QObject
