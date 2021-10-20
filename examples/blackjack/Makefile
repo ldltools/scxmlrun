@@ -8,4 +8,4 @@ clean::
 install::
 
 run:
-	scxmlrun blackjack.scxml blackjack.in
+	shelltest blackjack.conf

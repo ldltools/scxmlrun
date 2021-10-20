@@ -7,4 +7,4 @@ all::
 clean::;	rm -f *~
 
 run:
-	scxmlrun microwave-01.scxml microwave-01.in
+	shelltest microwave.conf

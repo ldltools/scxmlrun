@@ -469,6 +469,7 @@ qtscxmlproc::js_send (const QJsonObject& params)
         // e = ... (not implemented)
     }
     assert (!e.empty ());
+    //qDebug () << "scxmlrun: [js_send] event = " << e;
 
     assert (!params.contains ("target") || !params.contains ("targetexpr"));
     // target (uri)
@@ -565,6 +566,8 @@ qtscxmlproc::js_send (const QJsonObject& params)
     // data
     nlohmann::json data =
         (e.contains ("data") && !e["data"].isNull ())? to_nlohmann (e["data"].toVariant ()) : nlohmann::json (nullptr);
+    qDebug () << "scxmlrun: [js_send] data = " << e["data"].toVariant();
+    //qDebug () << "scxmlrun: [js_send] data = " << data.dump ().c_str ();
 
     // origin (uri)
     nlohmann::json origin = nullptr;
@@ -784,10 +787,12 @@ to_nlohmann (const QVariant v)
     {
     case QVariant::String:
         return nlohmann::json (v.toString ().toStdString ());
-    case QVariant::Int:
-        return nlohmann::json (v.toInt ());
     case QVariant::Double:
         return nlohmann::json (v.toDouble ());
+    case QVariant::Int:
+        return nlohmann::json (v.toInt ());
+    case QVariant::LongLong:
+        return nlohmann::json (v.toLongLong ());
     case QVariant::Map:
         // object
         //return to_nlohmann (v.toJsonObject ());

@@ -59,10 +59,10 @@ which will be accessible through `man scxmlrun` after installation.
 - [Qt5](http://doc.qt.io/qt-5/) libraries including:
   libQt5Core, libQt5Qml, and libQt5Network  
 
-  run: `apt-get install qt5-default qtbase5-dev qtbase5-private-dev`  
+  run: `apt-get install qtbase5-dev qtbase5-private-dev`  
   run: `apt-get install qtdeclarative5-dev qtdeclarative5-private-dev`  
 
-  Note: as of Jul 2020, the packages for Ubuntu 20.04 are based on Qt v5.12.8.
+  Note: as of Oct 2021, the packages for Debian 11 (bullseye) are based on Qt v5.15.2.
 
 - [QtSCXML](https://doc.qt.io/qt-5/qtscxml-overview.html): SCXML processor  
   run: `apt-get install libqt5scxml5-dev`
@@ -70,12 +70,12 @@ which will be accessible through `man scxmlrun` after installation.
 - Extra header files for hacking the QtSCXML engine
 
   download/expand the corresponding version of the QtSCXML source package  
-  run: `wget https://github.com/qt/qtscxml/archive/v5.12.8.tar.gz; tar xzf v5.12.8.tar.gz`
+  run: `wget https://github.com/qt/qtscxml/archive/v5.15.2.tar.gz; tar xzf v5.15.2.tar.gz`
 
   copy those header files into the system QtSCXML direcotry  
   run: `mkdir -p ${QTDIR}/QtScxml/private; cp qtscxml-5.12.8/src/scxml/*.h ${QTDIR}/QtScxml/private`  
   where `QTDIR` refers to the system-wide directory for the Qt5 header files
-  (`/usr/include/x86_64-linux-gnu/qt5` on ubuntu 20.04)
+  (`/usr/include/x86_64-linux-gnu/qt5` on debian)
 
 - [Mosquitto](https://mosquitto.org): MQTT broker and development library  
   run: `apt-get install mosquitto mosquitto-clients libmosquitto-dev`  
